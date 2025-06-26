@@ -1,0 +1,162 @@
+/* MikroTik Monitoring App CSS */
+
+/* Icon Circle Styling */
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Left aligned */
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.icon-circle i {
+    font-size: 24px;
+    margin-left: 10px; /* Add left margin to position icon */
+}
+
+/* Horizontal Card Styling */
+.horizontal-card {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.horizontal-card .icon-circle {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    margin-right: 12px;
+    margin-bottom: 0;
+}
+
+.horizontal-card .card-content {
+    text-align: left;
+}
+
+.horizontal-card .card-content h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.horizontal-card .card-content p {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+    opacity: 0.8;
+}
+
+/* Statistics Cards Styling */
+.stat-card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.stat-card p {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+body {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.resource-card {
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 0.25rem;
+    height: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.resource-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.resource-card h4 {
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-up {
+    background-color: #198754;
+}
+
+.status-down {
+    background-color: #dc3545;
+}
+
+.footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d;
+    margin-top: 3rem;
+}
+
+/* Progress bar styles */
+.progress {
+    height: 10px;
+    margin-bottom: 0.25rem;
+}
+
+/* For high values (e.g., CPU > 80%, Memory > 90%) */
+.progress-bar[aria-valuenow="80"],
+.progress-bar[aria-valuenow="90"],
+.progress-bar[aria-valuenow="100"],
+.progress-bar[style*="width: 8"],
+.progress-bar[style*="width: 9"],
+.progress-bar[style*="width: 100"] {
+    background-color: #dc3545;  /* Red for high values */
+}
+
+/* Table responsive adjustments */
+.table-responsive {
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .resource-card {
+        margin-bottom: 1rem;
+    }
+}

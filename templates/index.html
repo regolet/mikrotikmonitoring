@@ -1,0 +1,1345 @@
+{% extends "base.html" %}
+
+{% block title %}MikroTik Monitoring Dashboard{% endblock %}
+
+{% block content %}
+{# No sorting applied - displaying interfaces as provided by the API #}
+{% if connected %}
+<!-- Refresh controls for PPPoE tables -->
+<div class="row mb-3">
+    <div class="col-md-12 text-end">
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Auto-refresh: <span id="refresh-interval-display">Off</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item refresh-option" href="#" data-interval="0">Off</a></li>
+                <li><a class="dropdown-item refresh-option" href="#" data-interval="5">5 seconds</a></li>
+                <li><a class="dropdown-item refresh-option" href="#" data-interval="10">10 seconds</a></li>
+                <li><a class="dropdown-item refresh-option" href="#" data-interval="30">30 seconds</a></li>
+                <li><a class="dropdown-item refresh-option" href="#" data-interval="60">1 minute</a></li>
+            </ul>
+        </div>
+        <button id="refresh-now" class="btn btn-primary ms-2">
+            <i class="bi bi-arrow-clockwise"></i> Refresh Now
+        </button>
+    </div>
+</div>
+<!-- Aggregate Statistics Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Network Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Total Accounts -->
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card">
+                            <div class="icon-circle">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0" id="total-accounts">{{ aggregate_stats.get('total_accounts', 0) }}</h3>
+                                <p class="mb-0">Total Accounts</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Online Accounts -->
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card bg-success bg-opacity-10">
+                            <div class="icon-circle bg-success bg-opacity-25">
+                                <i class="bi bi-wifi text-success"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0 text-success" id="online-accounts">{{ aggregate_stats.get('online_accounts', 0) }}</h3>
+                                <p class="mb-0">Online</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Offline Accounts -->
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card bg-danger bg-opacity-10">
+                            <div class="icon-circle bg-danger bg-opacity-25">
+                                <i class="bi bi-wifi-off text-danger"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0 text-danger" id="offline-accounts">{{ aggregate_stats.get('offline_accounts', 0) }}</h3>
+                                <p class="mb-0">Offline</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Enabled Accounts -->
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card bg-info bg-opacity-10">
+                            <div class="icon-circle bg-info bg-opacity-25">
+                                <i class="bi bi-toggle-on text-info"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0 text-info" id="enabled-accounts">{{ aggregate_stats.get('enabled_accounts', 0) }}</h3>
+                                <p class="mb-0">Enabled</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Disabled Accounts -->
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card bg-secondary bg-opacity-10">
+                            <div class="icon-circle bg-secondary bg-opacity-25">
+                                <i class="bi bi-toggle-off text-secondary"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0 text-secondary" id="disabled-accounts">{{ aggregate_stats.get('disabled_accounts', 0) }}</h3>
+                                <p class="mb-0">Disabled</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Upload Speed (Displayed first since it's typically higher) -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card bg-primary bg-opacity-10">
+                            <div class="icon-circle bg-primary bg-opacity-25">
+                                <i class="bi bi-cloud-arrow-up text-primary"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0 text-primary" id="total-upload-speed">Calculating...</h3>
+                                <p class="mb-0">Total Upload Speed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Download Speed -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="stat-card horizontal-card bg-warning bg-opacity-10">
+                            <div class="icon-circle bg-warning bg-opacity-25">
+                                <i class="bi bi-cloud-arrow-down text-warning"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="mb-0 text-warning" id="total-download-speed">Calculating...</h3>
+                                <p class="mb-0">Total Download Speed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-end">
+                        <small class="text-muted">Last updated: <span id="last-updated-time">{{ aggregate_stats.get('last_updated', current_time) }}</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PPPoE-in Interfaces Section -->
+{% if connected and pppoe_interfaces %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">PPPoE-in Interfaces Traffic</h3>
+                <div>
+                    <select id="pppoe-rows-per-page" class="form-select form-select-sm">
+                        <option value="10">10 rows</option>
+                        <option value="20" selected>20 rows</option>
+                        <option value="50">50 rows</option>
+                        <option value="100">100 rows</option>
+                        <option value="0">All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-sm" id="pppoe-interfaces-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Profile Plan</th>
+                                <th>Status</th>
+                                <th>Download (TX)</th>
+                                <th>Upload (RX)</th>
+                                <th>Address</th>
+                                <th>Uptime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interface in pppoe_interfaces %}
+                            <tr class="{% if interface.get('running', 'false') == 'true' %}table-default{% else %}table-secondary{% endif %}">
+                                <td>{{ interface.get('name', 'N/A') }}</td>
+                                <td>{{ interface.get('profile', 'N/A') }}</td>
+                                <td>
+                                    <span class="status-indicator 
+                                        {% if interface.get('running', 'false') == 'true' %}status-up{% else %}status-down{% endif %}"></span>
+                                    {{ 'Up' if interface.get('running', 'false') == 'true' else 'Down' }}
+                                </td>
+                                <td>{{ format_bytes(interface.get('tx_bytes', '0')) }}</td>
+                                <td>{{ format_bytes(interface.get('rx_bytes', '0')) }}</td>
+                                <td>{{ interface.get('address', 'N/A') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        Showing <span id="pppoe-showing-start">1</span> to <span id="pppoe-showing-end">20</span> of <span id="pppoe-total-rows">{{ pppoe_interfaces|length }}</span> entries
+                    </div>
+                    <div>
+                        <nav aria-label="PPPoE table navigation">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item">
+                                    <button id="pppoe-prev-page" class="page-link" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item">
+                                    <span class="page-link">Page <span id="pppoe-current-page">1</span></span>
+                                </li>
+                                <li class="page-item">
+                                    <button id="pppoe-next-page" class="page-link" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offline PPPoE Accounts Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Offline PPPoE Accounts</h3>
+                <div>
+                    <select id="offline-rows-per-page" class="form-select form-select-sm">
+                        <option value="10">10 rows</option>
+                        <option value="20" selected>20 rows</option>
+                        <option value="50">50 rows</option>
+                        <option value="100">100 rows</option>
+                        <option value="0">All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-sm" id="offline-accounts-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Profile Plan</th>
+                                <th>Status</th>
+                                <th>Downtime</th>
+                                <th>Last Up</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        Showing <span id="offline-showing-start">0</span> to <span id="offline-showing-end">0</span> of <span id="offline-total-rows">0</span> entries
+                    </div>
+                    <div>
+                        <nav aria-label="Offline accounts table navigation">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item">
+                                    <button id="offline-prev-page" class="page-link" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <li class="page-item">
+                                    <span class="page-link">Page <span id="offline-current-page">1</span></span>
+                                </li>
+                                <li class="page-item">
+                                    <button id="offline-next-page" class="page-link" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    {% if identity %}
+                        {{ identity }}
+                    {% else %}
+                        MikroTik Router
+                    {% endif %}
+                </h2>
+                <span class="badge {% if connected %}bg-success{% else %}bg-danger{% endif %}">
+                    {% if connected %}Connected{% else %}Disconnected{% endif %}
+                </span>
+            </div>
+            
+            {% if not connected %}
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h4>Connection Error</h4>
+                    <p>Failed to connect to MikroTik router. Please check your connection settings.</p>
+                    <ul>
+                        <li>Host: {{ router_ip }}</li>
+                        <li>User: {{ router_user }}</li>
+                        <li>Port: {{ router_port }}</li>
+                    </ul>
+                    {% if error %}
+                    <p><strong>Error:</strong> {{ error }}</p>
+                    {% endif %}
+                    <a href="{{ url_for('settings') }}" class="btn btn-primary">Update Settings</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if connected and resources %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>System Resources</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- CPU Load -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="resource-card">
+                            <h4>CPU Load</h4>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" 
+                                     data-width="{{ resources['cpu-load'] }}"
+                                     aria-valuenow="{{ resources['cpu-load'] }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ resources['cpu-load'] }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {{ resources.get('cpu-count', '1') }} CPU(s), {{ resources.get('cpu-frequency', 'N/A') }} MHz
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Memory Usage -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="resource-card">
+                            <h4>Memory Usage</h4>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" 
+                                     data-width="{{ resources.get('memory_percentage', 0) }}"
+                                     aria-valuenow="{{ resources.get('memory_percentage', 0) }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ resources.get('memory_percentage', 0)|round(1) }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {{ format_bytes(resources.get('memory_used', 0)) }} / {{ format_bytes(resources.get('total-memory', 0)) }}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- HDD Usage -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="resource-card">
+                            <h4>HDD Usage</h4>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" 
+                                     data-width="{{ resources.get('hdd_percentage', 0) }}"
+                                     aria-valuenow="{{ resources.get('hdd_percentage', 0) }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ resources.get('hdd_percentage', 0)|round(1) }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {{ format_bytes(resources.get('hdd_used', 0)) }} / {{ format_bytes(resources.get('total-hdd-space', 0)) }}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Uptime -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="resource-card">
+                            <h4>Uptime</h4>
+                            <p class="mb-0">{{ resources.get('uptime', 'N/A') }}</p>
+                            <small class="text-muted">
+                                Version: {{ resources.get('version', 'N/A') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if connected and interfaces %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Network Interfaces</h3>
+                <div>
+                    <select id="interface-filter" class="form-select form-select-sm">
+                        <option value="all">Show All</option>
+                        <option value="no-pppoe" selected>Hide PPPoE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="network-interfaces-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>MAC Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interface in interfaces %}
+                            <tr class="{% if interface.get('running', 'false') == 'true' %}table-default{% else %}table-secondary{% endif %} interface-row{% if 'pppoe' in interface.get('name', '').lower() or 'pppoe' in interface.get('type', '').lower() %} pppoe-interface{% endif %}">
+                                <td>{{ interface.get('name', 'N/A') }}</td>
+                                <td>{{ interface.get('type', 'N/A') }}</td>
+                                <td>
+                                    <span class="status-indicator 
+                                        {% if interface.get('running', 'false') == 'true' %}status-up{% else %}status-down{% endif %}"></span>
+                                    {{ 'Up' if interface.get('running', 'false') == 'true' else 'Down' }}
+                                </td>
+                                <td>{{ interface.get('mac-address', 'N/A') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if connected and hotspot_users is not none %}
+<script>
+// Store PPP secrets globally for cross-referencing in the PPPoE interfaces table
+window.pppSecrets = JSON.parse('{{ ppp_secrets|tojson|safe }}');
+</script>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Active Hotspot Users</h3>
+            </div>
+            <div class="card-body">
+                {% if hotspot_users|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>IP Address</th>
+                                <th>MAC Address</th>
+                                <th>Uptime</th>
+                                <th>Bytes In/Out</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in hotspot_users %}
+                            <tr>
+                                <td>{{ user.get('user', 'N/A') }}</td>
+                                <td>{{ user.get('address', 'N/A') }}</td>
+                                <td>{{ user.get('mac-address', 'N/A') }}</td>
+                                <td>{{ user.get('uptime', 'N/A') }}</td>
+                                <td>{{ format_bytes(user.get('bytes-in', 0)) }} / {{ format_bytes(user.get('bytes-out', 0)) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No active hotspot users</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if connected and dhcp_leases is not none %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>DHCP Leases</h3>
+            </div>
+            <div class="card-body">
+                {% if dhcp_leases|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Hostname</th>
+                                <th>IP Address</th>
+                                <th>MAC Address</th>
+                                <th>Status</th>
+                                <th>Expires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lease in dhcp_leases %}
+                            <tr>
+                                <td>{{ lease.get('host-name', 'N/A') }}</td>
+                                <td>{{ lease.get('address', 'N/A') }}</td>
+                                <td>{{ lease.get('mac-address', 'N/A') }}</td>
+                                <td>{{ lease.get('status', 'N/A') }}</td>
+                                <td>{{ lease.get('expires-after', 'N/A') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No DHCP leases</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if connected and ppp_secrets is not none %}
+<script>
+// Store PPP secrets globally for cross-referencing in the PPPoE interfaces table
+window.pppSecrets = JSON.parse('{{ ppp_secrets|tojson|safe }}');
+</script>
+<div class="row">
+    <!-- PPP Accounts (Secrets) -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>PPP Accounts</h3>
+            </div>
+            <div class="card-body">
+                {% if ppp_secrets|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Service</th>
+                                <th>Profile</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for secret in ppp_secrets %}
+                            <tr>
+                                <td>{{ secret.get('name', 'N/A') }}</td>
+                                <td>{{ secret.get('service', 'N/A') }}</td>
+                                <td>{{ secret.get('profile', 'N/A') }}</td>
+                                <td>
+                                    {% if secret.get('disabled') == 'true' %}
+                                    <span class="badge bg-danger">Disabled</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Enabled</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No PPP accounts configured</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active PPP Connections -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Active PPP Connections</h3>
+            </div>
+            <div class="card-body">
+                {% if active_ppp and active_ppp|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Service</th>
+                                <th>Address</th>
+                                <th>Uptime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for conn in active_ppp %}
+                            <tr>
+                                <td>{{ conn.get('name', 'N/A') }}</td>
+                                <td>{{ conn.get('service', 'N/A') }}</td>
+                                <td>{{ conn.get('address', 'N/A') }}</td>
+                                <td>{{ conn.get('uptime', 'N/A') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No active PPP connections</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if connected and pppoe_interfaces %}
+<!-- Store PPP secrets as a data attribute for JavaScript to use -->
+<div id="ppp-data" data-ppp-secrets='{{ ppp_secrets|tojson if ppp_secrets else "[]" }}' style="display:none;"></div>
+
+<script>
+    // Global variables for interface statistics and pagination
+    let interfaceStats = {};
+    let prevStats = {};
+    let refreshIntervalId = null;
+    let fullPppoeList = [];
+    let pppoeCurrentPage = 1;
+    let pppoeRowsPerPage = 20;
+    let secretsByName = {}; // Make secretsByName available globally
+    
+    // Global variables for offline PPPoE accounts
+    let offlinePppoeList = [];
+    let offlineCurrentPage = 1;
+    let offlineRowsPerPage = 20;
+    
+    // Retrieve PPP secrets from data attribute
+    window.pppSecrets = JSON.parse(document.getElementById('ppp-data').getAttribute('data-ppp-secrets') || '[]');
+    
+    // Initialize secretsByName mapping from PPP secrets
+    function updateSecretsByNameMapping() {
+        secretsByName = {}; // Reset the mapping
+        const allSecrets = window.pppSecrets || [];
+        allSecrets.forEach(secret => {
+            secretsByName[secret.name.toLowerCase()] = secret;
+            // Also map by username for broader matching
+            if (secret.username) {
+                secretsByName[secret.username.toLowerCase()] = secret;
+            }
+        });
+    }
+    
+    // Initialize the mapping on page load
+    updateSecretsByNameMapping();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to format bytes nicely
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+        
+        // Function to calculate uptime from last-link-up-time
+        function calculateUptime(lastLinkUpTime) {
+            if (!lastLinkUpTime) return null;
+            
+            try {
+                // Parse the date string
+                const linkUpDate = new Date(lastLinkUpTime);
+                const now = new Date();
+                
+                // Check if the date is valid
+                if (isNaN(linkUpDate.getTime())) {
+                    return null;
+                }
+                
+                // Calculate the difference in seconds
+                const diffSeconds = Math.floor((now - linkUpDate) / 1000);
+                
+                // Format the duration
+                const days = Math.floor(diffSeconds / 86400);
+                const hours = Math.floor((diffSeconds % 86400) / 3600);
+                const minutes = Math.floor((diffSeconds % 3600) / 60);
+                const secs = diffSeconds % 60;
+                
+                let formattedUptime = '';
+                if (days > 0) formattedUptime += `${days}d `;
+                if (hours > 0 || days > 0) formattedUptime += `${hours}h `;
+                if (minutes > 0 || hours > 0 || days > 0) formattedUptime += `${minutes}m `;
+                formattedUptime += `${secs}s`;
+                
+                return formattedUptime.trim();
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        // Function to calculate downtime from last-logged-out date
+        function calculateDowntime(lastLoggedOut) {
+            if (!lastLoggedOut) return null;
+            
+            try {
+                // Parse the date string
+                const loggedOutDate = new Date(lastLoggedOut);
+                const now = new Date();
+                
+                // Check if the date is valid
+                if (isNaN(loggedOutDate.getTime())) {
+                    return null;
+                }
+                
+                // Calculate the difference in milliseconds
+                const diffMs = now - loggedOutDate;
+                
+                // Calculate years, months, days, hours, minutes, seconds
+                const msInSecond = 1000;
+                const msInMinute = msInSecond * 60;
+                const msInHour = msInMinute * 60;
+                const msInDay = msInHour * 24;
+                
+                // Approximate values (not exact due to variable month lengths)
+                const msInMonth = msInDay * 30.436875; // Average days in month
+                const msInYear = msInDay * 365.25; // Account for leap years
+                
+                const years = Math.floor(diffMs / msInYear);
+                const months = Math.floor((diffMs % msInYear) / msInMonth);
+                const days = Math.floor((diffMs % msInMonth) / msInDay);
+                const hours = Math.floor((diffMs % msInDay) / msInHour);
+                const minutes = Math.floor((diffMs % msInHour) / msInMinute);
+                const seconds = Math.floor((diffMs % msInMinute) / msInSecond);
+                
+                // Format as Y/M/d/h/m/s
+                let formattedDowntime = '';
+                if (years > 0) formattedDowntime += `${years}Y/`;
+                if (months > 0 || years > 0) formattedDowntime += `${months}M/`;
+                formattedDowntime += `${days}d/${hours}h/${minutes}m/${seconds}s`;
+                
+                return formattedDowntime;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        // Function to format uptime nicely (fallback for direct uptime values)
+        function formatUptime(uptimeValue) {
+            if (!uptimeValue) return 'N/A';
+            
+            // Convert seconds if needed
+            if (uptimeValue.includes('d') || uptimeValue.includes('h') || uptimeValue.includes('m') || uptimeValue.includes('s')) {
+                // Handle "1d2h3m4s" format - already formatted, just return
+                return uptimeValue;
+            } else if (uptimeValue.match(/^\d+$/)) {
+                // Handle raw seconds format
+                const seconds = parseInt(uptimeValue);
+                const days = Math.floor(seconds / 86400);
+                const hours = Math.floor((seconds % 86400) / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                
+                let formattedUptime = '';
+                if (days > 0) formattedUptime += `${days}d `;
+                if (hours > 0 || days > 0) formattedUptime += `${hours}h `;
+                if (minutes > 0 || hours > 0 || days > 0) formattedUptime += `${minutes}m `;
+                formattedUptime += `${secs}s`;
+                
+                return formattedUptime.trim();
+            } else {
+                // Use as is for any other format
+                return uptimeValue;
+            }
+        }
+
+        // Function to render a specific page of the PPPoE interfaces
+        function renderPppoePage() {
+            if (!fullPppoeList || fullPppoeList.length === 0) return;
+            
+            // Get reference to table body
+            const tableBody = document.querySelector('#pppoe-interfaces-table tbody');
+            if (!tableBody) return;
+            
+            // Calculate pagination values
+            const totalRows = fullPppoeList.length;
+            const totalPages = Math.ceil(totalRows / pppoeRowsPerPage);
+            
+            // Validate current page
+            if (pppoeCurrentPage < 1) pppoeCurrentPage = 1;
+            if (pppoeCurrentPage > totalPages) pppoeCurrentPage = totalPages;
+            
+            // Calculate start and end indices
+            const startIndex = (pppoeCurrentPage - 1) * pppoeRowsPerPage;
+            const endIndex = Math.min(startIndex + pppoeRowsPerPage, totalRows);
+            
+            // Update pagination info
+            document.getElementById('pppoe-showing-start').textContent = totalRows > 0 ? startIndex + 1 : 0;
+            document.getElementById('pppoe-showing-end').textContent = endIndex;
+            document.getElementById('pppoe-total-rows').textContent = totalRows;
+            document.getElementById('pppoe-current-page').textContent = pppoeCurrentPage;
+            
+            // Update button states
+            document.getElementById('pppoe-prev-page').disabled = pppoeCurrentPage <= 1;
+            document.getElementById('pppoe-next-page').disabled = pppoeCurrentPage >= totalPages;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Get the data for the current page
+            const pageData = fullPppoeList.slice(startIndex, endIndex);
+            
+            // Render rows for this page
+            pageData.forEach(iface => {
+                const row = document.createElement('tr');
+                row.className = iface.running === 'true' ? 'table-default' : 'table-secondary';
+                
+                // Create cells with proper data mapping
+                const nameCell = document.createElement('td');
+                nameCell.textContent = iface.name || 'N/A';
+                row.appendChild(nameCell);
+                
+                const profileCell = document.createElement('td');
+                // Look up the profile from PPP secrets if available
+                let profile = iface.profile || 'N/A';
+                
+                // Try different ways to match the PPP secret to the interface
+                const ifaceName = iface.name ? iface.name.toLowerCase() : '';
+                let secretUsername = ifaceName.replace(/^<pppoe-/, '').replace(/>$/, '');
+                
+                // Try to find the matching secret
+                const secretInfo = secretsByName[secretUsername] || secretsByName[ifaceName];
+                
+                if (secretInfo) {
+                    // Use the profile from the PPP secret if available
+                    profile = secretInfo.profile || secretInfo.local_address || profile;
+                }
+                
+                profileCell.textContent = profile;
+                row.appendChild(profileCell);
+                
+                const statusCell = document.createElement('td');
+                const statusBadge = document.createElement('span');
+                statusBadge.className = `badge ${iface.running === 'true' ? 'bg-success' : 'bg-danger'}`;
+                statusBadge.textContent = iface.running === 'true' ? 'Online' : 'Offline';
+                statusCell.appendChild(statusBadge);
+                row.appendChild(statusCell);
+                
+                // Add download rate cell (note: MikroTik swaps rx/tx for client perspective)
+                const downloadCell = document.createElement('td');
+                const downloadRate = iface.calculatedTxRateBps || 0;
+                downloadCell.textContent = formatBytes(downloadRate, 2) + '/s';
+                row.appendChild(downloadCell);
+                
+                // Add upload rate cell
+                const uploadCell = document.createElement('td');
+                const uploadRate = iface.calculatedRxRateBps || 0;
+                uploadCell.textContent = formatBytes(uploadRate, 2) + '/s';
+                row.appendChild(uploadCell);
+                
+                const addressCell = document.createElement('td');
+                addressCell.textContent = iface.address || 'N/A';
+                row.appendChild(addressCell);
+                
+                // Add uptime cell
+                const uptimeCell = document.createElement('td');
+                
+                // Get the interface name without the pppoe prefix/suffix
+                const fullName = iface.name || '';
+                const username = fullName.replace(/^<pppoe-/, '').replace(/>$/, '');
+                
+                // Get the address if available
+                const address = iface.address || '';
+                
+                // Look for last-link-up-time in the interface data
+                let calculatedUptime = null;
+                
+                if (iface['last-link-up-time']) {
+                    calculatedUptime = calculateUptime(iface['last-link-up-time']);
+                } else if (iface.lastLinkUpTime) {
+                    calculatedUptime = calculateUptime(iface.lastLinkUpTime);
+                }
+                
+                // If we couldn't find last-link-up-time in the interface, check direct uptime fields
+                let uptimeValue = null;
+                if (!calculatedUptime) {
+                    if (iface.uptime) {
+                        uptimeValue = iface.uptime;
+                    } else if (iface['up-time']) {
+                        uptimeValue = iface['up-time'];
+                    }
+                }
+                
+                // Display the uptime, preferring calculated value over direct value
+                if (calculatedUptime) {
+                    uptimeCell.textContent = calculatedUptime;
+                } else if (uptimeValue) {
+                    uptimeCell.textContent = formatUptime(uptimeValue);
+                } else {
+                    // If we couldn't find uptime in the interface, check PPP active data
+                    if (window.pppActive && Array.isArray(window.pppActive)) {
+                        // Loop through all active connections to find a match
+                        for (let i = 0; i < window.pppActive.length; i++) {
+                            const active = window.pppActive[i];
+                            
+                            // Try to match by name or address
+                            if ((active.name && (active.name === username || fullName.includes(active.name))) || 
+                                (active.address && active.address === address)) {
+                                
+                                // Check if it has last-link-up-time
+                                if (active['last-link-up-time']) {
+                                    calculatedUptime = calculateUptime(active['last-link-up-time']);
+                                    if (calculatedUptime) {
+                                        uptimeCell.textContent = calculatedUptime;
+                                        break;
+                                    }
+                                } else if (active.uptime) {
+                                    uptimeCell.textContent = formatUptime(active.uptime);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If still no uptime found, show N/A
+                    if (!calculatedUptime && !uptimeValue) {
+                        uptimeCell.textContent = 'N/A';
+                    }
+                }
+                
+                row.appendChild(uptimeCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to update the PPPoE interfaces table
+        function updatePPPoETable(data) {
+            // Process data directly (no sorting)
+            const interfaces = data.pppoe_interfaces;
+            if (!interfaces) return;
+            
+            // Update global PPP secrets if available
+            if (data.ppp_secrets) {
+                window.pppSecrets = data.ppp_secrets;
+                // Update the global secretsByName mapping
+                updateSecretsByNameMapping();
+            }
+            
+            // Store PPP active data if available
+            if (data.ppp_active) {
+                window.pppActive = data.ppp_active;
+                console.log('PPP Active data:', data.ppp_active);
+            } else {
+                console.log('PPP Active data not available in API response');
+            }
+            
+            // Check if uptime is directly in the interfaces data
+            if (interfaces.length > 0 && interfaces[0]) {
+                console.log('Sample interface data:', interfaces[0]);
+            }
+            
+            // Get all PPP secrets to identify profile plans for accounts
+            const allSecrets = window.pppSecrets || [];
+            
+            // Get reference to table body
+            const tableBody = document.querySelector('#pppoe-interfaces-table tbody');
+            if (!tableBody) return;
+            
+            // Calculate rate values for each interface for display
+            let totalDownloadRate = 0;
+            let totalUploadRate = 0;
+            
+            interfaces.forEach(iface => {
+                // Get current values from the interface - ensure we're getting the raw byte counts
+                const rxBytes = parseFloat(iface['rx-byte'] || iface.rx_bytes || 0);
+                const txBytes = parseFloat(iface['tx-byte'] || iface.tx_bytes || 0);
+                
+                // Calculate rates from byte differences
+                let calculatedRxRateBps = 0;
+                let calculatedTxRateBps = 0;
+                
+                const name = iface.name;
+                if (prevStats[name]) {
+                    const timeDiff = (Date.now() - prevStats[name].timestamp) / 1000; // Convert to seconds
+                    if (timeDiff > 0) {
+                        // Handle counter wrapping (if new value is smaller than previous, assume counter reset)
+                        let rxDiff = rxBytes - prevStats[name].rxBytes;
+                        let txDiff = txBytes - prevStats[name].txBytes;
+                        
+                        // Ensure we only count positive changes
+                        rxDiff = rxDiff < 0 ? rxBytes : rxDiff;
+                        txDiff = txDiff < 0 ? txBytes : txDiff;
+                        
+                        // Calculate bytes per second
+                        calculatedRxRateBps = Math.max(0, rxDiff / timeDiff);
+                        calculatedTxRateBps = Math.max(0, txDiff / timeDiff);
+                    }
+                }
+                
+                // Store current values for next calculation
+                prevStats[name] = {
+                    rxBytes: rxBytes,
+                    txBytes: txBytes,
+                    timestamp: Date.now()
+                };
+                
+                // Store calculated rates in the interface object for display
+                iface.calculatedRxRateBps = calculatedRxRateBps;
+                iface.calculatedTxRateBps = calculatedTxRateBps;
+                
+                // Add to totals
+                totalDownloadRate += iface.calculatedRxRateBps;
+                totalUploadRate += iface.calculatedTxRateBps;
+            });
+            
+            // Update total rate displays - note the IDs are swapped because the labels were swapped
+            document.getElementById('total-upload-speed').textContent = formatBytes(totalDownloadRate, 2) + '/s';
+            document.getElementById('total-download-speed').textContent = formatBytes(totalUploadRate, 2) + '/s';
+            
+            // Store the full list of interfaces for pagination
+            fullPppoeList = interfaces;
+            
+            // Update the offline PPPoE accounts table
+            updateOfflinePPPoETable();
+
+            // Render the current page
+            renderPppoePage();
+        }
+        
+        // Function to update aggregate statistics
+        function updateAggregateStats(data) {
+            const stats = data.aggregate_stats;
+            if (!stats) return;
+            
+            // Update all statistics
+            document.getElementById('total-accounts').textContent = stats.total_accounts || 0;
+            document.getElementById('online-accounts').textContent = stats.online_accounts || 0;
+            document.getElementById('offline-accounts').textContent = stats.offline_accounts || 0;
+            document.getElementById('enabled-accounts').textContent = stats.enabled_accounts || 0;
+            document.getElementById('disabled-accounts').textContent = stats.disabled_accounts || 0;
+            
+            // Total download/upload speeds are handled in updatePPPoETable
+            
+            // Update the last updated time
+            document.getElementById('last-updated-time').textContent = data.current_time || stats.last_updated || '';
+        }
+        
+        // Main function to refresh data
+        function refreshData() {
+            fetch('/api/pppoe_interfaces')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update both tables with new data
+                        updatePPPoETable(data);
+                        updateAggregateStats(data);
+                        // Data refresh successful
+                    } else {
+                        console.error('Error refreshing data:', data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to refresh data:', err);
+                });
+        }
+        
+        // Set up refresh interval
+        function setRefreshInterval(seconds) {
+            // Clear any existing interval
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+                refreshIntervalId = null;
+            }
+            
+            // Update display
+            refreshInterval = seconds;
+            const display = document.getElementById('refresh-interval-display');
+            display.textContent = seconds > 0 ? seconds + ' seconds' : 'Off';
+            
+            // Set new interval if needed
+            if (seconds > 0) {
+                refreshIntervalId = setInterval(refreshData, seconds * 1000);
+            }
+            
+            // Save preference in localStorage
+            localStorage.setItem('refreshInterval', seconds.toString());
+        }
+        
+        // Initialize pagination variables once at the beginning
+        const pppoeInitialRowsPerPage = parseInt(document.getElementById('pppoe-rows-per-page').value) || 20;
+        
+        // Set up click handlers for pagination and rows per page
+        document.getElementById('pppoe-rows-per-page').addEventListener('change', function() {
+            pppoeRowsPerPage = parseInt(this.value) || 20;
+            pppoeCurrentPage = 1; // Reset to first page when changing rows per page
+            renderPppoePage();
+        });
+
+        document.getElementById('pppoe-prev-page').addEventListener('click', function() {
+            if (pppoeCurrentPage > 1) {
+                pppoeCurrentPage--;
+                renderPppoePage();
+            }
+        });
+
+        document.getElementById('pppoe-next-page').addEventListener('click', function() {
+            const totalPages = Math.ceil(fullPppoeList.length / pppoeRowsPerPage);
+            if (pppoeCurrentPage < totalPages) {
+                pppoeCurrentPage++;
+                renderPppoePage();
+            }
+        });
+
+        // Set up Network Interfaces table filtering
+        function applyInterfaceFilter() {
+            const filterValue = document.getElementById('interface-filter').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#network-interfaces-table tbody tr');
+            
+            tableRows.forEach(row => {
+                const interfaceName = row.cells[0].textContent.toLowerCase();
+                const interfaceType = row.cells[1].textContent.toLowerCase();
+                
+                // Special handling for no-pppoe filter
+                if (filterValue === 'no-pppoe') {
+                    if (interfaceName.includes('pppoe') || interfaceType.includes('pppoe')) {
+                        row.style.display = 'none';
+                    } else {
+                        row.style.display = '';
+                    }
+                } else if (filterValue === 'all' || 
+                    interfaceName.includes(filterValue) || 
+                    interfaceType.includes(filterValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        document.getElementById('interface-filter').addEventListener('change', applyInterfaceFilter);
+        
+        // Apply filter on page load
+        applyInterfaceFilter();
+
+        // Function to render a specific page of offline PPPoE accounts
+        function renderOfflinePage(page) {
+            // Validate and update page number
+            page = Math.max(1, Math.min(page, Math.ceil(offlinePppoeList.length / offlineRowsPerPage) || 1));
+            offlineCurrentPage = page;
+            
+            // Calculate start and end index for the current page
+            const startIndex = (page - 1) * offlineRowsPerPage;
+            let endIndex;
+            if (offlineRowsPerPage === 0) {
+                endIndex = offlinePppoeList.length;
+            } else {
+                endIndex = Math.min(startIndex + offlineRowsPerPage, offlinePppoeList.length);
+            }
+            
+            // Get reference to table body
+            const tableBody = document.querySelector('#offline-accounts-table tbody');
+            if (!tableBody) return;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // If no offline accounts, show a message
+            if (offlinePppoeList.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.setAttribute('colspan', '5');
+                cell.className = 'text-center';
+                cell.textContent = 'No offline PPPoE accounts';
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+                
+                // Update pagination info
+                document.getElementById('offline-showing-start').textContent = '0';
+                document.getElementById('offline-showing-end').textContent = '0';
+                document.getElementById('offline-total-rows').textContent = '0';
+                document.getElementById('offline-current-page').textContent = '1';
+                return;
+            }
+            
+            // Render rows for current page
+            for (let i = startIndex; i < endIndex; i++) {
+                const secret = offlinePppoeList[i];
+                const row = document.createElement('tr');
+                
+                // Add name cell
+                const nameCell = document.createElement('td');
+                nameCell.textContent = secret.name || 'N/A';
+                row.appendChild(nameCell);
+                
+                // Add profile plan cell
+                const profileCell = document.createElement('td');
+                profileCell.textContent = secret.profile || 'default';
+                row.appendChild(profileCell);
+                
+                // Add status cell
+                const statusCell = document.createElement('td');
+                if (secret.disabled === 'true') {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-secondary'; // Grey for disabled accounts
+                    badge.textContent = 'Disabled';
+                    statusCell.appendChild(badge);
+                } else {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-danger'; // Keep red for offline accounts
+                    badge.textContent = 'Offline';
+                    statusCell.appendChild(badge);
+                }
+                row.appendChild(statusCell);
+                
+                // Add Downtime cell
+                const downtimeCell = document.createElement('td');
+                downtimeCell.textContent = calculateDowntime(secret['last-logged-out']) || 'N/A';
+                row.appendChild(downtimeCell);
+                
+                // Add Last Up cell with formatted date
+                const lastUpCell = document.createElement('td');
+                if (secret['last-logged-out']) {
+                    try {
+                        // Parse the last-logged-out date and format it as MMM-DD,YYYY
+                        const lastDate = new Date(secret['last-logged-out']);
+                        const month = lastDate.toLocaleString('en-US', { month: 'short' });
+                        const day = lastDate.getDate();
+                        const year = lastDate.getFullYear();
+                        lastUpCell.textContent = `${month}-${day},${year}`;
+                    } catch (e) {
+                        // If date parsing fails, just show the raw value
+                        lastUpCell.textContent = secret['last-logged-out'];
+                    }
+                } else {
+                    lastUpCell.textContent = 'N/A';
+                }
+                row.appendChild(lastUpCell);
+                
+                tableBody.appendChild(row);
+            }
+            
+            // Update pagination info
+            document.getElementById('offline-showing-start').textContent = offlinePppoeList.length > 0 ? startIndex + 1 : '0';
+            document.getElementById('offline-showing-end').textContent = endIndex;
+            document.getElementById('offline-total-rows').textContent = offlinePppoeList.length;
+            document.getElementById('offline-current-page').textContent = page;
+            
+            // Enable/disable pagination buttons based on current page
+            document.getElementById('offline-prev-page').disabled = (page === 1);
+            document.getElementById('offline-next-page').disabled = (page === Math.ceil(offlinePppoeList.length / offlineRowsPerPage) || offlinePppoeList.length === 0);
+        }
+        
+        // Function to update the offline PPPoE accounts table
+        function updateOfflinePPPoETable() {
+            // Get all PPP secrets
+            const allSecrets = window.pppSecrets || [];
+            if (!allSecrets.length) return;
+            
+            // Get all active PPPoE usernames/names
+            const activePppoe = new Set();
+            fullPppoeList.forEach(iface => {
+                // Extract username from interface name (pppoe-name pattern)
+                const name = iface.name;
+                if (name) {
+                    // For interfaces like "<pppoe-username>"
+                    const match = name.match(/^<pppoe-(.+)>$/);
+                    if (match) {
+                        activePppoe.add(match[1].toLowerCase());
+                    } else {
+                        activePppoe.add(name.toLowerCase());
+                    }
+                    
+                    // Also add the actual username if available
+                    if (iface.user) {
+                        activePppoe.add(iface.user.toLowerCase());
+                    }
+                }
+            });
+            
+            // Filter secrets to find offline accounts (not in active set)
+            offlinePppoeList = allSecrets.filter(secret => {
+                // Check if either name or username is active
+                const secretName = secret.name ? secret.name.toLowerCase() : '';
+                const username = secret.username ? secret.username.toLowerCase() : '';
+                
+                // If the secret is for PPPoE service and not active, then it's offline
+                return (secret.service === 'pppoe' || secret.service === 'any') && 
+                       !activePppoe.has(secretName) && 
+                       (!username || !activePppoe.has(username));
+            });
+            
+            // Render the offline accounts
+            renderOfflinePage(offlineCurrentPage);
+        }
+        
+        // Set up pagination for offline PPPoE accounts
+        document.getElementById('offline-prev-page')?.addEventListener('click', function() {
+            renderOfflinePage(offlineCurrentPage - 1);
+        });
+        
+        document.getElementById('offline-next-page')?.addEventListener('click', function() {
+            renderOfflinePage(offlineCurrentPage + 1);
+        });
+        
+        document.getElementById('offline-rows-per-page')?.addEventListener('change', function() {
+            offlineRowsPerPage = parseInt(this.value) || 20;
+            renderOfflinePage(1); // Reset to first page when changing rows per page
+        });
+        
+        // Set up refresh controls
+        document.querySelectorAll('.refresh-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                const interval = parseInt(this.dataset.interval);
+                setRefreshInterval(interval);
+            });
+        });
+        
+        window.addEventListener('load', function() {
+            // Initialize data
+            refreshData();
+            // Set interval for auto-refresh based on selection
+            setAutoRefreshInterval();
+        });
+
+        document.getElementById('refresh-now').addEventListener('click', function() {
+            refreshData();
+        });
+
+        // Load saved refresh interval from localStorage
+        const savedInterval = localStorage.getItem('refreshInterval');
+        if (savedInterval) {
+            setRefreshInterval(parseInt(savedInterval));
+        }
+    });
+</script>
+{% endif %}
+{% endif %} {# Close the main {% if connected %} statement from line 7 #}
+
+{% endblock %}

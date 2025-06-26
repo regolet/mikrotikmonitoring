@@ -1,0 +1,111 @@
+[
+  {
+    "id": "d393ab31-58ab-41a2-91ba-c2fc10ff1f88",
+    "name": "Bolila",
+    "accounts": [
+      "Bolila_Bentong",
+      "Bolila_Dikyam",
+      "Bolila_Engineer",
+      "Bolila_Gemma",
+      "Bolila_Laiza",
+      "Bolila_Marife_mamale",
+      "Bolila_Ongrea",
+      "Vendo_BolilaAngchay",
+      "Vendo_BolilaCamoro",
+      "Vendo_BolilaCampo",
+      "Vendo_BolilaEden",
+      "Vendo_BolilaGboy",
+      "Vendo_BolilaMamale",
+      "Vendo_BolilaTimogMerez"
+    ],
+    "created_at": "2025-06-16 03:00:57",
+    "updated_at": "2025-06-16 03:05:48"
+  },
+  {
+    "id": "2409f065-30f7-455f-802d-e09016b699fc",
+    "name": "Poblacion",
+    "accounts": [
+      "Poblacion_BhauzRegz",
+      "Poblacion_HouseRegzWifi",
+      "Poblacion_Molina",
+      "Poblacion_Palabrica",
+      "Poblacion_Relativo",
+      "Poblacion_RelocationRegoBhouse",
+      "Poblacion_TambakanOgoy",
+      "Rego",
+      "Tubalan_Bautista"
+    ],
+    "created_at": "2025-06-16 03:05:22",
+    "updated_at": "2025-06-16 03:05:58"
+  },
+  {
+    "id": "d8d1eb60-a7d4-4afe-9eeb-e2689c41c96a",
+    "name": "Calian Centro",
+    "accounts": [
+      "Vendo_CalianBanlas",
+      "Vendo_CalianBanlasLorina",
+      "Vendo_CalianBay2xErick",
+      "Vendo_CalianElem",
+      "Vendo_CalianEmmie",
+      "Vendo_CalianJerson",
+      "Vendo_CalianKagMino",
+      "Vendo_CalianKokoy",
+      "Vendo_CalianMarisaGym",
+      "Vendo_CalianNemcySTL",
+      "Vendo_CalianOmicas",
+      "Vendo_CalianPaterna",
+      "Vendo_CalianPong",
+      "Vendo_CalianTommy"
+    ],
+    "created_at": "2025-06-16 03:06:49",
+    "updated_at": "2025-06-16 03:11:45"
+  },
+  {
+    "id": "1e4779a0-a9d0-469a-b16c-b944fd9f39a6",
+    "name": "Calian South",
+    "accounts": [
+      "Vendo_KawayanMarikit",
+      "Vendo_KawayanWenard",
+      "Vendo_LinadasanKimote",
+      "Vendo_LinadasanTataBasa",
+      "Vendo_NorthGusatbak",
+      "Vendo_NorthKiambingPanay",
+      "Vendo_NorthKipangol",
+      "Vendo_NorthLacubiJoan",
+      "Vendo_NorthMike",
+      "Vendo_SouthAdap",
+      "Vendo_SouthBatoDelaRosa",
+      "Vendo_SouthBenaliEm2",
+      "Vendo_SouthKapSteve",
+      "Vendo_SouthMansanitas",
+      "Vendo_WestSitioLucas"
+    ],
+    "created_at": "2025-06-16 03:08:04",
+    "updated_at": "2025-06-16 03:09:28"
+  },
+  {
+    "id": "fd8c3e2a-f8c0-40a4-a69d-4b34175c8a1a",
+    "name": "Don Marcelino",
+    "accounts": [
+      "Donmar_PBETunod",
+      "Tubalan_Bautista",
+      "Vendo_DonmarBeltran",
+      "Vendo_DonmarBlackpeer",
+      "Vendo_DonmarJamilSubo",
+      "Vendo_DonmarJeffrey"
+    ],
+    "created_at": "2025-06-16 03:08:53"
+  },
+  {
+    "id": "f7f455dd-e466-4a02-983e-63677aa926bf",
+    "name": "Linadasan",
+    "accounts": [
+      "Vendo_LinadasanElem",
+      "Vendo_LinadasanNesoy",
+      "Vendo_LinadasanSalvador",
+      "Vendo_LinadasanTataBasa",
+      "Vendo_LinadasanTess"
+    ],
+    "created_at": "2025-06-16 03:10:31"
+  }
+]
