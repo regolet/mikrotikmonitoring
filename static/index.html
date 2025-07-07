@@ -10,6 +10,7 @@
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/">MikroTik Monitoring</a>
@@ -19,54 +20,61 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">Dashboard</a>
+                        <a class="nav-link active" href="/" data-page="dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/settings">Settings</a>
+                        <a class="nav-link" href="/groups" data-page="groups">Groups</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings" data-page="settings">Settings</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid mt-4">
-        <!-- Refresh Controls -->
-        <div class="row mb-3">
-            <div class="col-md-12 text-end">
-                <div class="btn-group me-2">
-                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-                        Auto-refresh: <span id="refresh-interval-display">Off</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item refresh-option" href="#" data-interval="0">Off</a></li>
-                        <li><a class="dropdown-item refresh-option" href="#" data-interval="5">5 seconds</a></li>
-                        <li><a class="dropdown-item refresh-option" href="#" data-interval="10">10 seconds</a></li>
-                        <li><a class="dropdown-item refresh-option" href="#" data-interval="30">30 seconds</a></li>
-                        <li><a class="dropdown-item refresh-option" href="#" data-interval="60">1 minute</a></li>
-                    </ul>
+    <!-- Main Content Container -->
+    <div id="main-content">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page-content">
+            <div class="container-fluid mt-4">
+                <!-- Refresh Controls -->
+                <div class="row mb-3">
+                    <div class="col-md-12 text-end">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                Auto-refresh: <span id="refresh-interval-display">Off</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item refresh-option" href="#" data-interval="0">Off</a></li>
+                                <li><a class="dropdown-item refresh-option" href="#" data-interval="5">5 seconds</a></li>
+                                <li><a class="dropdown-item refresh-option" href="#" data-interval="10">10 seconds</a></li>
+                                <li><a class="dropdown-item refresh-option" href="#" data-interval="30">30 seconds</a></li>
+                                <li><a class="dropdown-item refresh-option" href="#" data-interval="60">1 minute</a></li>
+                            </ul>
+                        </div>
+                        <button id="refresh-now" class="btn btn-primary me-2">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Now
+                        </button>
+                        <button id="export-data" class="btn btn-success me-2">
+                            <i class="bi bi-download"></i> Export Data
+                        </button>
+                        <button id="test-notification" class="btn btn-info">
+                            <i class="bi bi-bell"></i> Test Notifications
+                        </button>
+                    </div>
                 </div>
-                <button id="refresh-now" class="btn btn-primary me-2">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                </button>
-                <button id="export-data" class="btn btn-success me-2">
-                    <i class="bi bi-download"></i> Export Data
-                </button>
-                <button id="test-notification" class="btn btn-info">
-                    <i class="bi bi-bell"></i> Test Notifications
-                </button>
-            </div>
-        </div>
 
-        <!-- Network Summary -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3>Network Summary</h3>
-            </div>
-            <div class="card-body">
-                <div class="seven-cards-row">
-                    <div class="stat-card-wrapper">
+                <!-- Network Summary -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Network Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="seven-cards-row">
+                                                <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card">
-                            <div class="icon-circle">
+                            <div class="icon-container">
                                 <i class="bi bi-people-fill"></i>
                             </div>
                             <div class="card-content">
@@ -78,7 +86,7 @@
                     
                     <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card bg-success bg-opacity-10">
-                            <div class="icon-circle bg-success bg-opacity-25">
+                            <div class="icon-container">
                                 <i class="bi bi-wifi text-success"></i>
                             </div>
                             <div class="card-content">
@@ -90,7 +98,7 @@
                     
                     <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card bg-danger bg-opacity-10">
-                            <div class="icon-circle bg-danger bg-opacity-25">
+                            <div class="icon-container">
                                 <i class="bi bi-wifi-off text-danger"></i>
                             </div>
                             <div class="card-content">
@@ -102,7 +110,7 @@
                     
                     <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card bg-info bg-opacity-10">
-                            <div class="icon-circle bg-info bg-opacity-25">
+                            <div class="icon-container">
                                 <i class="bi bi-toggle-on text-info"></i>
                             </div>
                             <div class="card-content">
@@ -114,7 +122,7 @@
                     
                     <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card bg-secondary bg-opacity-10">
-                            <div class="icon-circle bg-secondary bg-opacity-25">
+                            <div class="icon-container">
                                 <i class="bi bi-toggle-off text-secondary"></i>
                             </div>
                             <div class="card-content">
@@ -126,7 +134,7 @@
                     
                     <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card bg-primary bg-opacity-10">
-                            <div class="icon-circle bg-primary bg-opacity-25">
+                            <div class="icon-container">
                                 <i class="bi bi-cloud-arrow-up text-primary"></i>
                             </div>
                             <div class="card-content">
@@ -138,7 +146,7 @@
                     
                     <div class="stat-card-wrapper">
                         <div class="stat-card horizontal-card bg-warning bg-opacity-10">
-                            <div class="icon-circle bg-warning bg-opacity-25">
+                            <div class="icon-container">
                                 <i class="bi bi-cloud-arrow-down text-warning"></i>
                             </div>
                             <div class="card-content">
@@ -147,57 +155,60 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 text-end">
-                        <small class="text-muted">Last updated: <span id="last-updated-time">-</span></small>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <small class="text-muted">Last updated: <span id="last-updated-time">-</span></small>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- System Resources -->
-        <div id="resources-section" style="display: none;">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3>System Resources</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row" id="resources-content">
-                        <!-- Resources will be populated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Two-column layout for Network Interfaces and PPP Active Connections -->
-        <div class="row">
-            <div class="col-md-6">
-                <!-- Network Interfaces -->
-                <div id="interfaces-section" style="display: none;">
+                <!-- PPPoE Interfaces -->
+                <div id="pppoe-section" style="display: none;">
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3>Network Interfaces</h3>
+                            <h3>PPPoE Interfaces</h3>
                             <div>
-                                <select id="interface-filter" class="form-select form-select-sm">
-                                    <option value="all">Show All</option>
-                                    <option value="no-pppoe" selected>Hide PPPoE</option>
+                                <select id="pppoe-rows-per-page" class="form-select form-select-sm">
+                                    <option value="10">10 rows</option>
+                                    <option value="20" selected>20 rows</option>
+                                    <option value="50">50 rows</option>
+                                    <option value="100">100 rows</option>
+                                    <option value="0">All</option>
                                 </select>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-striped" id="network-interfaces-table">
+                                <table class="table table-striped table-hover table-sm" id="pppoe-interfaces-table">
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Type</th>
-                                            <th>Status</th>
-                                            <th>MAC Address</th>
+                                            <th class="sortable" data-sort="name">
+                                                Name <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="profile">
+                                                Profile Plan <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="status">
+                                                Status <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="download">
+                                                Download Speed (Mbps) <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="upload">
+                                                Upload Speed (Mbps) <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="address">
+                                                Address <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="uptime">
+                                                Uptime <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Interfaces will be populated by JavaScript -->
+                                        <!-- PPPoE interfaces will be populated by JavaScript -->
                                     </tbody>
                                 </table>
                             </div>
@@ -205,62 +216,21 @@
                         <div class="card-footer">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    Showing <span id="interfaces-showing-start">0</span> to <span id="interfaces-showing-end">0</span> of <span id="interfaces-total-rows">0</span> entries
+                                    Showing <span id="pppoe-showing-start">0</span> to <span id="pppoe-showing-end">0</span> of <span id="pppoe-total-rows">0</span> entries
                                 </div>
                                 <div>
-                                    <nav aria-label="Interfaces table navigation">
+                                    <nav aria-label="PPPoE table navigation">
                                         <ul class="pagination pagination-sm mb-0">
                                             <li class="page-item">
-                                                <button id="interfaces-prev-page" class="page-link" aria-label="Previous">
+                                                <button id="pppoe-prev-page" class="page-link" aria-label="Previous">
                                                     <span aria-hidden="true">&laquo;</span>
                                                 </button>
                                             </li>
                                             <li class="page-item">
-                                                <span class="page-link">Page <span id="interfaces-current-page">1</span></span>
+                                                <span class="page-link">Page <span id="pppoe-current-page">1</span></span>
                                             </li>
                                             <li class="page-item">
-                                                <button id="interfaces-next-page" class="page-link" aria-label="Next">
-                                                    <span aria-hidden="true">&raquo;</span>
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <!-- PPP Active Connections -->
-                <div id="ppp-active-section" style="display: none;">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h3>Active PPP Connections</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="ppp-active-content">
-                                <!-- PPP active connections will be populated by JavaScript -->
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    Showing <span id="ppp-active-showing-start">0</span> to <span id="ppp-active-showing-end">0</span> of <span id="ppp-active-total-rows">0</span> entries
-                                </div>
-                                <div>
-                                    <nav aria-label="PPP Active table navigation">
-                                        <ul class="pagination pagination-sm mb-0">
-                                            <li class="page-item">
-                                                <button id="ppp-active-prev-page" class="page-link" aria-label="Previous">
-                                                    <span aria-hidden="true">&laquo;</span>
-                                                </button>
-                                            </li>
-                                            <li class="page-item">
-                                                <span class="page-link">Page <span id="ppp-active-current-page">1</span></span>
-                                            </li>
-                                            <li class="page-item">
-                                                <button id="ppp-active-next-page" class="page-link" aria-label="Next">
+                                                <button id="pppoe-next-page" class="page-link" aria-label="Next">
                                                     <span aria-hidden="true">&raquo;</span>
                                                 </button>
                                             </li>
@@ -274,106 +244,129 @@
             </div>
         </div>
 
-        <!-- PPPoE Interfaces -->
-        <div id="pppoe-section" style="display: none;">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3>PPPoE Interfaces</h3>
-                    <div>
-                        <select id="pppoe-rows-per-page" class="form-select form-select-sm">
-                            <option value="10">10 rows</option>
-                            <option value="20" selected>20 rows</option>
-                            <option value="50">50 rows</option>
-                            <option value="100">100 rows</option>
-                            <option value="0">All</option>
-                        </select>
+        <!-- Groups Page -->
+        <div id="groups-page" class="page-content" style="display: none;">
+            <div class="container-fluid mt-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3>Groups Management</h3>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                            <i class="bi bi-plus-circle"></i> Add Group
+                        </button>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover table-sm" id="pppoe-interfaces-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Profile Plan</th>
-                                    <th>Status</th>
-                                    <th>Download (TX)</th>
-                                    <th>Upload (RX)</th>
-                                    <th>Address</th>
-                                    <th>Uptime</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- PPPoE interfaces will be populated by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            Showing <span id="pppoe-showing-start">0</span> to <span id="pppoe-showing-end">0</span> of <span id="pppoe-total-rows">0</span> entries
-                        </div>
-                        <div>
-                            <nav aria-label="PPPoE table navigation">
-                                <ul class="pagination pagination-sm mb-0">
-                                    <li class="page-item">
-                                        <button id="pppoe-prev-page" class="page-link" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </button>
-                                    </li>
-                                    <li class="page-item">
-                                        <span class="page-link">Page <span id="pppoe-current-page">1</span></span>
-                                    </li>
-                                    <li class="page-item">
-                                        <button id="pppoe-next-page" class="page-link" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nav>
+                    <div class="card-body">
+                        <div id="groups-content">
+                            <!-- Groups will be populated by JavaScript -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PPP Accounts -->
-        <div id="ppp-accounts-section" style="display: none;">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3>PPP Accounts</h3>
-                </div>
-                <div class="card-body">
-                    <div id="ppp-accounts-content">
-                        <!-- PPP accounts will be populated by JavaScript -->
+        <!-- Settings Page -->
+        <div id="settings-page" class="page-content" style="display: none;">
+            <div class="container-fluid mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Router Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="settings-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="router_ip" class="form-label">Router IP Address</label>
+                                        <input type="text" class="form-control" id="router_ip" name="router_ip" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="router_port" class="form-label">Port</label>
+                                        <input type="number" class="form-control" id="router_port" name="router_port" value="8728" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="router_user" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="router_user" name="router_user" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="router_password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="router_password" name="router_password" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Settings
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="test-connection">
+                                    <i class="bi bi-wifi"></i> Test Connection
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            Showing <span id="ppp-accounts-showing-start">0</span> to <span id="ppp-accounts-showing-end">0</span> of <span id="ppp-accounts-total-rows">0</span> entries
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Group Modal -->
+    <div class="modal fade" id="addGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-group-form">
+                        <div class="mb-3">
+                            <label for="group-name" class="form-label">Group Name</label>
+                            <input type="text" class="form-control" id="group-name" required>
                         </div>
-                        <div>
-                            <nav aria-label="PPP Accounts table navigation">
-                                <ul class="pagination pagination-sm mb-0">
-                                    <li class="page-item">
-                                        <button id="ppp-accounts-prev-page" class="page-link" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </button>
-                                    </li>
-                                    <li class="page-item">
-                                        <span class="page-link">Page <span id="ppp-accounts-current-page">1</span></span>
-                                    </li>
-                                    <li class="page-item">
-                                        <button id="ppp-accounts-next-page" class="page-link" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nav>
+                        <div class="mb-3">
+                            <label for="group-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="group-description" rows="3"></textarea>
                         </div>
-                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-group-btn">Save Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-group-form">
+                        <input type="hidden" id="edit-group-id">
+                        <div class="mb-3">
+                            <label for="edit-group-name" class="form-label">Group Name</label>
+                            <input type="text" class="form-control" id="edit-group-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-group-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="edit-group-description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="update-group-btn">Update Group</button>
                 </div>
             </div>
         </div>
@@ -391,7 +384,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Bootstrap Toast Notification Helper
+    <!-- Bootstrap Toast Notification Helper -->
+    <script>
     function showToast(message, type = 'info', title = '') {
         const toastId = 'toast-' + Date.now();
         const icon = type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-x-circle-fill' : type === 'warning' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
@@ -422,35 +416,44 @@
 
     <!-- Main Application Logic -->
     <script>
-        class MikroTikMonitor {
+        class MikroTikSPA {
             constructor() {
+                this.currentPage = 'dashboard';
                 this.refreshInterval = null;
                 this.currentData = {};
-                this.interfacesPage = 1;
-                this.pppAccountsPage = 1;
-                this.pppActivePage = 1;
-                this.rowsPerPage = 20;
                 this.pppoePage = 1;
+                this.rowsPerPage = 20;
+                this.sortColumn = 'name';
+                this.sortDirection = 'asc';
                 this.init();
-                // Instantly load all data on creation
-                this.refreshAllData();
             }
 
             init() {
                 this.setupEventListeners();
+                this.setupRouting();
+                this.loadCurrentPage();
             }
 
             setupEventListeners() {
-                // Refresh controls
-                document.getElementById('refresh-now').addEventListener('click', () => {
-                    this.refreshAllData();
+                // Navigation
+                document.querySelectorAll('[data-page]').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = e.target.dataset.page;
+                        this.navigateTo(page);
+                    });
                 });
 
-                document.getElementById('export-data').addEventListener('click', () => {
+                // Dashboard controls
+                document.getElementById('refresh-now')?.addEventListener('click', () => {
+                    this.refreshDashboardData();
+                });
+
+                document.getElementById('export-data')?.addEventListener('click', () => {
                     this.exportData();
                 });
 
-                document.getElementById('test-notification').addEventListener('click', () => {
+                document.getElementById('test-notification')?.addEventListener('click', () => {
                     this.testNotifications();
                 });
 
@@ -463,16 +466,98 @@
                     });
                 });
 
-                // Interface filter
-                document.getElementById('interface-filter').addEventListener('change', () => {
-                    this.applyInterfaceFilter();
+                // Settings form
+                document.getElementById('settings-form')?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveSettings();
+                });
+
+                document.getElementById('test-connection')?.addEventListener('click', () => {
+                    this.testConnection();
+                });
+
+                // Groups functionality
+                document.getElementById('save-group-btn')?.addEventListener('click', () => {
+                    this.saveGroup();
+                });
+
+                document.getElementById('update-group-btn')?.addEventListener('click', () => {
+                    this.updateGroup();
+                });
+
+                // PPPoE table sorting
+                document.querySelectorAll('#pppoe-interfaces-table th.sortable').forEach(th => {
+                    th.addEventListener('click', (e) => {
+                        const sortField = th.dataset.sort;
+                        this.sortPPPoETable(sortField);
+                    });
                 });
             }
 
-            async loadInitialData() {
+            setupRouting() {
+                // Handle browser back/forward
+                window.addEventListener('popstate', (e) => {
+                    const page = e.state?.page || 'dashboard';
+                    this.showPage(page);
+                });
+
+                // Initial route
+                const path = window.location.pathname;
+                if (path === '/settings') {
+                    this.navigateTo('settings');
+                } else if (path === '/groups') {
+                    this.navigateTo('groups');
+                } else {
+                    this.navigateTo('dashboard');
+                }
+            }
+
+            navigateTo(page) {
+                this.currentPage = page;
+                this.showPage(page);
+                window.history.pushState({ page }, '', `/${page === 'dashboard' ? '' : page}`);
+                
+                // Update navigation active state
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+            }
+
+            showPage(page) {
+                // Hide all pages
+                document.querySelectorAll('.page-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                // Show selected page
+                const pageElement = document.getElementById(`${page}-page`);
+                if (pageElement) {
+                    pageElement.style.display = 'block';
+                }
+
+                // Load page-specific data
+                this.loadCurrentPage();
+            }
+
+            loadCurrentPage() {
+                switch (this.currentPage) {
+                    case 'dashboard':
+                        this.loadDashboardData();
+                        break;
+                    case 'groups':
+                        this.loadGroups();
+                        break;
+                    case 'settings':
+                        this.loadSettings();
+                        break;
+                }
+            }
+
+            async loadDashboardData() {
                 await this.checkConnection();
                 if (this.currentData.connected) {
-                    await this.refreshAllData();
+                    await this.refreshDashboardData();
                 }
             }
 
@@ -494,144 +579,24 @@
                 }
             }
 
-            async refreshAllData() {
-                // Show loading placeholders for each section
-                this.showLoadingPlaceholders();
-                // Fetch and render each section independently
-                this.fetchAndRenderResources();
-                this.fetchAndRenderInterfaces();
-                this.fetchAndRenderPPPoE();
-                this.fetchAndRenderPPPActive();
-                this.fetchAndRenderPPPAccounts();
-            }
-
-            showLoadingPlaceholders() {
-                // Resources
-                const resourcesSection = document.getElementById('resources-section');
-                const resourcesContent = document.getElementById('resources-content');
-                if (resourcesSection && resourcesContent) {
-                    resourcesSection.style.display = 'block';
-                    // Only show loading if no current data
-                    if (!this.currentData.resources) {
-                        resourcesContent.innerHTML = '<div class="text-center text-muted py-4">Loading system resources...</div>';
-                    }
-                }
-                // Interfaces
-                const interfacesSection = document.getElementById('interfaces-section');
-                const interfacesTbody = document.querySelector('#network-interfaces-table tbody');
-                if (interfacesSection && interfacesTbody) {
-                    interfacesSection.style.display = 'block';
-                    // Only show loading if no current data
-                    if (!this.currentData.interfaces || this.currentData.interfaces.length === 0) {
-                        interfacesTbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Loading interfaces...</td></tr>';
-                    }
-                }
-                // PPPoE
-                const pppoeSection = document.getElementById('pppoe-section');
-                const pppoeTbody = document.querySelector('#pppoe-interfaces-table tbody');
-                if (pppoeSection && pppoeTbody) {
-                    pppoeSection.style.display = 'block';
-                    // Only show loading if no current data
-                    if (!this.currentData.pppoe || !this.currentData.pppoe.pppoe_interfaces || this.currentData.pppoe.pppoe_interfaces.length === 0) {
-                        pppoeTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Loading PPPoE interfaces...</td></tr>';
-                    }
-                }
-                // PPP Active
-                const pppActiveSection = document.getElementById('ppp-active-section');
-                const pppActiveContent = document.getElementById('ppp-active-content');
-                if (pppActiveSection && pppActiveContent) {
-                    pppActiveSection.style.display = 'block';
-                    // Only show loading if no current data
-                    if (!this.currentData.ppp_active || this.currentData.ppp_active.length === 0) {
-                        pppActiveContent.innerHTML = '<div class="text-center text-muted py-4">Loading active PPP connections...</div>';
-                    }
-                }
-                // PPP Accounts
-                const pppAccountsSection = document.getElementById('ppp-accounts-section');
-                const pppAccountsContent = document.getElementById('ppp-accounts-content');
-                if (pppAccountsSection && pppAccountsContent) {
-                    pppAccountsSection.style.display = 'block';
-                    // Only show loading if no current data
-                    if (!this.currentData.ppp_accounts || this.currentData.ppp_accounts.length === 0) {
-                        pppAccountsContent.innerHTML = '<div class="text-center text-muted py-4">Loading PPP accounts...</div>';
-                    }
-                }
-            }
-
-            async fetchAndRenderResources() {
-                try {
-                    const response = await fetch('/api/resources');
-                    const data = await response.json();
-                    this.currentData.resources = data.success ? data.resources : null;
-                    this.updateResources();
-                } catch (error) {
-                    this.currentData.resources = null;
-                    this.updateResources();
-                }
-            }
-
-            async fetchAndRenderInterfaces() {
-                try {
-                    const response = await fetch('/api/interfaces');
-                    const data = await response.json();
-                    this.currentData.interfaces = data.success ? data.interfaces : null;
-                    this.updateInterfaces();
-                } catch (error) {
-                    this.currentData.interfaces = null;
-                    this.updateInterfaces();
-                }
-            }
-
-            async fetchAndRenderPPPoE() {
+            async refreshDashboardData() {
                 try {
                     const response = await fetch('/api/pppoe');
                     const data = await response.json();
-                    this.currentData.pppoe = data.success ? data : null;
-                    this.updatePPPoE();
-                    // Also update network summary if stats are present
-                    this.updateNetworkSummary();
+                    
+                    if (data.success) {
+                        this.currentData.pppoe = data;
+                        this.updateDashboard();
+                    } else {
+                        showError('Data Error', data.error || 'Failed to load data');
+                    }
                 } catch (error) {
-                    this.currentData.pppoe = null;
-                    this.updatePPPoE();
+                    console.error('Error refreshing data:', error);
+                    showError('Refresh Error', 'Failed to refresh data');
                 }
             }
 
-            async fetchAndRenderPPPActive() {
-                try {
-                    const response = await fetch('/api/ppp_active');
-                    const data = await response.json();
-                    this.currentData.ppp_active = data.success ? data.ppp_active : null;
-                    this.updatePPPActive();
-                } catch (error) {
-                    this.currentData.ppp_active = null;
-                    this.updatePPPActive();
-                }
-            }
-
-            async fetchAndRenderPPPAccounts() {
-                try {
-                    const response = await fetch('/api/ppp_accounts');
-                    const data = await response.json();
-                    this.currentData.ppp_accounts = data.success ? data.ppp_accounts : null;
-                    this.updatePPPAccounts();
-                } catch (error) {
-                    this.currentData.ppp_accounts = null;
-                    this.updatePPPAccounts();
-                }
-            }
-
-            updateUI() {
-                this.updateNetworkSummary();
-                this.updateResources();
-                this.updateInterfaces();
-                this.updatePPPoE();
-                this.updatePPPActive();
-                this.updatePPPAccounts();
-                this.updateFooter();
-                this.updatePaginationControls();
-            }
-
-            updateNetworkSummary() {
+            updateDashboard() {
                 if (this.currentData.pppoe && this.currentData.pppoe.aggregate_stats) {
                     const stats = this.currentData.pppoe.aggregate_stats;
                     document.getElementById('total-accounts').textContent = stats.total_accounts || 0;
@@ -641,311 +606,546 @@
                     document.getElementById('disabled-accounts').textContent = stats.disabled_accounts || 0;
                 }
 
-                // Update speeds (placeholder for now)
-                document.getElementById('total-upload-speed').textContent = 'Calculating...';
-                document.getElementById('total-download-speed').textContent = 'Calculating...';
+                // Update PPPoE table and calculate speeds
+                const processedInterfaces = this.updatePPPoETable();
+                this.updateSpeedCalculations(processedInterfaces);
+                this.updateFooter();
             }
 
-            updateResources() {
-                const section = document.getElementById('resources-section');
-                const content = document.getElementById('resources-content');
-                
-                if (this.currentData.resources) {
-                    section.style.display = 'block';
-                    content.innerHTML = this.renderResources(this.currentData.resources);
-                } else {
-                    section.style.display = 'none';
-                }
-            }
-
-            renderResources(resources) {
-                return `
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="resource-card">
-                            <h4>CPU Load</h4>
-                            <div class="progress mb-2">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: ${resources['cpu-load'] || 0}%"
-                                     aria-valuenow="${resources['cpu-load'] || 0}" 
-                                     aria-valuemin="0" aria-valuemax="100">
-                                    ${resources['cpu-load'] || 0}%
-                                </div>
-                            </div>
-                            <small class="text-muted">
-                                ${resources['cpu-count'] || 1} CPU(s), ${resources['cpu-frequency'] || 'N/A'} MHz
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="resource-card">
-                            <h4>Memory Usage</h4>
-                            <div class="progress mb-2">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: ${resources.memory_percentage || 0}%"
-                                     aria-valuenow="${resources.memory_percentage || 0}" 
-                                     aria-valuemin="0" aria-valuemax="100">
-                                    ${(resources.memory_percentage || 0).toFixed(1)}%
-                                </div>
-                            </div>
-                            <small class="text-muted">
-                                ${this.formatBytes(resources.memory_used || 0)} / ${this.formatBytes(resources['total-memory'] || 0)}
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="resource-card">
-                            <h4>HDD Usage</h4>
-                            <div class="progress mb-2">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: ${resources.hdd_percentage || 0}%"
-                                     aria-valuenow="${resources.hdd_percentage || 0}" 
-                                     aria-valuemin="0" aria-valuemax="100">
-                                    ${(resources.hdd_percentage || 0).toFixed(1)}%
-                                </div>
-                            </div>
-                            <small class="text-muted">
-                                ${this.formatBytes(resources.hdd_used || 0)} / ${this.formatBytes(resources['total-hdd-space'] || 0)}
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="resource-card">
-                            <h4>Uptime</h4>
-                            <p class="mb-0">${resources.uptime || 'N/A'}</p>
-                            <small class="text-muted">
-                                Version: ${resources.version || 'N/A'}
-                            </small>
-                        </div>
-                    </div>
-                `;
-            }
-
-            updateInterfaces() {
-                const section = document.getElementById('interfaces-section');
-                const tbody = document.querySelector('#network-interfaces-table tbody');
-                const data = this.currentData.interfaces ? this.currentData.interfaces.filter(iface => iface.type !== 'pppoe-in') : [];
-                const total = data.length;
-                const start = (this.interfacesPage - 1) * this.rowsPerPage;
-                const end = Math.min(start + this.rowsPerPage, total);
-                const pageData = data.slice(start, end);
-                if (data.length > 0) {
-                    section.style.display = 'block';
-                    tbody.innerHTML = pageData.map(iface => `
-                        <tr class="${iface.running === 'true' ? 'table-default' : 'table-secondary'} interface-row${iface.name.toLowerCase().includes('pppoe') ? ' pppoe-interface' : ''}">
-                            <td>${iface.name || 'N/A'}</td>
-                            <td>${iface.type || 'N/A'}</td>
-                            <td>
-                                <span class="status-indicator ${iface.running === 'true' ? 'status-up' : 'status-down'}"></span>
-                                ${iface.running === 'true' ? 'Up' : 'Down'}
-                            </td>
-                            <td>${iface['mac-address'] || 'N/A'}</td>
-                        </tr>
-                    `).join('');
-                    document.getElementById('interfaces-showing-start').textContent = total === 0 ? 0 : start + 1;
-                    document.getElementById('interfaces-showing-end').textContent = end;
-                    document.getElementById('interfaces-total-rows').textContent = total;
-                    document.getElementById('interfaces-current-page').textContent = this.interfacesPage;
-                } else {
-                    section.style.display = 'none';
-                }
-            }
-
-            updatePPPoE() {
+            updatePPPoETable() {
                 const section = document.getElementById('pppoe-section');
                 const tbody = document.querySelector('#pppoe-interfaces-table tbody');
-                // Build a map of PPP account name and username (case-insensitive) -> account for quick lookup
-                const pppAccounts = (this.currentData.ppp_accounts || []);
+                
+                if (!this.currentData.pppoe || !this.currentData.pppoe.pppoe_interfaces) {
+                    section.style.display = 'none';
+                    return [];
+                }
+
+                const interfaces = this.currentData.pppoe.pppoe_interfaces;
+                const pppSecrets = this.currentData.pppoe.ppp_secrets || [];
+                const pppActive = this.currentData.pppoe.ppp_active || [];
+                
+                // Create a map of PPP secrets for quick lookup
                 const pppAccountMap = {};
-                pppAccounts.forEach(acc => {
+                pppSecrets.forEach(acc => {
                     if (acc.name) pppAccountMap[acc.name.toLowerCase()] = acc;
                     if (acc.username) pppAccountMap[acc.username.toLowerCase()] = acc;
                 });
-                const data = this.currentData.pppoe && this.currentData.pppoe.pppoe_interfaces ? this.currentData.pppoe.pppoe_interfaces : [];
-                const total = data.length;
-                const start = (this.pppoePage || 1) - 1 >= 0 ? ((this.pppoePage || 1) - 1) * this.rowsPerPage : 0;
+
+                // Build a map for quick lookup by name and address
+                const pppActiveMap = {};
+                pppActive.forEach(entry => {
+                    if (entry.name) pppActiveMap[entry.name.toLowerCase()] = entry;
+                    if (entry.address) pppActiveMap[entry.address] = entry;
+                });
+
+                // Process interfaces with speed calculations and account matching
+                const processedInterfaces = interfaces.map(iface => {
+                    // Try to match PPPoE interface name to PPP account
+                    let accountName = iface.name || 'N/A';
+                    let profilePlan = iface.profile || 'N/A';
+                    
+                    // Extract username from interface name if it matches <pppoe-username> pattern
+                    const match = iface.name.match(/^<pppoe-(.+)>$/i);
+                    if (match && match[1]) {
+                        const username = match[1].toLowerCase();
+                        const account = pppAccountMap[username];
+                        if (account) {
+                            accountName = account.name || account.username || iface.name;
+                            profilePlan = account.profile || 'N/A';
+                        }
+                    } else {
+                        // Try direct name matching
+                        const account = pppAccountMap[iface.name.toLowerCase()];
+                        if (account) {
+                            accountName = account.name || account.username || iface.name;
+                            profilePlan = account.profile || 'N/A';
+                        }
+                    }
+                    
+                    // Calculate speeds for this interface
+                    const rxBytes = parseFloat(iface['rx-byte'] || 0);
+                    const txBytes = parseFloat(iface['tx-byte'] || 0);
+                    
+                    // Calculate rates using localStorage pattern
+                    let calculatedRxRateBps = 0;
+                    let calculatedTxRateBps = 0;
+                    
+                    const interfaceName = iface.name;
+                    const storageKey = `pppoe_stats_${interfaceName}`;
+                    const currentTime = Date.now();
+                    
+                    // Get previous stats from localStorage
+                    const prevStatsStr = localStorage.getItem(storageKey);
+                    if (prevStatsStr) {
+                        try {
+                            const prevStats = JSON.parse(prevStatsStr);
+                            const timeDiff = (currentTime - prevStats.timestamp) / 1000;
+                            
+                            if (timeDiff > 0) {
+                                let rxDiff = rxBytes - prevStats.rxBytes;
+                                let txDiff = txBytes - prevStats.txBytes;
+                                
+                                // Handle counter wrapping
+                                rxDiff = rxDiff < 0 ? rxBytes : rxDiff;
+                                txDiff = txDiff < 0 ? txBytes : txDiff;
+                                
+                                calculatedRxRateBps = Math.max(0, rxDiff / timeDiff);
+                                calculatedTxRateBps = Math.max(0, txDiff / timeDiff);
+                            }
+                        } catch (e) {
+                            console.warn('Error parsing previous stats for', interfaceName, e);
+                        }
+                    }
+                    
+                    // Store current values for next calculation
+                    const currentStats = {
+                        rxBytes: rxBytes,
+                        txBytes: txBytes,
+                        timestamp: currentTime
+                    };
+                    localStorage.setItem(storageKey, JSON.stringify(currentStats));
+                    
+                    return {
+                        ...iface,
+                        accountName: accountName,
+                        profilePlan: profilePlan,
+                        calculatedRxRateBps: calculatedRxRateBps,
+                        calculatedTxRateBps: calculatedTxRateBps,
+                        status: iface.running === 'true' ? 'Up' : 'Down',
+                        statusClass: iface.running === 'true' ? 'status-up' : 'status-down'
+                    };
+                });
+
+                // Sort the processed interfaces
+                this.sortInterfaces(processedInterfaces);
+
+                const total = processedInterfaces.length;
+                const start = (this.pppoePage - 1) * this.rowsPerPage;
                 const end = Math.min(start + this.rowsPerPage, total);
-                const pageData = data.slice(start, end);
-                if (data.length > 0) {
+                const pageData = processedInterfaces.slice(start, end);
+
+                if (total > 0) {
                     section.style.display = 'block';
                     tbody.innerHTML = pageData.map(iface => {
-                        // Try to match PPPoE interface name to PPP account by name or username (case-insensitive)
-                        let acc = null;
-                        if (iface.name) {
-                            acc = pppAccountMap[iface.name.toLowerCase()];
-                            // Also try to extract username from interface name if it matches <pppoe-username>
-                            const match = iface.name.match(/^<pppoe-(.+)>$/i);
-                            if (!acc && match && match[1]) {
-                                acc = pppAccountMap[match[1].toLowerCase()];
-                            }
+                        // Try to find a matching PPP active entry
+                        let activeEntry = null;
+                        if (iface.accountName && pppActiveMap[iface.accountName.toLowerCase()]) {
+                            activeEntry = pppActiveMap[iface.accountName.toLowerCase()];
+                        } else if (iface.address && pppActiveMap[iface.address]) {
+                            activeEntry = pppActiveMap[iface.address];
                         }
-                        const name = acc ? acc.name : (iface.name || 'N/A');
-                        const profile = acc ? acc.profile : (iface.profile || 'N/A');
+                        const address = activeEntry ? (activeEntry.address || activeEntry['remote-address']) : (iface.address || iface['remote-address']);
+                        const uptime = activeEntry ? activeEntry.uptime : (iface.uptime || iface['uptime']);
                         return `
-                        <tr class="${iface.running === 'true' ? 'table-default' : 'table-secondary'}">
-                            <td>${name}</td>
-                            <td>${profile}</td>
-                            <td>
-                                <span class="status-indicator ${iface.running === 'true' ? 'status-up' : 'status-down'}"></span>
-                                ${iface.running === 'true' ? 'Up' : 'Down'}
-                            </td>
-                            <td>${this.formatBytes(iface['tx-byte'] || 0)}</td>
-                            <td>${this.formatBytes(iface['rx-byte'] || 0)}</td>
-                            <td>${iface.address || 'N/A'}</td>
-                            <td>${iface.uptime || 'N/A'}</td>
-                        </tr>
+                            <tr class="${iface.running === 'true' ? 'table-default' : 'table-secondary'}">
+                                <td>${iface.accountName}</td>
+                                <td>${iface.profilePlan}</td>
+                                <td>
+                                    <span class="status-indicator ${iface.statusClass}"></span>
+                                    ${iface.status}
+                                </td>
+                                <td>${this.formatMbps(iface.calculatedTxRateBps)}</td>
+                                <td>${this.formatMbps(iface.calculatedRxRateBps)}</td>
+                                <td>${address || 'N/A'}</td>
+                                <td>${uptime || 'N/A'}</td>
+                            </tr>
                         `;
                     }).join('');
+
+                    // Update pagination info
                     document.getElementById('pppoe-showing-start').textContent = total === 0 ? 0 : start + 1;
                     document.getElementById('pppoe-showing-end').textContent = end;
                     document.getElementById('pppoe-total-rows').textContent = total;
-                    document.getElementById('pppoe-current-page').textContent = this.pppoePage || 1;
+                    document.getElementById('pppoe-current-page').textContent = this.pppoePage;
+                    
+                    // Set up pagination controls
+                    const prevBtn = document.getElementById('pppoe-prev-page');
+                    const nextBtn = document.getElementById('pppoe-next-page');
+                    const rowsSelect = document.getElementById('pppoe-rows-per-page');
+                    
+                    if (prevBtn) {
+                        prevBtn.onclick = () => {
+                            if (this.pppoePage > 1) {
+                                this.pppoePage--;
+                                this.updatePPPoETable();
+                            }
+                        };
+                    }
+                    
+                    if (nextBtn) {
+                        nextBtn.onclick = () => {
+                            const totalPages = Math.ceil(total / this.rowsPerPage);
+                            if (this.pppoePage < totalPages) {
+                                this.pppoePage++;
+                                this.updatePPPoETable();
+                            }
+                        };
+                    }
+                    
+                    if (rowsSelect) {
+                        rowsSelect.onchange = () => {
+                            this.rowsPerPage = parseInt(rowsSelect.value) || 20;
+                            this.pppoePage = 1;
+                            this.updatePPPoETable();
+                        };
+                    }
                 } else {
                     section.style.display = 'none';
                 }
-            }
-
-            updatePPPActive() {
-                const section = document.getElementById('ppp-active-section');
-                const content = document.getElementById('ppp-active-content');
-                const data = this.currentData.ppp_active || [];
-                const total = data.length;
-                const start = (this.pppActivePage - 1) * this.rowsPerPage;
-                const end = Math.min(start + this.rowsPerPage, total);
-                const pageData = data.slice(start, end);
-                if (data.length > 0) {
-                    section.style.display = 'block';
-                    content.innerHTML = `
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Service</th>
-                                        <th>Address</th>
-                                        <th>Uptime</th>
-                                        <th>Bytes In/Out</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${pageData.map(conn => `
-                                        <tr>
-                                            <td>${conn.name || 'N/A'}</td>
-                                            <td>${conn.service || 'N/A'}</td>
-                                            <td>${conn.address || 'N/A'}</td>
-                                            <td>${conn.uptime || 'N/A'}</td>
-                                            <td>${this.formatBytes(conn['bytes-in'] || 0)} / ${this.formatBytes(conn['bytes-out'] || 0)}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                    document.getElementById('ppp-active-showing-start').textContent = total === 0 ? 0 : start + 1;
-                    document.getElementById('ppp-active-showing-end').textContent = end;
-                    document.getElementById('ppp-active-total-rows').textContent = total;
-                    document.getElementById('ppp-active-current-page').textContent = this.pppActivePage;
-                } else {
-                    section.style.display = 'block';
-                    content.innerHTML = '<div class="alert alert-info">No active PPP connections</div>';
-                    document.getElementById('ppp-active-showing-start').textContent = 0;
-                    document.getElementById('ppp-active-showing-end').textContent = 0;
-                    document.getElementById('ppp-active-total-rows').textContent = 0;
-                    document.getElementById('ppp-active-current-page').textContent = 1;
-                }
-            }
-
-            updatePPPAccounts() {
-                const section = document.getElementById('ppp-accounts-section');
-                const content = document.getElementById('ppp-accounts-content');
-                const data = this.currentData.ppp_accounts || [];
-                const total = data.length;
-                const start = (this.pppAccountsPage - 1) * this.rowsPerPage;
-                const end = Math.min(start + this.rowsPerPage, total);
-                const pageData = data.slice(start, end);
-                if (data.length > 0) {
-                    section.style.display = 'block';
-                    content.innerHTML = `
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Service</th>
-                                        <th>Profile</th>
-                                        <th>Status</th>
-                                        <th>Last Logged Out</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${pageData.map(account => `
-                                        <tr>
-                                            <td>${account.name || 'N/A'}</td>
-                                            <td>${account.service || 'N/A'}</td>
-                                            <td>${account.profile || 'N/A'}</td>
-                                            <td>
-                                                ${account.disabled === 'true' 
-                                                    ? '<span class="badge bg-danger">Disabled</span>' 
-                                                    : '<span class="badge bg-success">Enabled</span>'}
-                                            </td>
-                                            <td>${account['last-logged-out'] || 'N/A'}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                } else {
-                    section.style.display = 'block';
-                    content.innerHTML = '<div class="alert alert-info">No PPP accounts configured</div>';
-                }
-            }
-
-            updateFooter() {
-                const now = new Date().toLocaleString();
-                document.getElementById('footer-time').textContent = now;
-                document.getElementById('last-updated-time').textContent = now;
-            }
-
-            applyInterfaceFilter() {
-                const filterValue = document.getElementById('interface-filter').value.toLowerCase();
-                const tableRows = document.querySelectorAll('#network-interfaces-table tbody tr');
                 
-                tableRows.forEach(row => {
-                    const interfaceName = row.cells[0].textContent.toLowerCase();
-                    const interfaceType = row.cells[1].textContent.toLowerCase();
-                    
-                    if (filterValue === 'no-pppoe') {
-                        if (interfaceName.includes('pppoe') || interfaceType.includes('pppoe')) {
-                            row.style.display = 'none';
-                        } else {
-                            row.style.display = '';
-                        }
-                    } else if (filterValue === 'all' || 
-                        interfaceName.includes(filterValue) || 
-                        interfaceType.includes(filterValue)) {
-                        row.style.display = '';
+                return processedInterfaces;
+            }
+
+            sortPPPoETable(sortField) {
+                // Toggle sort direction if same column
+                if (this.sortColumn === sortField) {
+                    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    this.sortColumn = sortField;
+                    this.sortDirection = 'asc';
+                }
+
+                // Update sort icons
+                document.querySelectorAll('#pppoe-interfaces-table th.sortable').forEach(th => {
+                    const icon = th.querySelector('.sort-icon');
+                    if (th.dataset.sort === sortField) {
+                        icon.className = this.sortDirection === 'asc' ? 'bi bi-arrow-up sort-icon' : 'bi bi-arrow-down sort-icon';
                     } else {
-                        row.style.display = 'none';
+                        icon.className = 'bi bi-arrow-down-up sort-icon';
+                    }
+                });
+
+                // Reset to first page when sorting
+                this.pppoePage = 1;
+                
+                // Update the table
+                this.updatePPPoETable();
+            }
+
+            sortInterfaces(interfaces) {
+                interfaces.sort((a, b) => {
+                    let aValue, bValue;
+                    
+                    switch (this.sortColumn) {
+                        case 'name':
+                            aValue = a.accountName.toLowerCase();
+                            bValue = b.accountName.toLowerCase();
+                            break;
+                        case 'profile':
+                            aValue = a.profilePlan.toLowerCase();
+                            bValue = b.profilePlan.toLowerCase();
+                            break;
+                        case 'status':
+                            aValue = a.status.toLowerCase();
+                            bValue = b.status.toLowerCase();
+                            break;
+                        case 'download':
+                            aValue = a.calculatedTxRateBps;
+                            bValue = b.calculatedTxRateBps;
+                            break;
+                        case 'upload':
+                            aValue = a.calculatedRxRateBps;
+                            bValue = b.calculatedRxRateBps;
+                            break;
+                        case 'address':
+                            aValue = this.ipToNumber(a.address || a['remote-address']);
+                            bValue = this.ipToNumber(b.address || b['remote-address']);
+                            break;
+                        case 'uptime':
+                            aValue = this.uptimeToSeconds(a.uptime || a['uptime']);
+                            bValue = this.uptimeToSeconds(b.uptime || b['uptime']);
+                            break;
+                        default:
+                            aValue = a.accountName.toLowerCase();
+                            bValue = b.accountName.toLowerCase();
+                    }
+                    
+                    // Handle numeric sorting
+                    if (this.sortColumn === 'download' || this.sortColumn === 'upload') {
+                        if (this.sortDirection === 'asc') {
+                            return aValue - bValue;
+                        } else {
+                            return bValue - aValue;
+                        }
+                    }
+                    
+                    // Handle string sorting
+                    if (typeof aValue === 'string' && typeof bValue === 'string') {
+                        if (this.sortDirection === 'asc') {
+                            return aValue.localeCompare(bValue);
+                        } else {
+                            return bValue.localeCompare(aValue);
+                        }
+                    } else {
+                        // Numeric or mixed types
+                        if (this.sortDirection === 'asc') {
+                            return aValue - bValue;
+                        } else {
+                            return bValue - aValue;
+                        }
                     }
                 });
             }
 
-            setRefreshInterval(seconds) {
-                if (this.refreshInterval) {
-                    clearInterval(this.refreshInterval);
-                    this.refreshInterval = null;
+            updateSpeedCalculations(processedInterfaces = null) {
+                if (!processedInterfaces || processedInterfaces.length === 0) {
+                    document.getElementById('total-upload-speed').textContent = '-';
+                    document.getElementById('total-download-speed').textContent = '-';
+                    return;
                 }
-                
-                const display = document.getElementById('refresh-interval-display');
-                display.textContent = seconds > 0 ? seconds + ' seconds' : 'Off';
-                
-                if (seconds > 0) {
-                    this.refreshInterval = setInterval(() => {
-                        this.refreshAllData();
-                    }, seconds * 1000);
+
+                let totalDownloadRate = 0;
+                let totalUploadRate = 0;
+
+                // Use the processed interfaces that already have speed calculations
+                processedInterfaces.forEach(iface => {
+                    totalDownloadRate += iface.calculatedTxRateBps || 0;
+                    totalUploadRate += iface.calculatedRxRateBps || 0;
+                });
+
+                // Update total speed displays
+                document.getElementById('total-download-speed').textContent = this.formatMbps(totalDownloadRate);
+                document.getElementById('total-upload-speed').textContent = this.formatMbps(totalUploadRate);
+            }
+
+            async loadGroups() {
+                try {
+                    const response = await fetch('/api/groups');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderGroups(data.groups || []);
+                    } else {
+                        showError('Groups Error', data.error || 'Failed to load groups');
+                    }
+                } catch (error) {
+                    console.error('Error loading groups:', error);
+                    showError('Groups Error', 'Failed to load groups');
                 }
+            }
+
+            renderGroups(groups) {
+                const content = document.getElementById('groups-content');
                 
-                localStorage.setItem('refreshInterval', seconds.toString());
+                if (groups.length === 0) {
+                    content.innerHTML = '<div class="alert alert-info">No groups found. Create your first group!</div>';
+                    return;
+                }
+
+                content.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${groups.map(group => `
+                                    <tr>
+                                        <td>${group.name}</td>
+                                        <td>${group.description || '-'}</td>
+                                        <td>${new Date(group.created_at).toLocaleDateString()}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" onclick="app.editGroup('${group.id}')">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="app.deleteGroup('${group.id}')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            async saveGroup() {
+                const name = document.getElementById('group-name').value.trim();
+                const description = document.getElementById('group-description').value.trim();
+                
+                if (!name) {
+                    showError('Validation Error', 'Group name is required');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/groups', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, description })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Group Created', 'Group saved successfully');
+                        document.getElementById('group-name').value = '';
+                        document.getElementById('group-description').value = '';
+                        bootstrap.Modal.getInstance(document.getElementById('addGroupModal')).hide();
+                        this.loadGroups();
+                    } else {
+                        showError('Save Error', data.error || 'Failed to save group');
+                    }
+                } catch (error) {
+                    console.error('Error saving group:', error);
+                    showError('Save Error', 'Failed to save group');
+                }
+            }
+
+            async editGroup(groupId) {
+                // Load group data and populate edit modal
+                try {
+                    const response = await fetch('/api/groups');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const group = data.groups.find(g => g.id === groupId);
+                        if (group) {
+                            document.getElementById('edit-group-id').value = group.id;
+                            document.getElementById('edit-group-name').value = group.name;
+                            document.getElementById('edit-group-description').value = group.description || '';
+                            
+                            const modal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+                            modal.show();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading group for edit:', error);
+                    showError('Edit Error', 'Failed to load group data');
+                }
+            }
+
+            async updateGroup() {
+                const id = document.getElementById('edit-group-id').value;
+                const name = document.getElementById('edit-group-name').value.trim();
+                const description = document.getElementById('edit-group-description').value.trim();
+                
+                if (!name) {
+                    showError('Validation Error', 'Group name is required');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/groups', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id, name, description })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Group Updated', 'Group updated successfully');
+                        bootstrap.Modal.getInstance(document.getElementById('editGroupModal')).hide();
+                        this.loadGroups();
+                    } else {
+                        showError('Update Error', data.error || 'Failed to update group');
+                    }
+                } catch (error) {
+                    console.error('Error updating group:', error);
+                    showError('Update Error', 'Failed to update group');
+                }
+            }
+
+            async deleteGroup(groupId) {
+                if (!confirm('Are you sure you want to delete this group?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/groups?id=${groupId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Group Deleted', 'Group deleted successfully');
+                        this.loadGroups();
+                    } else {
+                        showError('Delete Error', data.error || 'Failed to delete group');
+                    }
+                } catch (error) {
+                    console.error('Error deleting group:', error);
+                    showError('Delete Error', 'Failed to delete group');
+                }
+            }
+
+            async loadSettings() {
+                try {
+                    const response = await fetch('/api/settings');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        document.getElementById('router_ip').value = data.router_ip || '';
+                        document.getElementById('router_port').value = data.router_port || 8728;
+                        document.getElementById('router_user').value = data.router_user || '';
+                        document.getElementById('router_password').value = '';
+                    } else {
+                        showError('Settings Error', data.error || 'Failed to load settings');
+                    }
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                    showError('Settings Error', 'Failed to load settings');
+                }
+            }
+
+            async saveSettings() {
+                const formData = new FormData(document.getElementById('settings-form'));
+                const settings = {
+                    router_ip: formData.get('router_ip'),
+                    router_port: parseInt(formData.get('router_port')),
+                    router_user: formData.get('router_user'),
+                    router_password: formData.get('router_password')
+                };
+
+                try {
+                    const response = await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(settings)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Settings Saved', 'Settings updated successfully');
+                    } else {
+                        showError('Save Error', data.error || 'Failed to save settings');
+                    }
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                    showError('Save Error', 'Failed to save settings');
+                }
+            }
+
+            async testConnection() {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    
+                    if (data.success && data.connected) {
+                        showSuccess('Connection Test', 'Successfully connected to router');
+                    } else {
+                        showError('Connection Test', 'Failed to connect to router');
+                    }
+                } catch (error) {
+                    console.error('Error testing connection:', error);
+                    showError('Connection Test', 'Failed to test connection');
+                }
             }
 
             async exportData() {
@@ -975,71 +1175,80 @@
             }
 
             testNotifications() {
-                showSuccess('Success Notification', 'This is a success message with 2-second delay');
+                showSuccess('Success Notification', 'This is a success message');
                 setTimeout(() => {
-                    showError('Error Notification', 'This is an error message with 2-second delay');
+                    showError('Error Notification', 'This is an error message');
                 }, 1000);
                 setTimeout(() => {
-                    showWarning('Warning Notification', 'This is a warning message with 2-second delay');
+                    showWarning('Warning Notification', 'This is a warning message');
                 }, 2000);
                 setTimeout(() => {
-                    showInfo('Info Notification', 'This is an info message with 2-second delay');
+                    showInfo('Info Notification', 'This is an info message');
                 }, 3000);
             }
 
-            formatBytes(bytes, decimals = 2) {
-                if (bytes === 0) return '0 B';
-                const k = 1024;
-                const dm = decimals < 0 ? 0 : decimals;
-                const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            setRefreshInterval(seconds) {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                    this.refreshInterval = null;
+                }
+                
+                const display = document.getElementById('refresh-interval-display');
+                display.textContent = seconds > 0 ? seconds + ' seconds' : 'Off';
+                
+                if (seconds > 0) {
+                    this.refreshInterval = setInterval(() => {
+                        if (this.currentPage === 'dashboard') {
+                            this.refreshDashboardData();
+                        }
+                    }, seconds * 1000);
+                }
+                
+                localStorage.setItem('refreshInterval', seconds.toString());
             }
 
-            updatePaginationControls() {
-                setTimeout(() => {
-                    // Network Interfaces
-                    const prevInt = document.getElementById('interfaces-prev-page');
-                    const nextInt = document.getElementById('interfaces-next-page');
-                    if (prevInt && nextInt) {
-                        prevInt.onclick = () => { if (this.interfacesPage > 1) { this.interfacesPage--; this.updateInterfaces(); } };
-                        nextInt.onclick = () => { const total = (this.currentData.interfaces ? this.currentData.interfaces.filter(iface => iface.type !== 'pppoe-in').length : 0); if (this.interfacesPage * this.rowsPerPage < total) { this.interfacesPage++; this.updateInterfaces(); } };
-                    }
-                    // PPPoE Interfaces
-                    const prevPPPoE = document.getElementById('pppoe-prev-page');
-                    const nextPPPoE = document.getElementById('pppoe-next-page');
-                    if (prevPPPoE && nextPPPoE) {
-                        prevPPPoE.onclick = () => { if ((this.pppoePage || 1) > 1) { this.pppoePage = (this.pppoePage || 1) - 1; this.updatePPPoE(); } };
-                        nextPPPoE.onclick = () => { const total = (this.currentData.pppoe && this.currentData.pppoe.pppoe_interfaces ? this.currentData.pppoe.pppoe_interfaces.length : 0); if ((this.pppoePage || 1) * this.rowsPerPage < total) { this.pppoePage = (this.pppoePage || 1) + 1; this.updatePPPoE(); } };
-                    }
-                    // PPP Accounts
-                    const prevAcc = document.getElementById('ppp-accounts-prev-page');
-                    const nextAcc = document.getElementById('ppp-accounts-next-page');
-                    if (prevAcc && nextAcc) {
-                        prevAcc.onclick = () => { if (this.pppAccountsPage > 1) { this.pppAccountsPage--; this.updatePPPAccounts(); } };
-                        nextAcc.onclick = () => { const total = (this.currentData.ppp_accounts ? this.currentData.ppp_accounts.length : 0); if (this.pppAccountsPage * this.rowsPerPage < total) { this.pppAccountsPage++; this.updatePPPAccounts(); } };
-                    }
-                    // PPP Active
-                    const prevAct = document.getElementById('ppp-active-prev-page');
-                    const nextAct = document.getElementById('ppp-active-next-page');
-                    if (prevAct && nextAct) {
-                        prevAct.onclick = () => { if (this.pppActivePage > 1) { this.pppActivePage--; this.updatePPPActive(); } };
-                        nextAct.onclick = () => { const total = (this.currentData.ppp_active ? this.currentData.ppp_active.length : 0); if (this.pppActivePage * this.rowsPerPage < total) { this.pppActivePage++; this.updatePPPActive(); } };
-                    }
-                }, 0);
+            updateFooter() {
+                const now = new Date().toLocaleString();
+                document.getElementById('footer-time').textContent = now;
+                document.getElementById('last-updated-time').textContent = now;
+            }
+
+            formatMbps(bps, decimals = 2) {
+                if (!bps || bps <= 0) return '0 Mbps';
+                return (bps * 8 / 1_000_000).toFixed(decimals) + ' Mbps';
+            }
+
+            // Helper to convert IP address to a number for sorting
+            ipToNumber(ip) {
+                if (!ip) return 0;
+                return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
+            }
+
+            // Helper to parse uptime string (e.g., '4d4h30m5s') to seconds
+            uptimeToSeconds(uptime) {
+                if (!uptime) return 0;
+                let total = 0;
+                const regex = /(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/;
+                const match = uptime.match(regex);
+                if (match) {
+                    total += (parseInt(match[1] || 0, 10) * 86400); // days
+                    total += (parseInt(match[2] || 0, 10) * 3600);  // hours
+                    total += (parseInt(match[3] || 0, 10) * 60);    // minutes
+                    total += (parseInt(match[4] || 0, 10));         // seconds
+                }
+                return total;
             }
         }
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
-            window.monitor = new MikroTikMonitor();
+            window.app = new MikroTikSPA();
+            
             // Load saved refresh interval
             const savedInterval = localStorage.getItem('refreshInterval');
             if (savedInterval) {
-                window.monitor.setRefreshInterval(parseInt(savedInterval));
+                window.app.setRefreshInterval(parseInt(savedInterval));
             }
-            // Instantly load all data on page load
-            window.monitor.refreshAllData();
         });
     </script>
 </body>

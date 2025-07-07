@@ -48,7 +48,7 @@ def get_mikrotik_client():
 
 @app.route('/')
 def index():
-    """Serve the main HTML page"""
+    """Serve the main SPA HTML page"""
     response = send_file('static/index.html')
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -57,12 +57,19 @@ def index():
 
 @app.route('/settings')
 def settings():
-    """Serve the settings HTML page"""
-    response = send_file('static/settings.html')
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+    """Serve the settings page - handled by client-side routing"""
+    return index()
+
+@app.route('/groups')
+def groups():
+    """Serve the groups page - handled by client-side routing"""
+    return index()
+
+# Catch-all route for SPA navigation
+@app.route('/<path:path>')
+def catch_all(path):
+    """Catch-all route for SPA navigation"""
+    return index()
 
 @app.route('/api/status')
 def api_status():
@@ -134,8 +141,6 @@ def api_interfaces():
     except Exception as e:
         error(f"Error in interfaces API: {e}")
         return jsonify({'success': False, 'error': str(e)})
-
-
 
 @app.route('/api/export')
 def api_export():
@@ -328,6 +333,121 @@ def api_pppoe():
     except Exception as e:
         error(f"Error in PPPoE API: {e}")
         return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/groups', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def api_groups():
+    """CRUD operations for groups"""
+    groups_file = 'data/groups.json'
+    
+    # Ensure data directory exists
+    os.makedirs('data', exist_ok=True)
+    
+    if request.method == 'GET':
+        try:
+            if os.path.exists(groups_file):
+                with open(groups_file, 'r') as f:
+                    groups = json.load(f)
+            else:
+                groups = []
+            return jsonify({'success': True, 'groups': groups})
+        except Exception as e:
+            error(f"Error reading groups: {e}")
+            return jsonify({'success': False, 'error': str(e)})
+    
+    elif request.method == 'POST':
+        try:
+            data = request.get_json()
+            if not data or 'name' not in data:
+                return jsonify({'success': False, 'error': 'Group name is required'}), 400
+            
+            # Load existing groups
+            if os.path.exists(groups_file):
+                with open(groups_file, 'r') as f:
+                    groups = json.load(f)
+            else:
+                groups = []
+            
+            # Check for duplicate names
+            if any(g['name'] == data['name'] for g in groups):
+                return jsonify({'success': False, 'error': 'Group name already exists'}), 400
+            
+            # Add new group
+            new_group = {
+                'id': str(len(groups) + 1),
+                'name': data['name'],
+                'description': data.get('description', ''),
+                'created_at': datetime.now().isoformat()
+            }
+            groups.append(new_group)
+            
+            # Save to file
+            with open(groups_file, 'w') as f:
+                json.dump(groups, f, indent=2)
+            
+            return jsonify({'success': True, 'group': new_group})
+        except Exception as e:
+            error(f"Error creating group: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
+    
+    elif request.method == 'PUT':
+        try:
+            data = request.get_json()
+            if not data or 'id' not in data or 'name' not in data:
+                return jsonify({'success': False, 'error': 'Group ID and name are required'}), 400
+            
+            # Load existing groups
+            if os.path.exists(groups_file):
+                with open(groups_file, 'r') as f:
+                    groups = json.load(f)
+            else:
+                return jsonify({'success': False, 'error': 'No groups found'}), 404
+            
+            # Find and update group
+            for group in groups:
+                if group['id'] == data['id']:
+                    group['name'] = data['name']
+                    group['description'] = data.get('description', group.get('description', ''))
+                    group['updated_at'] = datetime.now().isoformat()
+                    
+                    # Save to file
+                    with open(groups_file, 'w') as f:
+                        json.dump(groups, f, indent=2)
+                    
+                    return jsonify({'success': True, 'group': group})
+            
+            return jsonify({'success': False, 'error': 'Group not found'}), 404
+        except Exception as e:
+            error(f"Error updating group: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
+    
+    elif request.method == 'DELETE':
+        try:
+            group_id = request.args.get('id')
+            if not group_id:
+                return jsonify({'success': False, 'error': 'Group ID is required'}), 400
+            
+            # Load existing groups
+            if os.path.exists(groups_file):
+                with open(groups_file, 'r') as f:
+                    groups = json.load(f)
+            else:
+                return jsonify({'success': False, 'error': 'No groups found'}), 404
+            
+            # Find and remove group
+            for i, group in enumerate(groups):
+                if group['id'] == group_id:
+                    deleted_group = groups.pop(i)
+                    
+                    # Save to file
+                    with open(groups_file, 'w') as f:
+                        json.dump(groups, f, indent=2)
+                    
+                    return jsonify({'success': True, 'message': 'Group deleted'})
+            
+            return jsonify({'success': False, 'error': 'Group not found'}), 404
+        except Exception as e:
+            error(f"Error deleting group: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
     load_settings()

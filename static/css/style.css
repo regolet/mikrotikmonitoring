@@ -24,7 +24,24 @@
     }
 }
 
-/* Icon Circle Styling */
+/* Icon Container Styling */
+.icon-container {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+}
+
+.icon-container i {
+    font-size: 20px;
+}
+
+/* Icon Circle Styling (keeping for other uses) */
 .icon-circle {
     width: 60px;
     height: 60px;
@@ -48,6 +65,14 @@
     padding: 10px 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.horizontal-card .icon-container {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    margin-right: 12px;
+    margin-bottom: 0;
 }
 
 .horizontal-card .icon-circle {
@@ -184,6 +209,27 @@ body {
 .progress-bar[style*="width: 9"],
 .progress-bar[style*="width: 100"] {
     background-color: #dc3545;  /* Red for high values */
+}
+
+/* Sortable table headers */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.sortable:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sort-icon {
+    margin-left: 5px;
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 1;
 }
 
 /* Table responsive adjustments */
