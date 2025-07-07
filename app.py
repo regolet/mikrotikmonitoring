@@ -190,7 +190,7 @@ def api_health():
     except Exception as e:
         error(f"Error in health check: {e}")
         return jsonify({
-            'success': False,
+            'success': False, 
             'status': 'unhealthy',
             'error': str(e),
             'timestamp': datetime.now().isoformat()
@@ -336,7 +336,21 @@ def api_pppoe():
 
 @app.route('/api/groups', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_groups():
-    """CRUD operations for groups"""
+    """
+    CRUD operations for groups.
+    
+    GET: Returns all groups.
+        Response: { success: bool, groups: [ {id, name, description, accounts, created_at, updated_at} ] }
+    POST: Create a new group.
+        Payload: { name: str, description?: str, accounts?: [str, ...] }
+        Response: { success: bool, group: {...} }
+    PUT: Update an existing group.
+        Payload: { id: str, name: str, description?: str, accounts?: [str, ...] }
+        Response: { success: bool, group: {...} }
+    DELETE: Delete a group by id.
+        Query param: id: str
+        Response: { success: bool, message: str }
+    """
     groups_file = 'data/groups.json'
     
     # Ensure data directory exists
@@ -376,6 +390,7 @@ def api_groups():
                 'id': str(len(groups) + 1),
                 'name': data['name'],
                 'description': data.get('description', ''),
+                'accounts': data.get('accounts', []),
                 'created_at': datetime.now().isoformat()
             }
             groups.append(new_group)
@@ -407,6 +422,7 @@ def api_groups():
                 if group['id'] == data['id']:
                     group['name'] = data['name']
                     group['description'] = data.get('description', group.get('description', ''))
+                    group['accounts'] = data.get('accounts', group.get('accounts', []))
                     group['updated_at'] = datetime.now().isoformat()
                     
                     # Save to file
@@ -448,6 +464,40 @@ def api_groups():
         except Exception as e:
             error(f"Error deleting group: {e}")
             return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/groups/members', methods=['POST'])
+def api_groups_members():
+    """
+    Update group membership (accounts) for a group.
+    
+    POST: Update the list of accounts for a group.
+        Payload: { group_id: str, accounts: [str, ...] }
+        Response: { success: bool, group: {...} }
+    """
+    groups_file = 'data/groups.json'
+    os.makedirs('data', exist_ok=True)
+    try:
+        data = request.get_json()
+        group_id = data.get('group_id')
+        accounts = data.get('accounts')
+        if not group_id or not isinstance(accounts, list):
+            return jsonify({'success': False, 'error': 'group_id and accounts (list) are required'}), 400
+        if os.path.exists(groups_file):
+            with open(groups_file, 'r') as f:
+                groups = json.load(f)
+        else:
+            return jsonify({'success': False, 'error': 'No groups found'}), 404
+        for group in groups:
+            if group['id'] == group_id:
+                group['accounts'] = accounts
+                group['updated_at'] = datetime.now().isoformat()
+                with open(groups_file, 'w') as f:
+                    json.dump(groups, f, indent=2)
+                return jsonify({'success': True, 'group': group})
+        return jsonify({'success': False, 'error': 'Group not found'}), 404
+    except Exception as e:
+        error(f"Error updating group members: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
     load_settings()

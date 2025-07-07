@@ -38,37 +38,33 @@
         <!-- Dashboard Page -->
         <div id="dashboard-page" class="page-content">
             <div class="container-fluid mt-4">
-                <!-- Refresh Controls -->
-                <div class="row mb-3">
-                    <div class="col-md-12 text-end">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-                                Auto-refresh: <span id="refresh-interval-display">Off</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item refresh-option" href="#" data-interval="0">Off</a></li>
-                                <li><a class="dropdown-item refresh-option" href="#" data-interval="5">5 seconds</a></li>
-                                <li><a class="dropdown-item refresh-option" href="#" data-interval="10">10 seconds</a></li>
-                                <li><a class="dropdown-item refresh-option" href="#" data-interval="30">30 seconds</a></li>
-                                <li><a class="dropdown-item refresh-option" href="#" data-interval="60">1 minute</a></li>
-                            </ul>
-                        </div>
-                        <button id="refresh-now" class="btn btn-primary me-2">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                        </button>
-                        <button id="export-data" class="btn btn-success me-2">
-                            <i class="bi bi-download"></i> Export Data
-                        </button>
-                        <button id="test-notification" class="btn btn-info">
-                            <i class="bi bi-bell"></i> Test Notifications
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Network Summary -->
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h3>Network Summary</h3>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Network Summary</h3>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                    Auto-refresh: <span id="refresh-interval-display">Off</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item refresh-option" href="#" data-interval="0">Off</a></li>
+                                    <li><a class="dropdown-item refresh-option" href="#" data-interval="5">5 seconds</a></li>
+                                    <li><a class="dropdown-item refresh-option" href="#" data-interval="10">10 seconds</a></li>
+                                    <li><a class="dropdown-item refresh-option" href="#" data-interval="30">30 seconds</a></li>
+                                    <li><a class="dropdown-item refresh-option" href="#" data-interval="60">1 minute</a></li>
+                                </ul>
+                            </div>
+                            <button id="refresh-now" class="btn btn-primary">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Now
+                            </button>
+                            <button id="export-data" class="btn btn-success">
+                                <i class="bi bi-download"></i> Export Data
+                            </button>
+                            <button id="test-notification" class="btn btn-info">
+                                <i class="bi bi-bell"></i> Test Notifications
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="seven-cards-row">
@@ -133,24 +129,24 @@
                     </div>
                     
                     <div class="stat-card-wrapper">
-                        <div class="stat-card horizontal-card bg-primary bg-opacity-10">
+                        <div class="stat-card horizontal-card bg-info bg-opacity-10">
                             <div class="icon-container">
-                                <i class="bi bi-cloud-arrow-up text-primary"></i>
+                                <i class="bi bi-cloud-arrow-up text-info"></i>
                             </div>
                             <div class="card-content">
-                                <h3 class="mb-0 text-primary" id="total-upload-speed">-</h3>
+                                <h3 class="mb-0 text-info" id="total-upload-speed">-</h3>
                                 <p class="mb-0">Total Upload Speed</p>
                             </div>
                         </div>
                     </div>
                     
                     <div class="stat-card-wrapper">
-                        <div class="stat-card horizontal-card bg-warning bg-opacity-10">
+                        <div class="stat-card horizontal-card bg-primary bg-opacity-10">
                             <div class="icon-container">
-                                <i class="bi bi-cloud-arrow-down text-warning"></i>
+                                <i class="bi bi-cloud-arrow-down text-primary"></i>
                             </div>
                             <div class="card-content">
-                                <h3 class="mb-0 text-warning" id="total-download-speed">-</h3>
+                                <h3 class="mb-0 text-primary" id="total-download-speed">-</h3>
                                 <p class="mb-0">Total Download Speed</p>
                             </div>
                         </div>
@@ -330,8 +326,29 @@
                             <input type="text" class="form-control" id="group-name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="group-description" class="form-label">Description</label>
-                            <textarea class="form-control" id="group-description" rows="3"></textarea>
+                            <label class="form-label">Group Members</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Available Accounts</label>
+                                    <select id="available-accounts" class="form-select" size="8" multiple>
+                                        <!-- Available accounts will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mb-2" id="add-members">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="remove-members">
+                                        <i class="bi bi-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Selected Members</label>
+                                    <select id="selected-members" class="form-select" size="8" multiple>
+                                        <!-- Selected members will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -359,8 +376,29 @@
                             <input type="text" class="form-control" id="edit-group-name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="edit-group-description" class="form-label">Description</label>
-                            <textarea class="form-control" id="edit-group-description" rows="3"></textarea>
+                            <label class="form-label">Group Members</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Available Accounts</label>
+                                    <select id="edit-available-accounts" class="form-select" size="8" multiple>
+                                        <!-- Available accounts will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mb-2" id="edit-add-members">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="edit-remove-members">
+                                        <i class="bi bi-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Selected Members</label>
+                                    <select id="edit-selected-members" class="form-select" size="8" multiple>
+                                        <!-- Selected members will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -483,6 +521,28 @@
 
                 document.getElementById('update-group-btn')?.addEventListener('click', () => {
                     this.updateGroup();
+                });
+
+                // Dual list select functionality
+                document.getElementById('add-members')?.addEventListener('click', () => {
+                    this.transferMembers('available-accounts', 'selected-members');
+                });
+
+                document.getElementById('remove-members')?.addEventListener('click', () => {
+                    this.transferMembers('selected-members', 'available-accounts');
+                });
+
+                document.getElementById('edit-add-members')?.addEventListener('click', () => {
+                    this.transferMembers('edit-available-accounts', 'edit-selected-members');
+                });
+
+                document.getElementById('edit-remove-members')?.addEventListener('click', () => {
+                    this.transferMembers('edit-selected-members', 'edit-available-accounts');
+                });
+
+                // Modal show events for dual list population
+                document.getElementById('addGroupModal')?.addEventListener('show.bs.modal', () => {
+                    this.populateDualList('available-accounts', 'selected-members');
                 });
 
                 // PPPoE table sorting
@@ -911,13 +971,35 @@
 
             async loadGroups() {
                 try {
-                    const response = await fetch('/api/groups');
-                    const data = await response.json();
+                    // Fetch both groups and PPP active data
+                    const [groupsResponse, pppActiveResponse] = await Promise.all([
+                        fetch('/api/groups'),
+                        fetch('/api/ppp_active')
+                    ]);
                     
-                    if (data.success) {
-                        this.renderGroups(data.groups || []);
+                    const groupsData = await groupsResponse.json();
+                    const pppActiveData = await pppActiveResponse.json();
+                    
+                    if (groupsData.success) {
+                        const groups = groupsData.groups || [];
+                        const pppActive = pppActiveData.success ? pppActiveData.ppp_active || [] : [];
+                        
+                        // Create a set of online usernames for quick lookup
+                        const onlineUsernames = new Set(pppActive.map(conn => conn.name));
+                        
+                        // Add online status to each group's accounts
+                        groups.forEach(group => {
+                            if (group.accounts) {
+                                group.accounts = group.accounts.map(account => ({
+                                    name: account,
+                                    online: onlineUsernames.has(account)
+                                }));
+                            }
+                        });
+                        
+                        this.renderGroups(groups);
                     } else {
-                        showError('Groups Error', data.error || 'Failed to load groups');
+                        showError('Groups Error', groupsData.error || 'Failed to load groups');
                     }
                 } catch (error) {
                     console.error('Error loading groups:', error);
@@ -934,41 +1016,138 @@
                 }
 
                 content.innerHTML = `
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${groups.map(group => `
-                                    <tr>
-                                        <td>${group.name}</td>
-                                        <td>${group.description || '-'}</td>
-                                        <td>${new Date(group.created_at).toLocaleDateString()}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary me-1" onclick="app.editGroup('${group.id}')">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="app.deleteGroup('${group.id}')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        ${groups.map(group => {
+                            // Calculate online/offline status
+                            const totalMembers = group.accounts ? group.accounts.length : 0;
+                            const onlineMembers = group.accounts ? group.accounts.filter(acc => acc.online).length : 0;
+                            const offlineMembers = totalMembers - onlineMembers;
+                            
+                            // Determine header color based on status
+                            let headerClass = 'bg-primary'; // default
+                            if (totalMembers > 0) {
+                                const onlinePercentage = (onlineMembers / totalMembers) * 100;
+                                if (onlinePercentage === 100) {
+                                    headerClass = 'bg-success'; // All online - Green
+                                } else if (onlinePercentage === 0) {
+                                    headerClass = 'bg-danger'; // All offline - Red
+                                } else if (offlineMembers >= totalMembers * 0.5) {
+                                    headerClass = 'bg-danger'; // >50% offline - Red
+                                } else if (offlineMembers === totalMembers * 0.5) {
+                                    headerClass = 'bg-warning'; // Exactly 50% offline - Orange
+                                } else {
+                                    headerClass = 'bg-primary'; // <50% offline - Blue
+                                }
+                            }
+                            
+                            return `
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header ${headerClass} text-white">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <h5 class="card-title mb-0">${group.name}</h5>
+                                                    <span class="badge bg-success">Online: ${onlineMembers}</span>
+                                                    <span class="badge bg-secondary">Offline: ${offlineMembers}</span>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-outline-light" onclick="app.editGroup('${group.id}')">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-light" onclick="app.deleteGroup('${group.id}')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text">
+                                                <strong>Members:</strong><br>
+                                                <span>
+                                                    ${group.accounts && group.accounts.length > 0 
+                                                        ? group.accounts.map(acc => `<span class='badge me-1 ${acc.online ? "bg-success" : "bg-danger"}'>${acc.name}</span>`).join(' ')
+                                                        : 'No members'
+                                                    }
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 `;
             }
 
+            transferMembers(fromId, toId) {
+                const fromSelect = document.getElementById(fromId);
+                const toSelect = document.getElementById(toId);
+                
+                if (!fromSelect || !toSelect) return;
+                
+                const selectedOptions = Array.from(fromSelect.selectedOptions);
+                selectedOptions.forEach(option => {
+                    toSelect.appendChild(option);
+                });
+            }
+
+            async loadAvailableAccounts() {
+                try {
+                    const response = await fetch('/api/ppp_accounts');
+                    const data = await response.json();
+                    
+                    if (data.success && data.ppp_accounts) {
+                        return data.ppp_accounts.map(account => account.name);
+                    }
+                    return [];
+                } catch (error) {
+                    console.error('Error loading accounts:', error);
+                    return [];
+                }
+            }
+
+            async populateDualList(availableSelectId, selectedSelectId, selectedAccounts = []) {
+                const availableSelect = document.getElementById(availableSelectId);
+                const selectedSelect = document.getElementById(selectedSelectId);
+                
+                if (!availableSelect || !selectedSelect) return;
+                
+                // Clear existing options
+                availableSelect.innerHTML = '';
+                selectedSelect.innerHTML = '';
+                
+                // Load all available accounts
+                const allAccounts = await this.loadAvailableAccounts();
+                
+                // Populate available accounts (excluding already selected ones)
+                allAccounts.forEach(account => {
+                    if (!selectedAccounts.includes(account)) {
+                        const option = document.createElement('option');
+                        option.value = account;
+                        option.textContent = account;
+                        availableSelect.appendChild(option);
+                    }
+                });
+                
+                // Populate selected accounts
+                selectedAccounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account;
+                    option.textContent = account;
+                    selectedSelect.appendChild(option);
+                });
+            }
+
+            getSelectedMembers(selectedSelectId) {
+                const selectedSelect = document.getElementById(selectedSelectId);
+                if (!selectedSelect) return [];
+                
+                return Array.from(selectedSelect.options).map(option => option.value);
+            }
+
             async saveGroup() {
                 const name = document.getElementById('group-name').value.trim();
-                const description = document.getElementById('group-description').value.trim();
+                const selectedMembers = this.getSelectedMembers('selected-members');
                 
                 if (!name) {
                     showError('Validation Error', 'Group name is required');
@@ -981,7 +1160,10 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ name, description })
+                        body: JSON.stringify({ 
+                            name, 
+                            accounts: selectedMembers 
+                        })
                     });
 
                     const data = await response.json();
@@ -989,7 +1171,8 @@
                     if (data.success) {
                         showSuccess('Group Created', 'Group saved successfully');
                         document.getElementById('group-name').value = '';
-                        document.getElementById('group-description').value = '';
+                        document.getElementById('selected-members').innerHTML = '';
+                        document.getElementById('available-accounts').innerHTML = '';
                         bootstrap.Modal.getInstance(document.getElementById('addGroupModal')).hide();
                         this.loadGroups();
                     } else {
@@ -1012,7 +1195,13 @@
                         if (group) {
                             document.getElementById('edit-group-id').value = group.id;
                             document.getElementById('edit-group-name').value = group.name;
-                            document.getElementById('edit-group-description').value = group.description || '';
+                            
+                            // Populate dual list with current group members
+                            await this.populateDualList(
+                                'edit-available-accounts', 
+                                'edit-selected-members', 
+                                group.accounts || []
+                            );
                             
                             const modal = new bootstrap.Modal(document.getElementById('editGroupModal'));
                             modal.show();
@@ -1027,7 +1216,7 @@
             async updateGroup() {
                 const id = document.getElementById('edit-group-id').value;
                 const name = document.getElementById('edit-group-name').value.trim();
-                const description = document.getElementById('edit-group-description').value.trim();
+                const selectedMembers = this.getSelectedMembers('edit-selected-members');
                 
                 if (!name) {
                     showError('Validation Error', 'Group name is required');
@@ -1040,7 +1229,11 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ id, name, description })
+                        body: JSON.stringify({ 
+                            id, 
+                            name, 
+                            accounts: selectedMembers 
+                        })
                     });
 
                     const data = await response.json();
@@ -1200,6 +1393,8 @@
                     this.refreshInterval = setInterval(() => {
                         if (this.currentPage === 'dashboard') {
                             this.refreshDashboardData();
+                        } else if (this.currentPage === 'groups') {
+                            this.loadGroups();
                         }
                     }, seconds * 1000);
                 }
