@@ -58,12 +58,6 @@
                             <button id="refresh-now" class="btn btn-primary">
                                 <i class="bi bi-arrow-clockwise"></i> Refresh Now
                             </button>
-                            <button id="export-data" class="btn btn-success">
-                                <i class="bi bi-download"></i> Export Data
-                            </button>
-                            <button id="test-notification" class="btn btn-info">
-                                <i class="bi bi-bell"></i> Test Notifications
-                            </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -463,8 +457,8 @@
                 this.currentData = {};
                 this.pppoePage = 1;
                 this.rowsPerPage = 20;
-                this.sortColumn = 'name';
-                this.sortDirection = 'asc';
+                this.sortColumn = 'download';
+                this.sortDirection = 'desc';
                 this.init();
             }
 
@@ -487,14 +481,6 @@
                 // Dashboard controls
                 document.getElementById('refresh-now')?.addEventListener('click', () => {
                     this.refreshDashboardData();
-                });
-
-                document.getElementById('export-data')?.addEventListener('click', () => {
-                    this.exportData();
-                });
-
-                document.getElementById('test-notification')?.addEventListener('click', () => {
-                    this.testNotifications();
                 });
 
                 // Auto-refresh options
@@ -1354,45 +1340,6 @@
                     console.error('Error testing connection:', error);
                     showError('Connection Test', 'Failed to test connection');
                 }
-            }
-
-            async exportData() {
-                try {
-                    showInfo('Export Started', 'Preparing data for download...');
-                    const response = await fetch('/api/export');
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `mikrotik-export-${new Date().toISOString().split('T')[0]}.json`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        showSuccess('Export Complete', 'Data exported successfully');
-                    } else {
-                        showError('Export Failed', data.error || 'Unknown error');
-                    }
-                } catch (error) {
-                    console.error('Export error:', error);
-                    showError('Export Error', 'Failed to export data');
-                }
-            }
-
-            testNotifications() {
-                showSuccess('Success Notification', 'This is a success message');
-                setTimeout(() => {
-                    showError('Error Notification', 'This is an error message');
-                }, 1000);
-                setTimeout(() => {
-                    showWarning('Warning Notification', 'This is a warning message');
-                }, 2000);
-                setTimeout(() => {
-                    showInfo('Info Notification', 'This is an info message');
-                }, 3000);
             }
 
             setRefreshInterval(seconds) {
