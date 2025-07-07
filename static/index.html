@@ -164,7 +164,9 @@
                 <div id="pppoe-section" style="display: none;">
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3>PPPoE Interfaces</h3>
+                            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                <input id="pppoe-search" type="text" class="form-control form-control-sm" placeholder="Search..." style="max-width: 350px; width: 100%;">
+                            </div>
                             <div>
                                 <select id="pppoe-rows-per-page" class="form-select form-select-sm">
                                     <option value="10">10 rows</option>
@@ -552,6 +554,14 @@
                         this.sortPPPoETable(sortField);
                     });
                 });
+
+                // Add event listener for PPPoE search
+                const pppoeSearchInput = document.getElementById('pppoe-search');
+                if (pppoeSearchInput) {
+                    pppoeSearchInput.addEventListener('input', (e) => {
+                        this.filterPPPoETable(e.target.value);
+                    });
+                }
             }
 
             setupRouting() {
@@ -669,6 +679,11 @@
                 // Update PPPoE table and calculate speeds
                 const processedInterfaces = this.updatePPPoETable();
                 this.updateSpeedCalculations(processedInterfaces);
+                // Reapply PPPoE search filter after table update
+                const searchInput = document.getElementById('pppoe-search');
+                if (searchInput) {
+                    this.filterPPPoETable(searchInput.value);
+                }
                 this.updateFooter();
             }
 
@@ -1432,6 +1447,17 @@
                     total += (parseInt(match[4] || 0, 10));         // seconds
                 }
                 return total;
+            }
+
+            filterPPPoETable(query) {
+                const tbody = document.querySelector('#pppoe-interfaces-table tbody');
+                if (!tbody) return;
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const q = query.trim().toLowerCase();
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(q) ? '' : 'none';
+                });
             }
         }
 
