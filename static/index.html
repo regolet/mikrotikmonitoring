@@ -1412,10 +1412,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.app = new MikroTikSPA();
             
-            // Load saved refresh interval
+            // Load saved refresh interval or default to 5 seconds
             const savedInterval = localStorage.getItem('refreshInterval');
             if (savedInterval) {
                 window.app.setRefreshInterval(parseInt(savedInterval));
+            } else {
+                // Default to 5 seconds if no saved interval
+                window.app.setRefreshInterval(5);
             }
         });
     </script>
