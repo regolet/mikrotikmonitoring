@@ -120,6 +120,15 @@ class MikroTikClient:
             self.error_message = str(e)
             return None
     
+    def get_resources(self) -> Optional[Dict]:
+        """
+        Get system resources - alias for get_system_resources.
+        
+        Returns:
+            dict: System resources information or None if failed
+        """
+        return self.get_system_resources()
+    
     def get_system_identity(self) -> Optional[str]:
         """
         Get router identity (name).
@@ -136,6 +145,15 @@ class MikroTikClient:
         except Exception as e:
             self.error_message = str(e)
             return None
+    
+    def get_identity(self) -> Optional[str]:
+        """
+        Get router identity (name) - alias for get_system_identity.
+        
+        Returns:
+            str: Router name or None if failed
+        """
+        return self.get_system_identity()
     
     def get_interfaces(self) -> Optional[List[Dict]]:
         """
@@ -211,6 +229,15 @@ class MikroTikClient:
             self.error_message = str(e)
             return None
     
+    def get_hotspot_users(self) -> Optional[List[Dict]]:
+        """
+        Get active hotspot users - alias for get_active_hotspot_users.
+        
+        Returns:
+            list: List of active hotspot users or None if failed
+        """
+        return self.get_active_hotspot_users()
+    
     def get_dhcp_leases(self) -> Optional[List[Dict]]:
         """
         Get DHCP leases.
@@ -232,33 +259,29 @@ class MikroTikClient:
     def get_ppp_secrets(self) -> Optional[List[Dict]]:
         """
         Get PPP secrets (accounts).
-        
         Returns:
             list: List of PPP secrets or empty list if none found
         """
         if not self.connected:
             logger.error("get_ppp_secrets: Not connected to router", "MikroTikClient.get_ppp_secrets")
-            return None
-            
+            return []
         try:
             logger.debug("Fetching PPP secrets...", "MikroTikClient.get_ppp_secrets")
-            # Get PPP secrets and convert to a list
             resource = self.connection.get_resource('/ppp/secret')
             if resource is None:
                 logger.debug("No PPP secrets resource found", "MikroTikClient.get_ppp_secrets")
                 return []
-                
-            secrets = list(resource.get())
+            raw_secrets = resource.get()
+            secrets = list(raw_secrets)
             logger.debug(f"Found {len(secrets)} PPP secrets", "MikroTikClient.get_ppp_secrets")
             return secrets
-            
         except Exception as e:
             error_msg = f"Error getting PPP secrets: {str(e)}"
             print(f"[ERROR] {error_msg}")
             import traceback
             print(f"[DEBUG] {traceback.format_exc()}")
             self.error_message = error_msg
-            return None
+            return []
     
     def get_active_ppp_connections(self) -> Optional[List[Dict]]:
         """
@@ -269,27 +292,32 @@ class MikroTikClient:
         """
         if not self.connected:
             logger.error("get_active_ppp_connections: Not connected to router", "MikroTikClient.get_active_ppp_connections")
-            return None
-            
+            return []
         try:
             logger.debug("Fetching active PPP connections...", "MikroTikClient.get_active_ppp_connections")
-            # Get active PPP connections and convert to a list
             resource = self.connection.get_resource('/ppp/active')
             if resource is None:
                 logger.debug("No active PPP connections resource found", "MikroTikClient.get_active_ppp_connections")
                 return []
-                
             connections = list(resource.get())
             logger.debug(f"Found {len(connections)} active PPP connections", "MikroTikClient.get_active_ppp_connections")
             return connections
-            
         except Exception as e:
             error_msg = f"Error getting active PPP connections: {str(e)}"
             print(f"[ERROR] {error_msg}")
             import traceback
             print(f"[DEBUG] {traceback.format_exc()}")
             self.error_message = error_msg
-            return None
+            return []
+    
+    def get_ppp_active(self) -> Optional[List[Dict]]:
+        """
+        Get active PPP connections - alias for get_active_ppp_connections.
+        
+        Returns:
+            list: List of active PPP connections or None if failed
+        """
+        return self.get_active_ppp_connections()
     
     def get_pppoe_interfaces_with_stats(self) -> Optional[List[Dict]]:
         """
@@ -404,6 +432,15 @@ class MikroTikClient:
             self.error_message = error_msg
             return None
     
+    def get_pppoe_interfaces(self) -> Optional[List[Dict]]:
+        """
+        Get PPPoE interfaces - alias for get_pppoe_interfaces_with_stats.
+        
+        Returns:
+            list: List of PPPoE interfaces or None if failed
+        """
+        return self.get_pppoe_interfaces_with_stats()
+    
     def get_aggregate_statistics(self) -> Dict:
         """
         Calculate aggregate statistics from various sources
@@ -480,3 +517,54 @@ class MikroTikClient:
             str: Error message or None if no error
         """
         return self.error_message
+
+    def test_connection(self) -> bool:
+        """
+        Test connection to the MikroTik router without maintaining a persistent connection.
+        
+        Returns:
+            bool: True if connection test was successful, False otherwise
+        """
+        try:
+            logger.debug(f"Testing connection to {self.host}:{self.port} as {self.user}", "MikroTikClient.test_connection")
+            if self.use_ssl:
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                
+                connection_params = {
+                    'host': self.host,
+                    'username': self.user,
+                    'password': self.password,
+                    'port': self.port,
+                    'ssl_wrapper': ssl_context.wrap_socket,
+                    'plaintext_login': True
+                }
+            else:
+                connection_params = {
+                    'host': self.host,
+                    'username': self.user,
+                    'password': self.password,
+                    'port': self.port,
+                    'plaintext_login': True
+                }
+            
+            # Create a temporary API pool for testing
+            temp_api = routeros_api.RouterOsApiPool(**connection_params)
+            temp_connection = temp_api.get_api()
+            
+            # Test with a simple command
+            test = temp_connection.get_resource('/system/resource').get()
+            
+            # Clean up
+            temp_api.disconnect()
+            
+            logger.info("Connection test successful!", "MikroTikClient.test_connection")
+            return True
+            
+        except Exception as e:
+            error_details = traceback.format_exc()
+            logger.error(f"Connection test failed: {str(e)}", "MikroTikClient.test_connection")
+            logger.debug(f"Error details: {error_details}", "MikroTikClient.test_connection")
+            self.error_message = str(e)
+            return False

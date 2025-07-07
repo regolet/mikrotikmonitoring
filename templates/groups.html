@@ -329,16 +329,50 @@ function renderGroups(groups) {
             cardElement.querySelector('.card-header').classList.add('bg-success', 'bg-opacity-50');
         }
         
-        // Populate accounts list
+        // Populate accounts list (separate online and offline)
         const accountsList = card.querySelector('.account-list');
         if (group.accounts && group.accounts.length > 0) {
-            group.accounts.forEach(account => {
-                const isOnline = group.online_accounts && group.online_accounts.includes(account);
-                const accountItem = document.createElement('div');
-                accountItem.className = isOnline ? 'text-success' : 'text-danger';
-                accountItem.textContent = account;
-                accountsList.appendChild(accountItem);
+            // Map account names to status using allAccounts (case-insensitive, trimmed)
+            const onlineAccounts = [];
+            const offlineAccounts = [];
+            group.accounts.forEach(accountName => {
+                const trimmedName = accountName.trim().toLowerCase();
+                const accountObj = allAccounts.find(acc => acc.name.trim().toLowerCase() === trimmedName);
+                if (accountObj && accountObj.status === 'online') {
+                    onlineAccounts.push(accountObj);
+                } else if (accountObj) {
+                    offlineAccounts.push(accountObj);
+                } else {
+                    // If not found in allAccounts, treat as offline (fallback)
+                    offlineAccounts.push({ name: accountName, profile: '', status: 'offline' });
+                }
             });
+            // Render online accounts
+            if (onlineAccounts.length > 0) {
+                const onlineHeader = document.createElement('div');
+                onlineHeader.className = 'fw-bold text-success';
+                onlineHeader.textContent = 'Online Accounts:';
+                accountsList.appendChild(onlineHeader);
+                onlineAccounts.forEach(account => {
+                    const accountItem = document.createElement('div');
+                    accountItem.className = 'text-success';
+                    accountItem.textContent = `${account.name}${account.profile ? ' (' + account.profile + ')' : ''} - online`;
+                    accountsList.appendChild(accountItem);
+                });
+            }
+            // Render offline accounts
+            if (offlineAccounts.length > 0) {
+                const offlineHeader = document.createElement('div');
+                offlineHeader.className = 'fw-bold text-danger mt-2';
+                offlineHeader.textContent = 'Offline Accounts:';
+                accountsList.appendChild(offlineHeader);
+                offlineAccounts.forEach(account => {
+                    const accountItem = document.createElement('div');
+                    accountItem.className = 'text-danger';
+                    accountItem.textContent = `${account.name}${account.profile ? ' (' + account.profile + ')' : ''} - offline`;
+                    accountsList.appendChild(accountItem);
+                });
+            }
         } else {
             const noAccounts = document.createElement('div');
             noAccounts.className = 'text-muted';
