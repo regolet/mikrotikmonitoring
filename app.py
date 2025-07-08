@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import logging
 from mikrotik_client import MikroTikClient
+from router_manager import router_manager
 from logger import log, info, error, warning, debug
 
 app = Flask(__name__)
@@ -15,36 +16,25 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global variables
-router_ip = None
-router_user = None
-router_password = None
-router_port = None
+active_router_id = None
 
-def load_settings():
-    """Load router settings from JSON file"""
-    global router_ip, router_user, router_password, router_port
-    try:
-        with open('settings.json', 'r') as f:
-            settings = json.load(f)
-            router_ip = settings.get('router_ip', '192.168.88.1')
-            router_user = settings.get('router_user', 'admin')
-            router_password = settings.get('router_password', '')
-            router_port = settings.get('router_port', 8728)
-        info(f"Settings loaded: {router_ip}:{router_port}")
-    except FileNotFoundError:
-        warning("Settings file not found, using defaults")
-        router_ip = '192.168.88.1'
-        router_user = 'admin'
-        router_password = ''
-        router_port = 8728
-    except Exception as e:
-        error(f"Error loading settings: {e}")
+def get_active_router_id():
+    """Get the currently active router ID"""
+    global active_router_id
+    if not active_router_id:
+        # Get first available router
+        routers = router_manager.get_all_routers()
+        if routers:
+            active_router_id = routers[0]['id']
+        else:
+            active_router_id = 'router_001'
+    return active_router_id
 
-def get_mikrotik_client():
-    """Create and return a MikroTik client instance"""
-    client = MikroTikClient(router_ip, router_user, router_password, router_port)
-    client.connect()  # Ensure connection is established!
-    return client
+def get_mikrotik_client(router_id=None):
+    """Create and return a MikroTik client instance for the specified router"""
+    if not router_id:
+        router_id = get_active_router_id()
+    return router_manager.get_mikrotik_client(router_id)
 
 @app.route('/')
 def index():
@@ -75,16 +65,30 @@ def catch_all(path):
 def api_status():
     """Get connection status and basic router info"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'connected': False, 'error': router_manager.last_client_error or 'Failed to connect to router', 'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
         connected = client.test_connection()
+        
+        router = router_manager.get_router(router_id)
+        if not router:
+            return jsonify({
+                'success': False,
+                'connected': False,
+                'error': 'Router not found',
+                'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
         
         if connected:
             identity = client.get_identity()
             return jsonify({
                 'success': True,
                 'connected': True,
-                'router_ip': router_ip,
-                'router_port': router_port,
+                'router_id': router_id,
+                'router_name': router['name'],
+                'router_ip': router['host'],
+                'router_port': router['port'],
                 'identity': identity,
                 'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             })
@@ -92,8 +96,10 @@ def api_status():
             return jsonify({
                 'success': False,
                 'connected': False,
-                'router_ip': router_ip,
-                'router_port': router_port,
+                'router_id': router_id,
+                'router_name': router['name'],
+                'router_ip': router['host'],
+                'router_port': router['port'],
                 'error': 'Connection failed',
                 'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             })
@@ -110,13 +116,19 @@ def api_status():
 def api_resources():
     """Get system resources"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
         if not client.test_connection():
             return jsonify({'success': False, 'error': 'Not connected'})
         
         resources = client.get_resources()
+        router = router_manager.get_router(router_id)
         return jsonify({
             'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
             'resources': resources,
             'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
@@ -128,13 +140,19 @@ def api_resources():
 def api_interfaces():
     """Get network interfaces"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
         if not client.test_connection():
             return jsonify({'success': False, 'error': 'Not connected'})
         
         interfaces = client.get_interfaces()
+        router = router_manager.get_router(router_id)
         return jsonify({
             'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
             'interfaces': interfaces,
             'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
@@ -146,16 +164,23 @@ def api_interfaces():
 def api_export():
     """Export all data as JSON"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
         if not client.test_connection():
             return jsonify({'success': False, 'error': 'Not connected'})
+        
+        router = router_manager.get_router(router_id)
         
         # Gather all data
         data = {
             'export_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'router_info': {
-                'ip': router_ip,
-                'port': router_port,
+                'id': router_id,
+                'name': router['name'] if router else 'Unknown',
+                'host': router['host'] if router else '',
+                'port': router['port'] if router else 8728,
                 'identity': client.get_identity()
             },
             'resources': client.get_resources(),
@@ -178,11 +203,17 @@ def api_export():
 def api_health():
     """Health check endpoint"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'status': 'unhealthy', 'error': router_manager.last_client_error or 'Failed to connect to router', 'timestamp': datetime.now().isoformat()})
         connected = client.test_connection()
         
+        router = router_manager.get_router(router_id)
         return jsonify({
             'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
             'status': 'healthy' if connected else 'unhealthy',
             'connected': connected,
             'timestamp': datetime.now().isoformat()
@@ -217,8 +248,7 @@ def api_logs():
 
 @app.route('/api/settings', methods=['GET', 'POST'])
 def api_settings():
-    """Get or update router settings"""
-    global router_ip, router_user, router_password, router_port
+    """Get or update router settings (legacy, now proxies to active router)"""
     if request.method == 'POST':
         try:
             data = request.get_json()
@@ -226,50 +256,62 @@ def api_settings():
                 error('No JSON data received in settings POST')
                 return jsonify({'success': False, 'error': 'No data received'}), 400
             
-            info(f'Received settings update: {list(data.keys())}')
+            # Update the active router's settings
+            active_router_id = get_active_router_id()
+            router = router_manager.get_router(active_router_id)
+            if not router:
+                return jsonify({'success': False, 'error': 'Active router not found'}), 404
             
-            router_ip = data.get('router_ip', router_ip)
-            router_user = data.get('router_user', router_user)
-            router_password = data.get('router_password', router_password)
-            router_port = int(data.get('router_port', router_port))
+            update_data = {}
+            if 'router_ip' in data:
+                update_data['host'] = data['router_ip']
+            if 'router_user' in data:
+                update_data['username'] = data['router_user']
+            if 'router_port' in data:
+                update_data['port'] = int(data['router_port'])
+            # Only update password if provided and not empty
+            if 'router_password' in data and data['router_password']:
+                update_data['password'] = data['router_password']
             
-            # Save to settings.json
-            settings_data = {
-                'router_ip': router_ip,
-                'router_user': router_user,
-                'router_password': router_password,
-                'router_port': router_port
-            }
-            
-            with open('settings.json', 'w') as f:
-                json.dump(settings_data, f, indent=2)
-            
-            load_settings()  # Reload settings
-            info('Settings updated via API')
-            return jsonify({'success': True, 'message': 'Settings updated'})
+            success = router_manager.update_router(active_router_id, update_data)
+            if success:
+                info('Settings updated via legacy API')
+                return jsonify({'success': True, 'message': 'Settings updated'})
+            else:
+                return jsonify({'success': False, 'error': 'Failed to update settings'}), 400
         except Exception as e:
             error(f'Error updating settings: {e}')
             return jsonify({'success': False, 'error': str(e)}), 400
     else:
-        # GET: return current settings (do not include password for security)
+        # GET: return current settings for the active router (do not include password for security)
+        active_router_id = get_active_router_id()
+        router = router_manager.get_router(active_router_id)
+        if not router:
+            return jsonify({'success': False, 'error': 'Active router not found'}), 404
         return jsonify({
             'success': True,
-            'router_ip': router_ip,
-            'router_user': router_user,
-            'router_port': router_port
+            'router_ip': router.get('host', ''),
+            'router_user': router.get('username', ''),
+            'router_port': router.get('port', 8728)
         })
 
 @app.route('/api/ppp_active')
 def api_ppp_active():
     """Get active PPP connections"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
         if not client.test_connection():
             return jsonify({'success': False, 'error': 'Not connected'})
         
         ppp_active = client.get_ppp_active()
+        router = router_manager.get_router(router_id)
         return jsonify({
             'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
             'ppp_active': ppp_active,
             'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
@@ -281,13 +323,19 @@ def api_ppp_active():
 def api_ppp_accounts():
     """Get PPP accounts (secrets)"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
         if not client.test_connection():
             return jsonify({'success': False, 'error': 'Not connected'})
         
         ppp_accounts = client.get_ppp_secrets()
+        router = router_manager.get_router(router_id)
         return jsonify({
             'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
             'ppp_accounts': ppp_accounts,
             'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
@@ -299,9 +347,12 @@ def api_ppp_accounts():
 def api_pppoe():
     """Get PPPoE interfaces and related data"""
     try:
-        client = get_mikrotik_client()
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
         if not client.test_connection():
-            return jsonify({'success': False, 'error': 'Not connected'})
+            return jsonify({'success': False, 'error': 'Not connected', 'error_message': client.get_error()})
         
         pppoe_interfaces = client.get_pppoe_interfaces()
         ppp_secrets = client.get_ppp_secrets()
@@ -315,8 +366,11 @@ def api_pppoe():
         enabled_accounts = len([s for s in ppp_secrets if s.get('disabled') != 'true']) if ppp_secrets else 0
         disabled_accounts = total_accounts - enabled_accounts
         
+        router = router_manager.get_router(router_id)
         return jsonify({
             'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
             'pppoe_interfaces': pppoe_interfaces,
             'ppp_secrets': ppp_secrets,
             'ppp_active': ppp_active,
@@ -328,7 +382,8 @@ def api_pppoe():
                 'disabled_accounts': disabled_accounts,
                 'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             },
-            'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'error_message': client.get_error()
         })
     except Exception as e:
         error(f"Error in PPPoE API: {e}")
@@ -339,31 +394,25 @@ def api_groups():
     """
     CRUD operations for groups.
     
-    GET: Returns all groups.
+    GET: Returns all groups for the specified router.
+        Query param: router_id (optional, defaults to active router)
         Response: { success: bool, groups: [ {id, name, description, accounts, created_at, updated_at} ] }
     POST: Create a new group.
-        Payload: { name: str, description?: str, accounts?: [str, ...] }
+        Payload: { name: str, description?: str, accounts?: [str, ...], router_id?: str }
         Response: { success: bool, group: {...} }
     PUT: Update an existing group.
-        Payload: { id: str, name: str, description?: str, accounts?: [str, ...] }
+        Payload: { id: str, name: str, description?: str, accounts?: [str, ...], router_id?: str }
         Response: { success: bool, group: {...} }
     DELETE: Delete a group by id.
-        Query param: id: str
+        Query param: id: str, router_id?: str
         Response: { success: bool, message: str }
     """
-    groups_file = 'data/groups.json'
-    
-    # Ensure data directory exists
-    os.makedirs('data', exist_ok=True)
+    router_id = request.args.get('router_id', get_active_router_id())
     
     if request.method == 'GET':
         try:
-            if os.path.exists(groups_file):
-                with open(groups_file, 'r') as f:
-                    groups = json.load(f)
-            else:
-                groups = []
-            return jsonify({'success': True, 'groups': groups})
+            groups = router_manager.get_groups(router_id)
+            return jsonify({'success': True, 'groups': groups, 'router_id': router_id})
         except Exception as e:
             error(f"Error reading groups: {e}")
             return jsonify({'success': False, 'error': str(e)})
@@ -374,20 +423,19 @@ def api_groups():
             if not data or 'name' not in data:
                 return jsonify({'success': False, 'error': 'Group name is required'}), 400
             
-            # Load existing groups
-            if os.path.exists(groups_file):
-                with open(groups_file, 'r') as f:
-                    groups = json.load(f)
-            else:
-                groups = []
+            # Use router_id from request or default to active router
+            group_router_id = data.get('router_id', router_id)
+            groups = router_manager.get_groups(group_router_id)
             
             # Check for duplicate names
             if any(g['name'] == data['name'] for g in groups):
                 return jsonify({'success': False, 'error': 'Group name already exists'}), 400
             
             # Add new group
+            import uuid
             new_group = {
-                'id': str(len(groups) + 1),
+                'id': str(uuid.uuid4()),
+                'router_id': group_router_id,
                 'name': data['name'],
                 'description': data.get('description', ''),
                 'accounts': data.get('accounts', []),
@@ -396,8 +444,7 @@ def api_groups():
             groups.append(new_group)
             
             # Save to file
-            with open(groups_file, 'w') as f:
-                json.dump(groups, f, indent=2)
+            router_manager.save_groups(group_router_id, groups)
             
             return jsonify({'success': True, 'group': new_group})
         except Exception as e:
@@ -410,12 +457,9 @@ def api_groups():
             if not data or 'id' not in data or 'name' not in data:
                 return jsonify({'success': False, 'error': 'Group ID and name are required'}), 400
             
-            # Load existing groups
-            if os.path.exists(groups_file):
-                with open(groups_file, 'r') as f:
-                    groups = json.load(f)
-            else:
-                return jsonify({'success': False, 'error': 'No groups found'}), 404
+            # Use router_id from request or default to active router
+            group_router_id = data.get('router_id', router_id)
+            groups = router_manager.get_groups(group_router_id)
             
             # Find and update group
             for group in groups:
@@ -426,8 +470,7 @@ def api_groups():
                     group['updated_at'] = datetime.now().isoformat()
                     
                     # Save to file
-                    with open(groups_file, 'w') as f:
-                        json.dump(groups, f, indent=2)
+                    router_manager.save_groups(group_router_id, groups)
                     
                     return jsonify({'success': True, 'group': group})
             
@@ -442,12 +485,7 @@ def api_groups():
             if not group_id:
                 return jsonify({'success': False, 'error': 'Group ID is required'}), 400
             
-            # Load existing groups
-            if os.path.exists(groups_file):
-                with open(groups_file, 'r') as f:
-                    groups = json.load(f)
-            else:
-                return jsonify({'success': False, 'error': 'No groups found'}), 404
+            groups = router_manager.get_groups(router_id)
             
             # Find and remove group
             for i, group in enumerate(groups):
@@ -455,8 +493,7 @@ def api_groups():
                     deleted_group = groups.pop(i)
                     
                     # Save to file
-                    with open(groups_file, 'w') as f:
-                        json.dump(groups, f, indent=2)
+                    router_manager.save_groups(router_id, groups)
                     
                     return jsonify({'success': True, 'message': 'Group deleted'})
             
@@ -474,31 +511,173 @@ def api_groups_members():
         Payload: { group_id: str, accounts: [str, ...] }
         Response: { success: bool, group: {...} }
     """
-    groups_file = 'data/groups.json'
-    os.makedirs('data', exist_ok=True)
     try:
         data = request.get_json()
         group_id = data.get('group_id')
         accounts = data.get('accounts')
+        router_id = data.get('router_id', get_active_router_id())
+        
         if not group_id or not isinstance(accounts, list):
             return jsonify({'success': False, 'error': 'group_id and accounts (list) are required'}), 400
-        if os.path.exists(groups_file):
-            with open(groups_file, 'r') as f:
-                groups = json.load(f)
-        else:
-            return jsonify({'success': False, 'error': 'No groups found'}), 404
+        
+        groups = router_manager.get_groups(router_id)
         for group in groups:
             if group['id'] == group_id:
                 group['accounts'] = accounts
                 group['updated_at'] = datetime.now().isoformat()
-                with open(groups_file, 'w') as f:
-                    json.dump(groups, f, indent=2)
+                router_manager.save_groups(router_id, groups)
                 return jsonify({'success': True, 'group': group})
         return jsonify({'success': False, 'error': 'Group not found'}), 404
     except Exception as e:
         error(f"Error updating group members: {e}")
         return jsonify({'success': False, 'error': str(e)}), 400
 
+# Router Management API Endpoints
+@app.route('/api/routers', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def api_routers():
+    """
+    CRUD operations for routers.
+    
+    GET: Returns all routers.
+        Response: { success: bool, routers: [ {id, name, host, enabled, connection_status, ...} ] }
+    POST: Create a new router.
+        Payload: { name: str, host: str, username: str, password: str, port?: int, description?: str }
+        Response: { success: bool, router: {...} }
+    PUT: Update an existing router.
+        Payload: { id: str, name?: str, host?: str, username?: str, password?: str, port?: int, description?: str }
+        Response: { success: bool, router: {...} }
+    DELETE: Delete a router by id.
+        Query param: id: str
+        Response: { success: bool, message: str }
+    """
+    if request.method == 'GET':
+        try:
+            routers = router_manager.get_all_routers_status()
+            return jsonify({'success': True, 'routers': routers})
+        except Exception as e:
+            error(f"Error getting routers: {e}")
+            return jsonify({'success': False, 'error': str(e)})
+    
+    elif request.method == 'POST':
+        try:
+            data = request.get_json()
+            if not data or 'name' not in data or 'host' not in data or 'username' not in data:
+                return jsonify({'success': False, 'error': 'Router name, host, and username are required'}), 400
+            
+            success = router_manager.add_router(data)
+            if success:
+                router_id = data.get('id', f"router_{len(router_manager.routers):03d}")
+                router = router_manager.get_router(router_id)
+                return jsonify({'success': True, 'router': router})
+            else:
+                return jsonify({'success': False, 'error': 'Failed to add router'}), 400
+        except Exception as e:
+            error(f"Error creating router: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
+    
+    elif request.method == 'PUT':
+        try:
+            data = request.get_json()
+            print('DEBUG: Received PUT /api/routers payload:', data)
+            if not data or 'id' not in data:
+                return jsonify({'success': False, 'error': 'Router ID is required'}), 400
+            
+            success = router_manager.update_router(data['id'], data)
+            if success:
+                router = router_manager.get_router(data['id'])
+                return jsonify({'success': True, 'router': router})
+            else:
+                return jsonify({'success': False, 'error': 'Failed to update router'}), 400
+        except Exception as e:
+            error(f"Error updating router: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
+    
+    elif request.method == 'DELETE':
+        try:
+            router_id = request.args.get('id')
+            if not router_id:
+                return jsonify({'success': False, 'error': 'Router ID is required'}), 400
+            
+            success = router_manager.delete_router(router_id)
+            if success:
+                return jsonify({'success': True, 'message': 'Router deleted'})
+            else:
+                return jsonify({'success': False, 'error': 'Failed to delete router'}), 400
+        except Exception as e:
+            error(f"Error deleting router: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/routers/<router_id>', methods=['GET'])
+def api_router_detail(router_id):
+    router = router_manager.get_router(router_id)
+    if router:
+        return jsonify({'success': True, 'router': router})
+    else:
+        return jsonify({'success': False, 'error': 'Router not found'}), 404
+
+@app.route('/api/routers/test', methods=['POST'])
+def api_test_router():
+    """
+    Test connection to a specific router.
+    
+    POST: Test router connection.
+        Payload: { router_id: str }
+        Response: { success: bool, connected: bool, identity?: str, error?: str }
+    """
+    try:
+        data = request.get_json()
+        router_id = data.get('router_id')
+        if not router_id:
+            return jsonify({'success': False, 'error': 'Router ID is required'}), 400
+        
+        result = router_manager.test_router_connection(router_id)
+        return jsonify(result)
+    except Exception as e:
+        error(f"Error testing router: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/routers/active', methods=['GET', 'POST'])
+def api_active_router():
+    """
+    Get or set the active router.
+    
+    GET: Returns the currently active router ID.
+    POST: Set the active router.
+        Payload: { router_id: str }
+        Response: { success: bool, active_router_id: str }
+    """
+    global active_router_id
+    
+    if request.method == 'GET':
+        return jsonify({
+            'success': True,
+            'active_router_id': get_active_router_id()
+        })
+    
+    elif request.method == 'POST':
+        try:
+            data = request.get_json()
+            router_id = data.get('router_id')
+            if not router_id:
+                return jsonify({'success': False, 'error': 'Router ID is required'}), 400
+            
+            # Verify router exists
+            router = router_manager.get_router(router_id)
+            if not router:
+                return jsonify({'success': False, 'error': 'Router not found'}), 404
+            
+            active_router_id = router_id
+            return jsonify({
+                'success': True,
+                'active_router_id': router_id,
+                'router_name': router['name']
+            })
+        except Exception as e:
+            error(f"Error setting active router: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
+
 if __name__ == '__main__':
-    load_settings()
+    # Initialize router manager
+    info("Starting MikroTik Monitoring Application")
+    info(f"Loaded {len(router_manager.routers)} routers")
     app.run(host='127.0.0.1', port=80, debug=True)

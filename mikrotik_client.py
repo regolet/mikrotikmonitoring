@@ -39,8 +39,8 @@ class MikroTikClient:
         Returns:
             bool: True if connection was successful, False otherwise
         """
+        logger.debug(f"Attempting to connect to {self.host}:{self.port} as {self.user}", "MikroTikClient.connect")
         try:
-            logger.debug(f"Attempting to connect to {self.host}:{self.port} as {self.user}", "MikroTikClient.connect")
             if self.use_ssl:
                 ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = False
@@ -277,9 +277,9 @@ class MikroTikClient:
             return secrets
         except Exception as e:
             error_msg = f"Error getting PPP secrets: {str(e)}"
-            print(f"[ERROR] {error_msg}")
+            logger.error(error_msg, "MikroTikClient.get_ppp_secrets")
             import traceback
-            print(f"[DEBUG] {traceback.format_exc()}")
+            logger.debug(traceback.format_exc(), "MikroTikClient.get_ppp_secrets")
             self.error_message = error_msg
             return []
     
@@ -304,9 +304,9 @@ class MikroTikClient:
             return connections
         except Exception as e:
             error_msg = f"Error getting active PPP connections: {str(e)}"
-            print(f"[ERROR] {error_msg}")
+            logger.error(error_msg, "MikroTikClient.get_active_ppp_connections")
             import traceback
-            print(f"[DEBUG] {traceback.format_exc()}")
+            logger.debug(traceback.format_exc(), "MikroTikClient.get_active_ppp_connections")
             self.error_message = error_msg
             return []
     
@@ -332,9 +332,10 @@ class MikroTikClient:
             
         try:
             logger.debug("Fetching PPPoE-in interfaces...", "MikroTikClient.get_pppoe_interfaces_with_stats")
-            
             # Get all interfaces first
             interfaces_resource = self.connection.get_resource('/interface')
+            if interfaces_resource is None:
+                return None
             all_interfaces = list(interfaces_resource.get())
             
             # Filter for PPPoE-in interfaces
@@ -428,6 +429,7 @@ class MikroTikClient:
         except Exception as e:
             error_msg = f"Error getting PPPoE-in interfaces: {str(e)}"
             logger.error(error_msg, "MikroTikClient.get_pppoe_interfaces_with_stats")
+            import traceback
             logger.debug(traceback.format_exc(), "MikroTikClient.get_pppoe_interfaces_with_stats")
             self.error_message = error_msg
             return None

@@ -1,5 +1,5 @@
 {
-  "router_ip": "172.75.2.1",
+  "router_ip": "192.168.3.2",
   "router_user": "pingapi",
   "router_password": "password123",
   "router_port": 8728
