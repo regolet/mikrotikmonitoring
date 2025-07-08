@@ -18,7 +18,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="/" data-page="dashboard">Dashboard</a>
                     </li>
@@ -27,6 +27,16 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/settings" data-page="settings">Settings</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <div class="d-flex align-items-center">
+                            <label for="router-selector" class="text-light me-2">Router:</label>
+                            <select id="router-selector" class="form-select form-select-sm" style="width: auto;">
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -258,9 +268,39 @@
         <!-- Settings Page -->
         <div id="settings-page" class="page-content" style="display: none;">
             <div class="container-fluid mt-4">
+                <!-- Router Management Section -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3>Router Management</h3>
+                        <button type="button" class="btn btn-primary" id="add-router-btn">
+                            <i class="bi bi-plus-circle"></i> Add Router
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="routers-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Host</th>
+                                        <th>Status</th>
+                                        <th>Last Connection</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Routers will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legacy Settings Section -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Router Settings</h3>
+                        <h3>Legacy Router Settings</h3>
+                        <small class="text-muted">This section will be deprecated in favor of the multi-router system above.</small>
                     </div>
                     <div class="card-body">
                         <form id="settings-form">
@@ -307,9 +347,138 @@
         </div>
     </div>
 
+    <!-- Add Router Modal -->
+    <div class="modal fade" id="addRouterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Router</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-router-form">
+                        <div class="mb-3">
+                            <label for="router-name" class="form-label">Router Name</label>
+                            <input type="text" class="form-control" id="router-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="router-description" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="router-description">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="router-host" class="form-label">Host/IP Address</label>
+                                    <input type="text" class="form-control" id="router-host" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="router-port" class="form-label">Port</label>
+                                    <input type="number" class="form-control" id="router-port" value="8728" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="router-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="router-username" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="router-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="router-password" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="router-ssl">
+                                <label class="form-check-label" for="router-ssl">
+                                    Use SSL/TLS
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-router-btn">Save Router</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Router Modal -->
+    <div class="modal fade" id="editRouterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Router</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-router-form">
+                        <input type="hidden" id="edit-router-id" name="edit-router-id">
+                        <div class="mb-3">
+                            <label for="edit-router-name" class="form-label">Router Name</label>
+                            <input type="text" class="form-control" id="edit-router-name" name="edit-router-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-router-description" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="edit-router-description" name="edit-router-description">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="edit-router-host" class="form-label">Host/IP Address</label>
+                                    <input type="text" class="form-control" id="edit-router-host" name="edit-router-host" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="edit-router-port" class="form-label">Port</label>
+                                    <input type="number" class="form-control" id="edit-router-port" name="edit-router-port" value="8728" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit-router-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="edit-router-username" name="edit-router-username" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit-router-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="edit-router-password" name="edit-router-password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="edit-router-ssl" name="edit-router-ssl">
+                                <label class="form-check-label" for="edit-router-ssl">
+                                    Use SSL/TLS
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="update-router-btn">Update Router</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Group Modal -->
     <div class="modal fade" id="addGroupModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Group</h5>
@@ -326,7 +495,8 @@
                             <div class="row">
                                 <div class="col-md-5">
                                     <label class="form-label text-muted">Available Accounts</label>
-                                    <select id="available-accounts" class="form-select" size="8" multiple>
+                                    <input type="text" class="form-control mb-2" id="available-accounts-search" placeholder="Search accounts...">
+                                    <select id="available-accounts" class="form-select" size="12" multiple>
                                         <!-- Available accounts will be populated by JavaScript -->
                                     </select>
                                 </div>
@@ -340,7 +510,7 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label text-muted">Selected Members</label>
-                                    <select id="selected-members" class="form-select" size="8" multiple>
+                                    <select id="selected-members" class="form-select" size="12" multiple>
                                         <!-- Selected members will be populated by JavaScript -->
                                     </select>
                                 </div>
@@ -358,7 +528,7 @@
 
     <!-- Edit Group Modal -->
     <div class="modal fade" id="editGroupModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Group</h5>
@@ -376,7 +546,8 @@
                             <div class="row">
                                 <div class="col-md-5">
                                     <label class="form-label text-muted">Available Accounts</label>
-                                    <select id="edit-available-accounts" class="form-select" size="8" multiple>
+                                    <input type="text" class="form-control mb-2" id="edit-available-accounts-search" placeholder="Search accounts...">
+                                    <select id="edit-available-accounts" class="form-select" size="12" multiple>
                                         <!-- Available accounts will be populated by JavaScript -->
                                     </select>
                                 </div>
@@ -390,7 +561,7 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label text-muted">Selected Members</label>
-                                    <select id="edit-selected-members" class="form-select" size="8" multiple>
+                                    <select id="edit-selected-members" class="form-select" size="12" multiple>
                                         <!-- Selected members will be populated by JavaScript -->
                                     </select>
                                 </div>
@@ -521,6 +692,7 @@
                 });
 
                 document.getElementById('edit-add-members')?.addEventListener('click', () => {
+                    console.log('DEBUG: Edit add members clicked');
                     this.transferMembers('edit-available-accounts', 'edit-selected-members');
                 });
 
@@ -530,8 +702,11 @@
 
                 // Modal show events for dual list population
                 document.getElementById('addGroupModal')?.addEventListener('show.bs.modal', () => {
-                    this.populateDualList('available-accounts', 'selected-members');
+                    this.populateAddModal();
                 });
+
+                // Note: editGroupModal population is handled in editGroup() method
+                // to ensure proper group data is loaded
 
                 // PPPoE table sorting
                 document.querySelectorAll('#pppoe-interfaces-table th.sortable').forEach(th => {
@@ -548,6 +723,39 @@
                         this.filterPPPoETable(e.target.value);
                     });
                 }
+
+                // Add event listeners for dual list search inputs
+                const addAvailableSearch = document.getElementById('available-accounts-search');
+                if (addAvailableSearch) {
+                    addAvailableSearch.addEventListener('input', (e) => {
+                        this.filterDualList(e.target.value, 'available-accounts');
+                    });
+                }
+
+                const editAvailableSearch = document.getElementById('edit-available-accounts-search');
+                if (editAvailableSearch) {
+                    editAvailableSearch.addEventListener('input', (e) => {
+                        this.filterDualList(e.target.value, 'edit-available-accounts');
+                    });
+                }
+
+                // Router management functionality
+                document.getElementById('add-router-btn')?.addEventListener('click', () => {
+                    this.showAddRouterModal();
+                });
+
+                document.getElementById('save-router-btn')?.addEventListener('click', () => {
+                    this.saveRouter();
+                });
+
+                document.getElementById('update-router-btn')?.addEventListener('click', () => {
+                    this.updateRouter();
+                });
+
+                // Router selector
+                document.getElementById('router-selector')?.addEventListener('change', (e) => {
+                    this.switchRouter(e.target.value);
+                });
             }
 
             setupRouting() {
@@ -606,6 +814,7 @@
                         break;
                     case 'settings':
                         this.loadSettings();
+                        this.loadRouters();
                         break;
                 }
             }
@@ -619,13 +828,17 @@
 
             async checkConnection() {
                 try {
-                    const response = await fetch('/api/status');
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    const url = routerId ? `/api/status?router_id=${routerId}` : '/api/status';
+                    
+                    const response = await fetch(url);
                     const data = await response.json();
                     
                     this.currentData.connected = data.connected;
                     
                     if (data.connected) {
-                        showSuccess('Connected', 'Successfully connected to MikroTik router');
+                        showSuccess('Connected', `Successfully connected to ${data.router_name || 'MikroTik router'}`);
                     } else {
                         showError('Connection Failed', 'Unable to connect to MikroTik router');
                     }
@@ -637,7 +850,11 @@
 
             async refreshDashboardData() {
                 try {
-                    const response = await fetch('/api/pppoe');
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    const url = routerId ? `/api/pppoe?router_id=${routerId}` : '/api/pppoe';
+                    
+                    const response = await fetch(url);
                     const data = await response.json();
                     
                     if (data.success) {
@@ -972,10 +1189,15 @@
 
             async loadGroups() {
                 try {
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    const groupsUrl = routerId ? `/api/groups?router_id=${routerId}` : '/api/groups';
+                    const pppActiveUrl = routerId ? `/api/ppp_active?router_id=${routerId}` : '/api/ppp_active';
+                    
                     // Fetch both groups and PPP active data
                     const [groupsResponse, pppActiveResponse] = await Promise.all([
-                        fetch('/api/groups'),
-                        fetch('/api/ppp_active')
+                        fetch(groupsUrl),
+                        fetch(pppActiveUrl)
                     ]);
                     
                     const groupsData = await groupsResponse.json();
@@ -1087,14 +1309,61 @@
                 if (!fromSelect || !toSelect) return;
                 
                 const selectedOptions = Array.from(fromSelect.selectedOptions);
+                if (selectedOptions.length === 0) return; // No items selected
+                
+                console.log('DEBUG: Transferring', selectedOptions.length, 'items from', fromId, 'to', toId);
+                console.log('DEBUG: Selected options:', selectedOptions.map(opt => opt.value));
+                
+                // Move selected items to the target list
                 selectedOptions.forEach(option => {
                     toSelect.appendChild(option);
                 });
+                
+                // If this is the edit modal, we need to ensure accounts used in other groups don't appear in available
+                if (fromId === 'edit-available-accounts' || toId === 'edit-available-accounts') {
+                    this.updateEditAvailableList();
+                } else {
+                    // Update the original options storage to remove transferred items
+                    if (fromSelect.dataset.originalOptions) {
+                        const originalOptions = JSON.parse(fromSelect.dataset.originalOptions);
+                        const transferredValues = selectedOptions.map(opt => opt.value);
+                        const remainingOptions = originalOptions.filter(option => 
+                            !transferredValues.includes(option.value)
+                        );
+                        fromSelect.dataset.originalOptions = JSON.stringify(remainingOptions);
+                        console.log('DEBUG: Updated original options, removed', transferredValues.length, 'items');
+                        console.log('DEBUG: Remaining options:', remainingOptions.length);
+                    }
+                    
+                    // Reapply search filter if there's an active search
+                    const searchInput = document.getElementById(fromId.replace('-accounts', '-accounts-search'));
+                    if (searchInput && searchInput.value.trim()) {
+                        console.log('DEBUG: Reapplying search filter with query:', searchInput.value);
+                        this.filterDualList(searchInput.value, fromId);
+                    } else {
+                        // If no active search, just update the visible options to match the stored original options
+                        if (fromSelect.dataset.originalOptions) {
+                            const originalOptions = JSON.parse(fromSelect.dataset.originalOptions);
+                            fromSelect.innerHTML = '';
+                            originalOptions.forEach(option => {
+                                const opt = document.createElement('option');
+                                opt.value = option.value;
+                                opt.textContent = option.text;
+                                fromSelect.appendChild(opt);
+                            });
+                            console.log('DEBUG: Updated visible options to match stored original options');
+                        }
+                    }
+                }
             }
 
             async loadAvailableAccounts() {
                 try {
-                    const response = await fetch('/api/ppp_accounts');
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    const url = routerId ? `/api/ppp_accounts?router_id=${routerId}` : '/api/ppp_accounts';
+                    
+                    const response = await fetch(url);
                     const data = await response.json();
                     
                     if (data.success && data.ppp_accounts) {
@@ -1107,28 +1376,158 @@
                 }
             }
 
-            async populateDualList(availableSelectId, selectedSelectId, selectedAccounts = []) {
-                const availableSelect = document.getElementById(availableSelectId);
-                const selectedSelect = document.getElementById(selectedSelectId);
+            async populateAddModal() {
+                const availableSelect = document.getElementById('available-accounts');
+                const selectedSelect = document.getElementById('selected-members');
                 
-                if (!availableSelect || !selectedSelect) return;
+                if (!availableSelect || !selectedSelect) {
+                    return;
+                }
                 
-                // Clear existing options
+                // Clear existing options and stored data
                 availableSelect.innerHTML = '';
                 selectedSelect.innerHTML = '';
+                delete availableSelect.dataset.originalOptions;
                 
                 // Load all available accounts
                 const allAccounts = await this.loadAvailableAccounts();
                 
-                // Populate available accounts (excluding already selected ones)
+                // Get all accounts that are already members of existing groups
+                const existingGroups = await this.loadExistingGroups();
+                const usedAccounts = new Set();
+                existingGroups.forEach(group => {
+                    if (group.accounts) {
+                        group.accounts.forEach(account => usedAccounts.add(account));
+                    }
+                });
+                
+                // Populate available accounts (excluding accounts already used in other groups)
                 allAccounts.forEach(account => {
-                    if (!selectedAccounts.includes(account)) {
+                    if (!usedAccounts.has(account)) {
                         const option = document.createElement('option');
                         option.value = account;
                         option.textContent = account;
                         availableSelect.appendChild(option);
                     }
                 });
+            }
+
+            async loadExistingGroups() {
+                try {
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    const url = routerId ? `/api/groups?router_id=${routerId}` : '/api/groups';
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.success && data.groups) {
+                        return data.groups;
+                    }
+                    return [];
+                } catch (error) {
+                    console.error('Error loading existing groups:', error);
+                    return [];
+                }
+            }
+
+            async updateEditAvailableList() {
+                const availableSelect = document.getElementById('edit-available-accounts');
+                const selectedSelect = document.getElementById('edit-selected-members');
+                
+                if (!availableSelect || !selectedSelect) return;
+                
+                // Get current selected members
+                const currentSelectedMembers = Array.from(selectedSelect.options).map(opt => opt.value);
+                
+                // Load all available accounts
+                const allAccounts = await this.loadAvailableAccounts();
+                
+                // Get all accounts that are already members of existing groups
+                const existingGroups = await this.loadExistingGroups();
+                const usedAccounts = new Set();
+                existingGroups.forEach(group => {
+                    if (group.accounts) {
+                        group.accounts.forEach(account => usedAccounts.add(account));
+                    }
+                });
+                
+                // Remove current group's accounts from used accounts (so they can be re-selected)
+                const currentGroupId = document.getElementById('edit-group-id')?.value;
+                if (currentGroupId) {
+                    const currentGroup = existingGroups.find(g => g.id === currentGroupId);
+                    if (currentGroup && currentGroup.accounts) {
+                        currentGroup.accounts.forEach(account => usedAccounts.delete(account));
+                    }
+                }
+                
+                // Clear and repopulate available list
+                availableSelect.innerHTML = '';
+                
+                // Populate available accounts (excluding accounts used in other groups and already selected ones)
+                const availableOptions = [];
+                allAccounts.forEach(account => {
+                    if (!usedAccounts.has(account) && !currentSelectedMembers.includes(account)) {
+                        const option = document.createElement('option');
+                        option.value = account;
+                        option.textContent = account;
+                        availableSelect.appendChild(option);
+                        availableOptions.push({ value: account, text: account });
+                    }
+                });
+                
+                // Store original options for search functionality
+                availableSelect.dataset.originalOptions = JSON.stringify(availableOptions);
+            }
+
+            async populateDualList(availableSelectId, selectedSelectId, selectedAccounts = []) {
+                const availableSelect = document.getElementById(availableSelectId);
+                const selectedSelect = document.getElementById(selectedSelectId);
+                
+                if (!availableSelect || !selectedSelect) {
+                    return;
+                }
+                
+                // Clear existing options and stored data
+                availableSelect.innerHTML = '';
+                selectedSelect.innerHTML = '';
+                delete availableSelect.dataset.originalOptions;
+                
+                // Load all available accounts
+                const allAccounts = await this.loadAvailableAccounts();
+                
+                // Get all accounts that are already members of existing groups
+                const existingGroups = await this.loadExistingGroups();
+                const usedAccounts = new Set();
+                existingGroups.forEach(group => {
+                    if (group.accounts) {
+                        group.accounts.forEach(account => usedAccounts.add(account));
+                    }
+                });
+                
+                // Remove current group's accounts from used accounts (so they can be re-selected)
+                const currentGroupId = document.getElementById('edit-group-id')?.value;
+                if (currentGroupId) {
+                    const currentGroup = existingGroups.find(g => g.id === currentGroupId);
+                    if (currentGroup && currentGroup.accounts) {
+                        currentGroup.accounts.forEach(account => usedAccounts.delete(account));
+                    }
+                }
+                
+                // Populate available accounts (excluding accounts used in other groups and already selected ones)
+                const availableOptions = [];
+                allAccounts.forEach(account => {
+                    if (!usedAccounts.has(account) && !selectedAccounts.includes(account)) {
+                        const option = document.createElement('option');
+                        option.value = account;
+                        option.textContent = account;
+                        availableSelect.appendChild(option);
+                        availableOptions.push({ value: account, text: account });
+                    }
+                });
+                
+                // Store original options for search functionality
+                availableSelect.dataset.originalOptions = JSON.stringify(availableOptions);
                 
                 // Populate selected accounts
                 selectedAccounts.forEach(account => {
@@ -1156,6 +1555,9 @@
                 }
 
                 try {
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    
                     const response = await fetch('/api/groups', {
                         method: 'POST',
                         headers: {
@@ -1163,7 +1565,8 @@
                         },
                         body: JSON.stringify({ 
                             name, 
-                            accounts: selectedMembers 
+                            accounts: selectedMembers,
+                            router_id: routerId
                         })
                     });
 
@@ -1225,6 +1628,9 @@
                 }
 
                 try {
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    
                     const response = await fetch('/api/groups', {
                         method: 'PUT',
                         headers: {
@@ -1233,7 +1639,8 @@
                         body: JSON.stringify({ 
                             id, 
                             name, 
-                            accounts: selectedMembers 
+                            accounts: selectedMembers,
+                            router_id: routerId
                         })
                     });
 
@@ -1258,7 +1665,11 @@
                 }
 
                 try {
-                    const response = await fetch(`/api/groups?id=${groupId}`, {
+                    const activeRouter = await this.getActiveRouter();
+                    const routerId = activeRouter?.active_router_id;
+                    const url = routerId ? `/api/groups?id=${groupId}&router_id=${routerId}` : `/api/groups?id=${groupId}`;
+                    
+                    const response = await fetch(url, {
                         method: 'DELETE'
                     });
 
@@ -1405,6 +1816,325 @@
                     const text = row.textContent.toLowerCase();
                     row.style.display = text.includes(q) ? '' : 'none';
                 });
+            }
+
+            filterDualList(query, availableSelectId) {
+                const availableSelect = document.getElementById(availableSelectId);
+                if (!availableSelect) return;
+
+                console.log('DEBUG: filterDualList called with query:', query, 'for select:', availableSelectId);
+
+                // Store original options if not already stored
+                if (!availableSelect.dataset.originalOptions) {
+                    availableSelect.dataset.originalOptions = JSON.stringify(
+                        Array.from(availableSelect.options).map(opt => ({
+                            value: opt.value,
+                            text: opt.textContent
+                        }))
+                    );
+                    console.log('DEBUG: Stored original options:', JSON.parse(availableSelect.dataset.originalOptions).length);
+                }
+
+                // Get original options
+                const originalOptions = JSON.parse(availableSelect.dataset.originalOptions);
+                console.log('DEBUG: Original options count:', originalOptions.length);
+                
+                // Filter based on search query
+                const filteredOptions = originalOptions.filter(option => 
+                    option.text.toLowerCase().includes(query.toLowerCase())
+                );
+                console.log('DEBUG: Filtered options count:', filteredOptions.length);
+
+                // Clear and repopulate
+                availableSelect.innerHTML = '';
+                filteredOptions.forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    availableSelect.appendChild(opt);
+                });
+            }
+
+            // Router Management Methods
+            async loadRouters() {
+                try {
+                    const response = await fetch('/api/routers');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.populateRouterSelector(data.routers);
+                        this.populateRoutersTable(data.routers);
+                    } else {
+                        showError('Routers Error', data.error || 'Failed to load routers');
+                    }
+                } catch (error) {
+                    console.error('Error loading routers:', error);
+                    showError('Routers Error', 'Failed to load routers');
+                }
+            }
+
+            populateRouterSelector(routers) {
+                const selector = document.getElementById('router-selector');
+                if (!selector) return;
+
+                selector.innerHTML = '';
+                routers.forEach(router => {
+                    const option = document.createElement('option');
+                    option.value = router.id;
+                    option.textContent = router.name;
+                    selector.appendChild(option);
+                });
+
+                // Set active router
+                this.getActiveRouter().then(activeRouter => {
+                    if (activeRouter && activeRouter.active_router_id) {
+                        selector.value = activeRouter.active_router_id;
+                    } else if (routers.length > 0) {
+                        selector.value = routers[0].id;
+                    }
+                });
+            }
+
+            populateRoutersTable(routers) {
+                const tbody = document.querySelector('#routers-table tbody');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+                routers.forEach(router => {
+                    const row = document.createElement('tr');
+                    const statusClass = router.connection_status === 'connected' ? 'text-success' : 
+                                     router.connection_status === 'disconnected' ? 'text-danger' : 'text-warning';
+                    const statusIcon = router.connection_status === 'connected' ? 'bi-wifi' : 
+                                    router.connection_status === 'disconnected' ? 'bi-wifi-off' : 'bi-question-circle';
+                    
+                    row.innerHTML = `
+                        <td>${router.name}</td>
+                        <td>${router.host}</td>
+                        <td><i class="bi ${statusIcon} ${statusClass}"></i> ${router.connection_status}</td>
+                        <td>${router.last_connection ? new Date(router.last_connection).toLocaleString() : 'Never'}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="app.testRouterConnection('${router.id}')">
+                                    <i class="bi bi-wifi"></i> Test
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="app.editRouter('${router.id}')">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="app.deleteRouter('${router.id}')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            async getActiveRouter() {
+                try {
+                    const response = await fetch('/api/routers/active');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error getting active router:', error);
+                    return null;
+                }
+            }
+
+            async switchRouter(routerId) {
+                if (!routerId) return;
+
+                try {
+                    const response = await fetch('/api/routers/active', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ router_id: routerId })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Router Switched', `Switched to ${data.router_name}`);
+                        // Refresh current page data
+                        this.loadCurrentPage();
+                    } else {
+                        showError('Switch Error', data.error || 'Failed to switch router');
+                    }
+                } catch (error) {
+                    console.error('Error switching router:', error);
+                    showError('Switch Error', 'Failed to switch router');
+                }
+            }
+
+            showAddRouterModal() {
+                // Clear form
+                document.getElementById('add-router-form').reset();
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('addRouterModal'));
+                modal.show();
+            }
+
+            async saveRouter() {
+                const form = document.getElementById('add-router-form');
+                const formData = new FormData(form);
+                
+                const routerData = {
+                    name: formData.get('router-name'),
+                    description: formData.get('router-description'),
+                    host: formData.get('router-host'),
+                    port: parseInt(formData.get('router-port')),
+                    username: formData.get('router-username'),
+                    password: formData.get('router-password'),
+                    use_ssl: document.getElementById('router-ssl').checked
+                };
+
+                try {
+                    const response = await fetch('/api/routers', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(routerData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Router Added', 'Router added successfully');
+                        bootstrap.Modal.getInstance(document.getElementById('addRouterModal')).hide();
+                        this.loadRouters();
+                    } else {
+                        showError('Add Error', data.error || 'Failed to add router');
+                    }
+                } catch (error) {
+                    console.error('Error adding router:', error);
+                    showError('Add Error', 'Failed to add router');
+                }
+            }
+
+            async editRouter(routerId) {
+                try {
+                    const response = await fetch(`/api/routers/${routerId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const router = data.router;
+                        console.log('DEBUG editRouter - router:', router); // Debug log
+                        if (router) {
+                            this.populateEditRouterForm(router);
+                            const modal = new bootstrap.Modal(document.getElementById('editRouterModal'));
+                            modal.show();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading router for edit:', error);
+                    showError('Edit Error', 'Failed to load router data');
+                }
+            }
+
+            populateEditRouterForm(router) {
+                document.getElementById('edit-router-id').value = router.id || '';
+                document.getElementById('edit-router-name').value = router.name || '';
+                document.getElementById('edit-router-description').value = router.description || '';
+                document.getElementById('edit-router-host').value = router.host || '';
+                document.getElementById('edit-router-port').value = router.port !== undefined ? router.port : '';
+                document.getElementById('edit-router-username').value = router.username || '';
+                document.getElementById('edit-router-password').value = '';
+                document.getElementById('edit-router-ssl').checked = router.use_ssl || false;
+            }
+
+            async updateRouter() {
+                const form = document.getElementById('edit-router-form');
+                const formData = new FormData(form);
+                
+                const routerData = {
+                    id: formData.get('edit-router-id'),
+                    name: formData.get('edit-router-name'),
+                    description: formData.get('edit-router-description'),
+                    host: formData.get('edit-router-host'),
+                    port: parseInt(formData.get('edit-router-port')),
+                    username: formData.get('edit-router-username'),
+                    password: formData.get('edit-router-password'),
+                    use_ssl: document.getElementById('edit-router-ssl').checked
+                };
+
+                // Debug: Log all routerData fields before validation
+                console.log('DEBUG updateRouter() - routerData:', routerData);
+                if (!routerData.id || !routerData.name || !routerData.host || isNaN(routerData.port) || !routerData.username) {
+                    showError('Validation Error', 'All fields except password and description are required.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/routers', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(routerData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Router Updated', 'Router updated successfully');
+                        bootstrap.Modal.getInstance(document.getElementById('editRouterModal')).hide();
+                        this.loadRouters();
+                    } else {
+                        showError('Update Error', data.error || 'Failed to update router');
+                    }
+                } catch (error) {
+                    console.error('Error updating router:', error);
+                    showError('Update Error', 'Failed to update router');
+                }
+            }
+
+            async deleteRouter(routerId) {
+                if (!confirm('Are you sure you want to delete this router? This will also delete all associated groups.')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/routers?id=${routerId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess('Router Deleted', 'Router deleted successfully');
+                        this.loadRouters();
+                    } else {
+                        showError('Delete Error', data.error || 'Failed to delete router');
+                    }
+                } catch (error) {
+                    console.error('Error deleting router:', error);
+                    showError('Delete Error', 'Failed to delete router');
+                }
+            }
+
+            async testRouterConnection(routerId) {
+                try {
+                    const response = await fetch('/api/routers/test', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ router_id: routerId })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success && data.connected) {
+                        showSuccess('Connection Test', `Successfully connected to ${data.router_name}`);
+                    } else {
+                        showError('Connection Test', data.error || 'Failed to connect to router');
+                    }
+                } catch (error) {
+                    console.error('Error testing router connection:', error);
+                    showError('Connection Test', 'Failed to test connection');
+                }
             }
         }
 
