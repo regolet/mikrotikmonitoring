@@ -692,7 +692,6 @@
                 });
 
                 document.getElementById('edit-add-members')?.addEventListener('click', () => {
-                    console.log('DEBUG: Edit add members clicked');
                     this.transferMembers('edit-available-accounts', 'edit-selected-members');
                 });
 
@@ -1311,8 +1310,7 @@
                 const selectedOptions = Array.from(fromSelect.selectedOptions);
                 if (selectedOptions.length === 0) return; // No items selected
                 
-                console.log('DEBUG: Transferring', selectedOptions.length, 'items from', fromId, 'to', toId);
-                console.log('DEBUG: Selected options:', selectedOptions.map(opt => opt.value));
+
                 
                 // Move selected items to the target list
                 selectedOptions.forEach(option => {
@@ -1331,14 +1329,13 @@
                             !transferredValues.includes(option.value)
                         );
                         fromSelect.dataset.originalOptions = JSON.stringify(remainingOptions);
-                        console.log('DEBUG: Updated original options, removed', transferredValues.length, 'items');
-                        console.log('DEBUG: Remaining options:', remainingOptions.length);
+                        
                     }
                     
                     // Reapply search filter if there's an active search
                     const searchInput = document.getElementById(fromId.replace('-accounts', '-accounts-search'));
                     if (searchInput && searchInput.value.trim()) {
-                        console.log('DEBUG: Reapplying search filter with query:', searchInput.value);
+    
                         this.filterDualList(searchInput.value, fromId);
                     } else {
                         // If no active search, just update the visible options to match the stored original options
@@ -1351,7 +1348,7 @@
                                 opt.textContent = option.text;
                                 fromSelect.appendChild(opt);
                             });
-                            console.log('DEBUG: Updated visible options to match stored original options');
+    
                         }
                     }
                 }
@@ -1822,7 +1819,7 @@
                 const availableSelect = document.getElementById(availableSelectId);
                 if (!availableSelect) return;
 
-                console.log('DEBUG: filterDualList called with query:', query, 'for select:', availableSelectId);
+
 
                 // Store original options if not already stored
                 if (!availableSelect.dataset.originalOptions) {
@@ -1832,18 +1829,16 @@
                             text: opt.textContent
                         }))
                     );
-                    console.log('DEBUG: Stored original options:', JSON.parse(availableSelect.dataset.originalOptions).length);
+
                 }
 
                 // Get original options
                 const originalOptions = JSON.parse(availableSelect.dataset.originalOptions);
-                console.log('DEBUG: Original options count:', originalOptions.length);
                 
                 // Filter based on search query
                 const filteredOptions = originalOptions.filter(option => 
                     option.text.toLowerCase().includes(query.toLowerCase())
                 );
-                console.log('DEBUG: Filtered options count:', filteredOptions.length);
 
                 // Clear and repopulate
                 availableSelect.innerHTML = '';
@@ -2020,7 +2015,7 @@
                     
                     if (data.success) {
                         const router = data.router;
-                        console.log('DEBUG editRouter - router:', router); // Debug log
+    
                         if (router) {
                             this.populateEditRouterForm(router);
                             const modal = new bootstrap.Modal(document.getElementById('editRouterModal'));
@@ -2060,7 +2055,7 @@
                 };
 
                 // Debug: Log all routerData fields before validation
-                console.log('DEBUG updateRouter() - routerData:', routerData);
+                
                 if (!routerData.id || !routerData.name || !routerData.host || isNaN(routerData.port) || !routerData.username) {
                     showError('Validation Error', 'All fields except password and description are required.');
                     return;

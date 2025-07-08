@@ -578,7 +578,7 @@ def api_routers():
     elif request.method == 'PUT':
         try:
             data = request.get_json()
-            print('DEBUG: Received PUT /api/routers payload:', data)
+    
             if not data or 'id' not in data:
                 return jsonify({'success': False, 'error': 'Router ID is required'}), 400
             

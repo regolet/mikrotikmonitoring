@@ -39,7 +39,7 @@ class MikroTikClient:
         Returns:
             bool: True if connection was successful, False otherwise
         """
-        logger.debug(f"Attempting to connect to {self.host}:{self.port} as {self.user}", "MikroTikClient.connect")
+
         try:
             if self.use_ssl:
                 ssl_context = ssl.create_default_context()
@@ -63,19 +63,19 @@ class MikroTikClient:
                     'plaintext_login': True
                 }
             
-            logger.debug(f"Connection parameters: { {k: '*****' if k == 'password' else v for k, v in connection_params.items()} }", "MikroTikClient.connect")
+
             
             self.api = routeros_api.RouterOsApiPool(**connection_params)
-            logger.debug("Created RouterOS API pool", "MikroTikClient.connect")
+
             
             # Test the connection with a simple command
             try:
                 self.connection = self.api.get_api()
-                logger.debug("Successfully obtained API connection", "MikroTikClient.connect")
+    
                 
                 # Test if we can actually execute a command
                 test = self.connection.get_resource('/system/resource').get()
-                logger.debug(f"Test command result: {test}", "MikroTikClient.connect")
+    
                 
                 self.connected = True
                 logger.info("Connection successful!", "MikroTikClient.connect")
@@ -90,7 +90,7 @@ class MikroTikClient:
         except Exception as e:
             error_details = traceback.format_exc()
             logger.error(f"Connection failed: {str(e)}", "MikroTikClient.connect")
-            logger.debug(f"Error details: {error_details}", "MikroTikClient.connect")
+
             self.error_message = str(e)
             self.connected = False
             return False
@@ -167,23 +167,23 @@ class MikroTikClient:
             return None
             
         try:
-            logger.debug("Fetching network interfaces...", "MikroTikClient.get_interfaces")
+    
             # Get interface resource and convert to a list before returning
             resource = self.connection.get_resource('/interface')
             
             if resource is None:
-                logger.debug("No interfaces resource found", "MikroTikClient.get_interfaces")
+    
                 return []
                 
             # Convert to list explicitly with get() method
             interfaces = list(resource.get())
-            logger.debug(f"Found {len(interfaces)} interfaces", "MikroTikClient.get_interfaces")
+
             return interfaces
             
         except Exception as e:
             error_msg = f"Error getting interfaces: {str(e)}"
             logger.error(error_msg, "MikroTikClient.get_interfaces")
-            logger.debug(traceback.format_exc(), "MikroTikClient.get_interfaces")
+
             self.error_message = error_msg
             return None
     
@@ -266,20 +266,20 @@ class MikroTikClient:
             logger.error("get_ppp_secrets: Not connected to router", "MikroTikClient.get_ppp_secrets")
             return []
         try:
-            logger.debug("Fetching PPP secrets...", "MikroTikClient.get_ppp_secrets")
+    
             resource = self.connection.get_resource('/ppp/secret')
             if resource is None:
-                logger.debug("No PPP secrets resource found", "MikroTikClient.get_ppp_secrets")
+    
                 return []
             raw_secrets = resource.get()
             secrets = list(raw_secrets)
-            logger.debug(f"Found {len(secrets)} PPP secrets", "MikroTikClient.get_ppp_secrets")
+
             return secrets
         except Exception as e:
             error_msg = f"Error getting PPP secrets: {str(e)}"
             logger.error(error_msg, "MikroTikClient.get_ppp_secrets")
             import traceback
-            logger.debug(traceback.format_exc(), "MikroTikClient.get_ppp_secrets")
+
             self.error_message = error_msg
             return []
     
@@ -294,19 +294,19 @@ class MikroTikClient:
             logger.error("get_active_ppp_connections: Not connected to router", "MikroTikClient.get_active_ppp_connections")
             return []
         try:
-            logger.debug("Fetching active PPP connections...", "MikroTikClient.get_active_ppp_connections")
+    
             resource = self.connection.get_resource('/ppp/active')
             if resource is None:
-                logger.debug("No active PPP connections resource found", "MikroTikClient.get_active_ppp_connections")
+    
                 return []
             connections = list(resource.get())
-            logger.debug(f"Found {len(connections)} active PPP connections", "MikroTikClient.get_active_ppp_connections")
+
             return connections
         except Exception as e:
             error_msg = f"Error getting active PPP connections: {str(e)}"
             logger.error(error_msg, "MikroTikClient.get_active_ppp_connections")
             import traceback
-            logger.debug(traceback.format_exc(), "MikroTikClient.get_active_ppp_connections")
+
             self.error_message = error_msg
             return []
     
@@ -331,7 +331,7 @@ class MikroTikClient:
             return None
             
         try:
-            logger.debug("Fetching PPPoE-in interfaces...", "MikroTikClient.get_pppoe_interfaces_with_stats")
+    
             # Get all interfaces first
             interfaces_resource = self.connection.get_resource('/interface')
             if interfaces_resource is None:
@@ -340,7 +340,7 @@ class MikroTikClient:
             
             # Filter for PPPoE-in interfaces
             pppoe_interfaces = [iface for iface in all_interfaces if iface.get('type') == 'pppoe-in']
-            logger.debug(f"Found {len(pppoe_interfaces)} PPPoE-in interfaces", "MikroTikClient.get_pppoe_interfaces_with_stats")
+
             
             # Get the interface statistics from the /interface/print stats command
             # This is a more reliable way to get interface statistics than monitor-traffic
@@ -353,14 +353,14 @@ class MikroTikClient:
                 interface_stats_cmd = self.connection.path(api_path)
                 interface_stats_result = interface_stats_cmd(**params)
                 
-                logger.debug(f"Fetched interface statistics using {api_path}", "MikroTikClient.get_pppoe_interfaces_with_stats")
+    
                 
                 # Create a mapping of interface name to stats
                 interface_stats_map = {}
                 for stat in interface_stats_result:
                     interface_stats_map[stat.get('name')] = stat
                     
-                logger.debug(f"Created stats map for {len(interface_stats_map)} interfaces", "MikroTikClient.get_pppoe_interfaces_with_stats")
+    
             except Exception as e:
                 logger.error(f"Error getting interface statistics: {str(e)}", "MikroTikClient.get_pppoe_interfaces_with_stats")
                 interface_stats_map = {}
@@ -369,7 +369,7 @@ class MikroTikClient:
             result = []
             for iface in pppoe_interfaces:
                 interface_name = iface.get('name')
-                logger.debug(f"Processing stats for interface: {interface_name}", "MikroTikClient.get_pppoe_interfaces_with_stats")
+
                 
                 # Default to zero for stats
                 iface['rx_bytes'] = '0'
@@ -380,7 +380,7 @@ class MikroTikClient:
                 # Try to get stats from the stats map
                 if interface_name in interface_stats_map:
                     stats = interface_stats_map[interface_name]
-                    logger.debug(f"Found stats for {interface_name}", "MikroTikClient.get_pppoe_interfaces_with_stats")
+
                     
                     # Get total bytes
                     iface['rx_bytes'] = stats.get('rx-byte', '0')
@@ -397,15 +397,13 @@ class MikroTikClient:
                     if 'last-link-up-time' in stats:
                         iface['last-link-up-time'] = stats.get('last-link-up-time')
                     
-                    logger.debug(f"Stats for {interface_name}: RX={iface['rx_bytes']} bytes, TX={iface['tx_bytes']} bytes", 
-                               "MikroTikClient.get_pppoe_interfaces_with_stats")
-                    logger.debug(f"Rates for {interface_name}: RX={iface['rx_rate']} bps, TX={iface['tx_rate']} bps", 
-                               "MikroTikClient.get_pppoe_interfaces_with_stats")
+                    
+                    
                 else:
                     # If interface isn't in the stats map, try to get stats directly
                     # using the monitor-traffic command as fallback
                     try:
-                        logger.debug(f"Trying monitor-traffic for {interface_name}", "MikroTikClient.get_pppoe_interfaces_with_stats")
+    
                         traffic_resource = self.connection.path('/interface/monitor-traffic')
                         traffic_stats = traffic_resource('once', {'interface': interface_name})
                         
@@ -416,8 +414,7 @@ class MikroTikClient:
                             iface['rx_rate'] = traffic_stats[0].get('rx-bits-per-second', '0')
                             iface['tx_rate'] = traffic_stats[0].get('tx-bits-per-second', '0')
                             
-                            logger.debug(f"Monitor-traffic stats for {interface_name}: RX={iface['rx_bytes']} bytes, TX={iface['tx_bytes']} bytes", 
-                                       "MikroTikClient.get_pppoe_interfaces_with_stats")
+                            
                     except Exception as e:
                         logger.error(f"Error getting monitor-traffic stats for {interface_name}: {str(e)}", 
                                     "MikroTikClient.get_pppoe_interfaces_with_stats")
@@ -430,7 +427,7 @@ class MikroTikClient:
             error_msg = f"Error getting PPPoE-in interfaces: {str(e)}"
             logger.error(error_msg, "MikroTikClient.get_pppoe_interfaces_with_stats")
             import traceback
-            logger.debug(traceback.format_exc(), "MikroTikClient.get_pppoe_interfaces_with_stats")
+
             self.error_message = error_msg
             return None
     
@@ -455,7 +452,7 @@ class MikroTikClient:
             return {}
             
         try:
-            logger.debug("Calculating aggregate statistics...", "MikroTikClient.get_aggregate_statistics")
+    
             
             stats = {
                 'total_accounts': 0,
@@ -507,7 +504,7 @@ class MikroTikClient:
         except Exception as e:
             error_msg = f"Error calculating aggregate statistics: {str(e)}"
             logger.error(error_msg, "MikroTikClient.get_aggregate_statistics")
-            logger.debug(traceback.format_exc(), "MikroTikClient.get_aggregate_statistics")
+
             self.error_message = error_msg
             return {}
     
@@ -528,7 +525,7 @@ class MikroTikClient:
             bool: True if connection test was successful, False otherwise
         """
         try:
-            logger.debug(f"Testing connection to {self.host}:{self.port} as {self.user}", "MikroTikClient.test_connection")
+    
             if self.use_ssl:
                 ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = False
@@ -567,6 +564,6 @@ class MikroTikClient:
         except Exception as e:
             error_details = traceback.format_exc()
             logger.error(f"Connection test failed: {str(e)}", "MikroTikClient.test_connection")
-            logger.debug(f"Error details: {error_details}", "MikroTikClient.test_connection")
+
             self.error_message = str(e)
             return False
