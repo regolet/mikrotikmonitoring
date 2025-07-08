@@ -1,45 +1,9 @@
 [
   {
-    "id": "9428acfa-f158-43da-b76b-b4af3d1984ab",
-    "router_id": "router_002",
-    "name": "SAN ROQUE",
-    "description": "",
-    "accounts": [
-      "Sanroque_CassandraInn",
-      "Poblacion_Sanroque sarominez",
-      "Poblacion_Sanroque ciriaco",
-      "Sanroque_jenelyn flores",
-      "Sanroque_JaJa",
-      "Sanroque_Bigboy printing",
-      "Sanroque_vendogoodeal",
-      "Sanroque_Marselina",
-      "Sanroque_rickJRHouse",
-      "Sanroque_SumandayJun",
-      "Sanroque_GalimbaPon",
-      "Sanroque_Atbangbalay",
-      "Sanroque_Gabreal",
-      "Sanroque_GinaFernandez",
-      "Sanroque_Talolok",
-      "Sanroque_JosylDee",
-      "Sanroque_GimMotorparts",
-      "Sanroque_AlfecheJoshua",
-      "Sanroque_MarquezDudu",
-      "Sanroque_BeaMasiwel",
-      "Sanroque_CaballeroGing2",
-      "Sanroque_Jan2Tabocco",
-      "Sanroque_JpTeh",
-      "Sanroque_MasiwelTindahan",
-      "Sanroque_MaritesLabra",
-      "Sanroque_TindahanMasiwel",
-      "Sanroque_CiriacoEn2"
-    ],
-    "created_at": "2025-07-08T16:07:45.854159"
-  },
-  {
     "id": "596537b3-abf3-4289-8797-1a23cb8edb84",
     "router_id": "router_002",
-    "name": "MARWASA TANKE - LCP:Marwasa - GEpon",
-    "description": "",
+    "name": "MARWASA TANKE",
+    "description": "LCP:Palengke - MiniEPON - Port:",
     "accounts": [
       "Marwasa_BessCabrera",
       "Amantemarwasa",
@@ -48,13 +12,13 @@
       "susanbenedictomarwasa"
     ],
     "created_at": "2025-07-08T16:16:17.722922",
-    "updated_at": "2025-07-08T21:51:13.882919"
+    "updated_at": "2025-07-08T23:31:36.243951"
   },
   {
     "id": "7af9dde3-cee4-474e-97eb-6e5763f29d86",
     "router_id": "router_002",
     "name": "SPAMAST",
-    "description": "",
+    "description": "LCP: Mutya - MiniEPON",
     "accounts": [
       "Spamast_EkingPetchon",
       "Spamast_Rickjunoir",
@@ -66,34 +30,31 @@
       "Spamast_PanyMosquida",
       "Spamast_Mamalitas"
     ],
-    "created_at": "2025-07-08T16:17:06.797493"
+    "created_at": "2025-07-08T16:17:06.797493",
+    "updated_at": "2025-07-09T00:04:01.774715"
   },
   {
     "id": "46319daf-dc5c-4c5c-90b7-906ab011e3bf",
     "router_id": "router_002",
     "name": "LOOBAN",
-    "description": "",
+    "description": "LCP: Palengke - MiniEPON",
     "accounts": [
       "Looban_LearouAmante",
-      "Looban_AprilynMalubay",
-      "Looban_LeonidesBarrosa",
-      "Looban_jocelynbadang",
       "Looban_MaryFlordelou",
-      "Looban_BbEmok",
+      "Looban_LeonidesBarrosa",
       "Looban_RJAbad",
       "Looban_DannyCawayan",
-      "Looban_ShielajeanUlan2x",
-      "Looban_WeljieAlcoy",
       "Looban_AruYuzon",
-      "Looban_ReymondTenorio"
+      "Looban_ShielajeanUlan2x"
     ],
-    "created_at": "2025-07-08T16:18:02.401770"
+    "created_at": "2025-07-08T16:18:02.401770",
+    "updated_at": "2025-07-08T23:41:13.907088"
   },
   {
     "id": "7b11c496-96d8-47a3-af72-32a5effdbef7",
     "router_id": "router_002",
-    "name": "SAMTALIKA - LCP:Block3 - GEpon",
-    "description": "",
+    "name": "SAMTALIKA",
+    "description": "LCP: Block3 - GEpon",
     "accounts": [
       "Samtalika_Jandy",
       "Samtalika_adorbirondo",
@@ -104,78 +65,30 @@
       "Poblacion_erica glass"
     ],
     "created_at": "2025-07-08T16:18:20.211937",
-    "updated_at": "2025-07-08T21:45:42.025615"
-  },
-  {
-    "id": "733a2674-d0b7-480c-95d3-2c42fcbc0291",
-    "router_id": "router_002",
-    "name": "FELIS",
-    "description": "",
-    "accounts": [
-      "nikkoinutanfelis",
-      "Felis_Sam del rosario",
-      "Felis_aike sarmiento",
-      "Felis_dmlopez",
-      "Felis_inutan",
-      "Felis_tesslopez",
-      "Felis_Markanthony",
-      "Felis_Angcahas",
-      "Felis_MasoyDabuan",
-      "Felis_DianneGonzales",
-      "Felis_FelmorFernandez",
-      "Felis_Kje2Hardwere",
-      "Felis_Katejulia",
-      "Felis_CrenieBarouis",
-      "Felis_ElemTindahan",
-      "Felis_JoeyDalit",
-      "Felis_Olga",
-      "Felis_TanaidMenirva"
-    ],
-    "created_at": "2025-07-08T16:18:45.292935"
+    "updated_at": "2025-07-08T23:45:25.785846"
   },
   {
     "id": "4a3747d9-71ef-4c58-8af9-b392ca1df3f8",
     "router_id": "router_002",
     "name": "HIGHWAY",
-    "description": "",
+    "description": "LCP: Highway - GEpon",
     "accounts": [
-      "Highway_FRGSutoy",
       "Highway_Rapuza",
-      "Highway_Mac2x",
-      "Highway_JunSolutan",
-      "Highway_MarlinoDanwata",
       "Highway_AbdurasidKing",
-      "Highway_DonezaDeliva",
-      "Highway_Donjuan",
-      "Highway_MarkyLumadas",
-      "Highway_MelvieElarde",
-      "Highway_TugononKim",
-      "Highway_LapinasLeonida",
-      "Highway_Diaz",
-      "Highway_Cariaga",
-      "Highway_Cube8Quizada",
-      "Highway_FernandezAnabelle",
       "Highway_MariaLugo",
-      "Highway_GalimbaMareh",
-      "Highway_AlcordoJun2",
-      "Highway_PortadesNoraiza",
-      "Highway_RheaBastida",
-      "Highway_PingkoyOmicas",
-      "Highway_BuyoyMunuz",
-      "Highway_MarlonParaiso",
-      "Highway_OlivoCleofe",
-      "Highway_OlivoOtik",
-      "Highway_Darren"
+      "Highway_LapinasLeonida",
+      "Highway_Cube8Quizada",
+      "Lumbia_ManisanJeco"
     ],
-    "created_at": "2025-07-08T16:19:06.740278"
+    "created_at": "2025-07-08T16:19:06.740278",
+    "updated_at": "2025-07-08T23:45:08.363354"
   },
   {
     "id": "fcfc8320-28a4-4bcf-9997-1a844af1fcfd",
     "router_id": "router_002",
     "name": "KULO",
-    "description": "",
+    "description": "LCP: Slaughter - GEpon",
     "accounts": [
-      "Poblacion_kulo welamae",
       "Kulo_OgoyJagna",
       "Kulo_RelatadoJr",
       "Kulo_Bucodbernie",
@@ -183,110 +96,64 @@
       "Kulo_JagnaPayk",
       "Kulo_HervasDexel"
     ],
-    "created_at": "2025-07-08T16:19:29.148359"
-  },
-  {
-    "id": "30bc1cd3-7bf2-4e35-a9b3-a3d68e87522b",
-    "router_id": "router_002",
-    "name": "STONINO",
-    "description": "",
-    "accounts": [
-      "Stonino_PalmaresAnn",
-      "Stonino_CastroBebot",
-      "Stonino_SaysonMerly",
-      "Stonino_CalleMercidita",
-      "Stonino_Jun2x",
-      "Stonino_biboylazarte",
-      "undasantoninyo",
-      "blangcosantoninyo",
-      "deprasantoninyo"
-    ],
-    "created_at": "2025-07-08T16:20:19.766611",
-    "updated_at": "2025-07-08T16:49:44.734914"
+    "created_at": "2025-07-08T16:19:29.148359",
+    "updated_at": "2025-07-08T23:41:31.687335"
   },
   {
     "id": "be3ce43d-a373-439c-a8d3-4e00d275cf5d",
     "router_id": "router_002",
-    "name": "TUGAS",
-    "description": "",
+    "name": "TUGAS 2",
+    "description": "LCP: Slaughter - GEpon",
     "accounts": [
-      "gulingtugas",
-      "pamattugas",
       "Tugas_Francis calixto",
       "Tugas_jebsalcedo",
       "Tugas_marites",
       "Tugas_Tan",
-      "Tugas_MarabillasToto",
-      "Tugas_RosarioSusan",
-      "Tugas_NijanSantos",
-      "Tugas_EdsheenBahinting",
-      "Tugas_YolandaSuansing",
-      "Tugas_Dandoy",
-      "Tugas_LelybethVillaga",
-      "Tugas_SantanJoniel",
       "Tugas_Benito",
-      "Tugas_Rillo",
-      "Tugas_FabCedeno",
-      "Tugas_Calacar"
+      "Tugas_SantanJoniel",
+      "Tugas_RosarioSusan",
+      "Tugas_MarabillasToto"
     ],
-    "created_at": "2025-07-08T16:20:35.322459"
+    "created_at": "2025-07-08T16:20:35.322459",
+    "updated_at": "2025-07-08T23:40:54.371271"
   },
   {
     "id": "eab41fd5-3106-40a6-b3a8-a9855a773701",
     "router_id": "router_002",
     "name": "RELOCATION",
-    "description": "",
+    "description": "LCP: Highway - GEpon",
     "accounts": [
-      "ogadarelocation",
       "Relocation_gladysmosquite",
-      "Relocation_Tecson",
-      "Relocation_JoseptCharyl",
-      "Relocation_IndayMaturan",
       "Relocation_JoseAbadSantos",
-      "Relocation_Simpron"
+      "Tambakan_Gonzalo",
+      "Tambakan_MarvinSanico",
+      "Tambakan_RashidAbas",
+      "Tambakan_ShinaMae",
+      "Relocation_Tecson",
+      "Relocation_JoseptCharyl"
     ],
-    "created_at": "2025-07-08T16:22:03.457375"
-  },
-  {
-    "id": "f6d41c88-3530-4c38-8e43-e95f6445ef15",
-    "router_id": "router_002",
-    "name": "FATIMA",
-    "description": "",
-    "accounts": [
-      "Fatima_philip",
-      "Fatima_Ericshop",
-      "Fatima_sombilon",
-      "Fatima_christy",
-      "Fatima_BryanjayRubio",
-      "Fatima_SusayAsunada",
-      "Fatima_Jing2Sanjuan",
-      "Fatima_JeffreyReyes",
-      "Fatima_MarissaGobalani",
-      "Fatima_jethroDelosReyes",
-      "Fatima_SanFerdinand",
-      "Fatima_TuradoJing2x"
-    ],
-    "created_at": "2025-07-08T16:22:44.782490",
-    "updated_at": "2025-07-08T17:38:27.181333"
+    "created_at": "2025-07-08T16:22:03.457375",
+    "updated_at": "2025-07-08T23:40:26.212776"
   },
   {
     "id": "e3ebc53b-f35c-4deb-b74c-55d3080fd6dc",
     "router_id": "router_002",
-    "name": "SABANG - LCP:Palengke - Mini EPON",
-    "description": "",
+    "name": "SABANG",
+    "description": "LCP: Palengke - Mini EPON",
     "accounts": [
       "Sabang_PunoBoyet",
       "Sabang_AbreganaCamlon",
-      "Sabang_JasminSaripa"
+      "Sabang_JasminSaripa",
+      "Looban_ReymondTenorio"
     ],
     "created_at": "2025-07-08T16:50:19.268680",
-    "updated_at": "2025-07-08T21:29:52.855308"
+    "updated_at": "2025-07-08T23:40:40.089075"
   },
   {
     "id": "fd1c1d20-e6d1-4a75-b4d0-23545c89bfc9",
     "router_id": "router_002",
     "name": "MAGASAYAP",
-    "description": "",
+    "description": "LCP: Highway - GEpon",
     "accounts": [
       "Mangasayap_vendomama",
       "Mangasayap_dodongcobio",
@@ -295,11 +162,10 @@
       "Mangasayap_Jedrama",
       "Mangasayap_GarryTaneza",
       "Mangasayap_CalvoMichael",
-      "Salvacion_LaurenceMangalogan",
-      "Mangasayap_RachelElemento",
-      "DepraJaysonmagasayap"
+      "Mangasayap_RachelElemento"
     ],
-    "created_at": "2025-07-08T16:51:06.774229"
+    "created_at": "2025-07-08T16:51:06.774229",
+    "updated_at": "2025-07-08T23:40:14.452519"
   },
   {
     "id": "e41c88b7-0600-44d2-8060-dcfa382bc797",
@@ -317,64 +183,39 @@
     "created_at": "2025-07-08T16:51:58.469686"
   },
   {
-    "id": "e6d2cf43-cbbb-4962-9fdd-fc76becca33c",
-    "router_id": "router_002",
-    "name": "TAMBAKAN",
-    "description": "",
-    "accounts": [
-      "Tambakan_Cabanilla",
-      "kingtambakan",
-      "Tambakan_ShinaMae",
-      "Tambakan_MarvinSanico",
-      "Tambakan_RashidAbas",
-      "Tambakan_JoshuaOpong",
-      "Tambakan_MacTecson",
-      "Tambakan_DoromalKent",
-      "Tambakan_MarivicSumanday",
-      "Tambakan_EstelaAilen",
-      "Tambakan_Serda",
-      "Tambakan_Gonzalo",
-      "Tambakan_CamposAnton",
-      "Tambakan_NovaNavarez"
-    ],
-    "created_at": "2025-07-08T16:52:25.207126"
-  },
-  {
     "id": "385706b5-b707-4584-a0b0-fd5eb268e8b1",
     "router_id": "router_002",
-    "name": "PHOENIX",
-    "description": "",
+    "name": "PENONGS",
+    "description": "LCP: Palengke- MiniEPON",
     "accounts": [
       "bagamanpenongs",
-      "grandebaptis",
-      "maturanbaptist",
-      "Phoenix_michael",
       "Phoenix_Junalyn",
-      "Baptist_JonalynMananzan"
+      "Baptist_JonalynMananzan",
+      "Highway_PortadesNoraiza",
+      "Highway_GalimbaMareh",
+      "Edsa_Cacho",
+      "Edsa_Dapny"
     ],
-    "created_at": "2025-07-08T16:56:08.184338"
+    "created_at": "2025-07-08T16:56:08.184338",
+    "updated_at": "2025-07-08T23:41:54.880847"
   },
   {
     "id": "5be02623-6cf5-43de-b6ba-0f8e6ca4b856",
     "router_id": "router_002",
     "name": "BOLILA",
-    "description": "",
+    "description": "FBT - NAP3",
     "accounts": [
       "Bolila_Kalingawomens",
-      "Bolila_MarifeMamale",
-      "Bolila_VendoCamoro",
-      "Bolila_VendoCamoro2",
-      "Bolila_GboyContigo",
-      "Bolila_DiazLemart",
-      "Bolila_RicaSanchez"
+      "Bolila_GboyContigo"
     ],
-    "created_at": "2025-07-08T17:36:23.988659"
+    "created_at": "2025-07-08T17:36:23.988659",
+    "updated_at": "2025-07-08T23:40:02.023664"
   },
   {
     "id": "57eb249a-dbbb-45fe-b28a-dd520e166ea3",
     "router_id": "router_002",
     "name": "SAPA",
-    "description": "",
+    "description": "LCP: Slaughter - GEpon",
     "accounts": [
       "Sapa_TampipiDondon",
       "Sapa_CesvantesGerald",
@@ -382,42 +223,17 @@
       "Sapa_SacilJun2x",
       "Sapa_HugoMargarito",
       "Sapa_DanDelaCuesta",
-      "Sapa_DoubleNett"
+      "Sapa_DoubleNett",
+      "Poblacion_kulo welamae"
     ],
-    "created_at": "2025-07-08T17:37:05.622444"
-  },
-  {
-    "id": "43754dee-4d6a-4186-9353-c8c16b267cb7",
-    "router_id": "router_002",
-    "name": "SANMIGUEL",
-    "description": "",
-    "accounts": [
-      "Sanmiguel_Chloe",
-      "Sanmiguel_Kstar",
-      "Fatima_FarrelRenter",
-      "Fatima_PalabricaCyrus"
-    ],
-    "created_at": "2025-07-08T17:38:05.872929",
-    "updated_at": "2025-07-08T17:38:39.831825"
-  },
-  {
-    "id": "67a07e38-48e9-4655-8fcd-67cad72e7adb",
-    "router_id": "router_002",
-    "name": "MUTYA",
-    "description": "",
-    "accounts": [
-      "baribarmutya",
-      "Mutya_ApplePastries",
-      "Mutya_HoneyFlordeliza",
-      "Mutya_MalitaCentral"
-    ],
-    "created_at": "2025-07-08T17:38:55.407979"
+    "created_at": "2025-07-08T17:37:05.622444",
+    "updated_at": "2025-07-08T23:45:45.429138"
   },
   {
     "id": "93af95ca-829f-413b-ac22-9ff12f9bb0cb",
     "router_id": "router_002",
-    "name": "BLOCK3 - LCP:Block3 - Gepon",
-    "description": "",
+    "name": "BLOCK3",
+    "description": "LCP: Block3 - Gepon",
     "accounts": [
       "tehuybaybay",
       "Salmonan_VillaberTibo",
@@ -426,23 +242,396 @@
       "Block3_Jofel"
     ],
     "created_at": "2025-07-08T21:22:33.801311",
-    "updated_at": "2025-07-08T21:25:12.425134"
-  },
-  {
-    "id": "406929a9-7716-4747-982e-200bc3b74d09",
-    "router_id": "router_002",
-    "name": "NAP1:SABANG  LCP:Block3 - GEPON",
-    "description": "",
-    "accounts": [],
-    "created_at": "2025-07-08T21:33:41.839074",
-    "updated_at": "2025-07-08T21:34:37.855452"
+    "updated_at": "2025-07-09T00:02:07.860288"
   },
   {
     "id": "335c7bbb-8aaf-4f76-81cf-37b3de168ce0",
     "router_id": "router_002",
-    "name": "JOSEPHARMACY - LCP:Block3 - GEpon",
-    "description": "",
+    "name": "JOSEPHARMACY",
+    "description": "LCP: Block3 - GEpon",
     "accounts": [],
-    "created_at": "2025-07-08T21:42:27.076774"
+    "created_at": "2025-07-08T21:42:27.076774",
+    "updated_at": "2025-07-08T23:42:24.751247"
+  },
+  {
+    "id": "1bfa6efc-2923-4d5a-bbaf-c4e6c5fae011",
+    "router_id": "router_002",
+    "name": "MARWASA JAYSON",
+    "description": "LCP: Marwasa - GEpon",
+    "accounts": [
+      "Marwasa_Daisy abellon",
+      "Marwasa_RoseArandia",
+      "Marwasa_MarquezJun2",
+      "Marwasa_Masoy",
+      "Marwasa_guhilde",
+      "Marwasa_JayAguinaldo",
+      "Marwasa_MarilouMehirola",
+      "Marwasa_AlcordoJun2x"
+    ],
+    "created_at": "2025-07-08T21:53:47.998157",
+    "updated_at": "2025-07-08T23:39:06.721653"
+  },
+  {
+    "id": "08177204-a09c-4dc8-ba0b-f6f789678da6",
+    "router_id": "router_002",
+    "name": "KAGAMPONG",
+    "description": "LCP:Marwasa - GEpon",
+    "accounts": [
+      "Kagampongvendo",
+      "Marwasa_RolenManolong",
+      "Marwasa_Japa",
+      "Marwasa_MasunongTessie",
+      "Kagampong_Eking2"
+    ],
+    "created_at": "2025-07-08T21:56:57.119308",
+    "updated_at": "2025-07-08T23:39:18.628584"
+  },
+  {
+    "id": "17402e03-daad-4f93-a4d6-ef0228fcfbeb",
+    "router_id": "router_002",
+    "name": "FELIS LOWER",
+    "description": "LCP: Marwasa - GEpon",
+    "accounts": [
+      "Felis_Katejulia",
+      "Felis_dmlopez",
+      "Felis_tesslopez",
+      "Felis_Sam del rosario",
+      "Felis_Markanthony",
+      "Felis_Angcahas",
+      "Felis_MasoyDabuan"
+    ],
+    "created_at": "2025-07-08T21:57:53.303941",
+    "updated_at": "2025-07-08T23:42:08.743917"
+  },
+  {
+    "id": "a2ff754f-5f39-4a3d-8601-0be3d0ab4bb3",
+    "router_id": "router_002",
+    "name": "SLAUGHTER",
+    "description": "LCP: Slaughter - GEpon",
+    "accounts": [
+      "Fatima_jethroDelosReyes",
+      "Sanroque_CaballeroGing2",
+      "Slaughter_BFP",
+      "Sanroque_BeaMasiwel",
+      "Fatima_SanFerdinand",
+      "Stonino_biboylazarte"
+    ],
+    "created_at": "2025-07-08T22:02:22.542185",
+    "updated_at": "2025-07-09T00:08:47.314357"
+  },
+  {
+    "id": "404fadc8-f6b0-4abe-9cb7-d268caae5e6e",
+    "router_id": "router_002",
+    "name": "MARIANOHIGH",
+    "description": "LCP: Highway - GEpon",
+    "accounts": [
+      "DepraJaysonmagasayap",
+      "FRGS_Likoddasureco",
+      "Highway_FRGSutoy",
+      "Highway_MelvieElarde",
+      "Highway_JunSolutan",
+      "Highway_DonezaDeliva",
+      "Highway_MarkyLumadas",
+      "Highway_BuyoyMunuz"
+    ],
+    "created_at": "2025-07-08T22:25:13.300626",
+    "updated_at": "2025-07-08T23:38:02.852647"
+  },
+  {
+    "id": "0e586608-8696-4013-82e1-5440126fde9f",
+    "router_id": "router_002",
+    "name": "HIGHWAY YAMAHA",
+    "description": "LCP: Shell - GEpon:2",
+    "accounts": [
+      "Highway_AlcordoJun2",
+      "Highway_RheaBastida",
+      "Highway_MarlonParaiso",
+      "Highway_OlivoCleofe",
+      "Highway_Darren",
+      "Highway_PingkoyOmicas",
+      "Highway_OlivoOtik"
+    ],
+    "created_at": "2025-07-08T22:29:37.029865",
+    "updated_at": "2025-07-08T23:38:22.888750"
+  },
+  {
+    "id": "acaa2589-024f-435a-8cf9-f9068637958f",
+    "router_id": "router_002",
+    "name": "WAREHOUSE",
+    "description": "LCP: Shell - GEpon:2",
+    "accounts": [
+      "Highway_Cariaga",
+      "Highway_TugononKim",
+      "CHRISTIANDANWATAPENONGS",
+      "Salvacion_GeraldCabillo",
+      "Highway_Diaz"
+    ],
+    "created_at": "2025-07-08T22:32:13.140292",
+    "updated_at": "2025-07-08T23:38:50.345486"
+  },
+  {
+    "id": "88e8f00f-4c5b-4fee-9498-f4aacd22b4ad",
+    "router_id": "router_002",
+    "name": "FELIS LOWER",
+    "description": "FBT - NAP1",
+    "accounts": [
+      "Felis_CrenieBarouis",
+      "Felis_inutan",
+      "Felis_JoeyDalit",
+      "Felis_Olga",
+      "Felis_TanaidMenirva"
+    ],
+    "created_at": "2025-07-08T22:37:24.528555",
+    "updated_at": "2025-07-08T23:38:35.831536"
+  },
+  {
+    "id": "a740b663-cc2c-483a-b70e-524f06c59f79",
+    "router_id": "router_002",
+    "name": "FELIS UPPER",
+    "description": "FBT - NAP2",
+    "accounts": [
+      "Felis_FelmorFernandez"
+    ],
+    "created_at": "2025-07-08T22:38:11.428491",
+    "updated_at": "2025-07-08T23:37:43.793910"
+  },
+  {
+    "id": "61f2abd5-d413-4edf-be54-b75a4a971b65",
+    "router_id": "router_002",
+    "name": "BOLILA PRICEGARDEN",
+    "description": "FBT - NAP4",
+    "accounts": [
+      "Bolila_MarifeMamale",
+      "Bolila_DiazLemart"
+    ],
+    "created_at": "2025-07-08T22:39:47.304019",
+    "updated_at": "2025-07-08T23:37:32.981589"
+  },
+  {
+    "id": "aca5e4a5-795e-4137-9ed3-18cf6d80cc07",
+    "router_id": "router_002",
+    "name": "BOLILA TIBOLOG",
+    "description": "FBT - NAP6",
+    "accounts": [
+      "Bolila_RicaSanchez"
+    ],
+    "created_at": "2025-07-08T22:40:22.685309",
+    "updated_at": "2025-07-08T23:44:34.966439"
+  },
+  {
+    "id": "9cb21a15-9890-45aa-8f38-8036ce241773",
+    "router_id": "router_002",
+    "name": "BOLILA TIBOLOGCAMORO",
+    "description": "FBT - NAP7",
+    "accounts": [
+      "Bolila_VendoCamoro",
+      "Bolila_VendoCamoro2"
+    ],
+    "created_at": "2025-07-08T22:41:05.066420",
+    "updated_at": "2025-07-08T23:43:19.382215"
+  },
+  {
+    "id": "f07e8360-f9c3-4880-9de1-0cb38af6cf51",
+    "router_id": "router_002",
+    "name": "STONINO 2",
+    "description": "LCP: Stonino - MiniEPON",
+    "accounts": [
+      "deprasantoninyo",
+      "kennetdike",
+      "Stonino_SaysonMerly",
+      "Stonino_PalmaresAnn"
+    ],
+    "created_at": "2025-07-08T22:42:48.671130",
+    "updated_at": "2025-07-08T23:44:20.163818"
+  },
+  {
+    "id": "3ed5d8a2-5da1-4936-b5cd-9579123eafac",
+    "router_id": "router_002",
+    "name": "STONINO 1",
+    "description": "LCP: Stonino - MiniEPON",
+    "accounts": [
+      "Stonino_CastroBebot",
+      "Solitanapublaciondike",
+      "blangcosantoninyo",
+      "Jimmy_Garsuta"
+    ],
+    "created_at": "2025-07-08T22:48:02.004970",
+    "updated_at": "2025-07-08T23:44:06.237829"
+  },
+  {
+    "id": "6dc23939-10c4-49a4-a999-ad9f76e59429",
+    "router_id": "router_002",
+    "name": "MARWASA TANKE2",
+    "description": "LCP: Slaughter- MiniEPON",
+    "accounts": [
+      "Marwasa_Quiay2xChloie",
+      "Marwasa_ShadyMarshall",
+      "Marwasa_MarivicLlamig",
+      "Marwasa_Agaw2x",
+      "Marwasa_Tevejohn",
+      "Marwasa_AlbaracinBeth",
+      "Marwasa_LumayasRonielyn",
+      "Marwasa_MariaSagot",
+      "Marwasa_DulayJocelyn",
+      "Marwasa_PrincessCarsonete"
+    ],
+    "created_at": "2025-07-08T23:27:33.091527",
+    "updated_at": "2025-07-08T23:43:40.296562"
+  },
+  {
+    "id": "d50c63ed-b1a4-4866-b6c0-9279c2e56e0e",
+    "router_id": "router_002",
+    "name": "TUGAS 1",
+    "description": "LCP: Slaughter - MiniEPON",
+    "accounts": [
+      "pamattugas",
+      "gulingtugas",
+      "Tugas_NijanSantos",
+      "Tugas_EdsheenBahinting",
+      "Tugas_YolandaSuansing",
+      "Tugas_Dandoy",
+      "Tugas_LelybethVillaga",
+      "Tugas_FabCedeno"
+    ],
+    "created_at": "2025-07-08T23:29:48.327209",
+    "updated_at": "2025-07-08T23:46:25.228156"
+  },
+  {
+    "id": "226c7e49-fbb8-4c68-99f6-fe91c1984b17",
+    "router_id": "router_002",
+    "name": "SANROQUE KANTO",
+    "description": "LCP: Slaughter - MiniEPON",
+    "accounts": [
+      "Sanroque_JaJa",
+      "Fatima_BryanjayRubio",
+      "Sanroque_rickJRHouse",
+      "Sanroque_vendogoodeal",
+      "Sanroque_SumandayJun",
+      "Sanroque_GalimbaPon",
+      "Sanroque_MarquezDudu"
+    ],
+    "created_at": "2025-07-08T23:34:16.001479",
+    "updated_at": "2025-07-08T23:46:09.774217"
+  },
+  {
+    "id": "e80931e1-0229-4d17-afaf-0e65b19c8725",
+    "router_id": "router_002",
+    "name": "FATIMA",
+    "description": "LCP: Slaughter- MiniEPON",
+    "accounts": [
+      "Fatima_JeffreyReyes",
+      "Fatima_MarissaGobalani",
+      "Edsa_Tindoy",
+      "Sanroque_JosylDee",
+      "Sanroque_GimMotorparts",
+      "Fatima_SusayAsunada",
+      "Sanroque_AlfecheJoshua",
+      "Fatima_philip"
+    ],
+    "created_at": "2025-07-08T23:36:39.918304",
+    "updated_at": "2025-07-08T23:46:18.421760"
+  },
+  {
+    "id": "3d188263-9cfc-4ad5-9c57-a53ba47b8080",
+    "router_id": "router_002",
+    "name": "SANMIGUEL",
+    "description": "LCP: Slaughter- MiniEPON",
+    "accounts": [
+      "Fatima_FarrelRenter",
+      "Fatima_PalabricaCyrus",
+      "Sanmiguel_Kstar",
+      "Salvacion_Dolly"
+    ],
+    "created_at": "2025-07-08T23:47:55.820335",
+    "updated_at": "2025-07-09T00:09:36.260395"
+  },
+  {
+    "id": "a547ee59-25e2-4d47-97e4-73d0bbb55d34",
+    "router_id": "router_002",
+    "name": "SANROQUE Basketballcourt",
+    "description": "LCP: Slaughter- MiniEPON",
+    "accounts": [
+      "Sanroque_CassandraInn",
+      "undaycolo",
+      "Sanroque_Talolok",
+      "Demegillosalvacion",
+      "Sanroque_MasiwelTindahan",
+      "Sanroque_TindahanMasiwel",
+      "Marwasa_CharoEstremos",
+      "Sanroque_JpTeh"
+    ],
+    "created_at": "2025-07-08T23:50:45.181956",
+    "updated_at": "2025-07-09T00:10:01.583804"
+  },
+  {
+    "id": "2bb13e02-0c42-4dce-91c8-d38d1a120d49",
+    "router_id": "router_002",
+    "name": "ESTACION",
+    "description": "LCP: Mutya - MiniEPON",
+    "accounts": [
+      "kag.bayunonsantalika",
+      "Samtalika_gumagaykim",
+      "Tunansantalika",
+      "Samtalika_TadorDaphine",
+      "baribarmutya"
+    ],
+    "created_at": "2025-07-08T23:54:26.681921"
+  },
+  {
+    "id": "139891c6-04e7-4f23-b58d-a18c115d905b",
+    "router_id": "router_002",
+    "name": "PHOENIX",
+    "description": "LCP: Mutya - MiniEPON",
+    "accounts": [
+      "honeypapas",
+      "Phoenix_michael",
+      "maturanbaptist"
+    ],
+    "created_at": "2025-07-08T23:57:36.727684"
+  },
+  {
+    "id": "38eb4f55-1d66-4ff1-9e4b-b9b8456807ea",
+    "router_id": "router_002",
+    "name": "PHOENIX 2",
+    "description": "LCP: Mutya - MiniEPON",
+    "accounts": [
+      "Poblacion_DeniseFerrer",
+      "Highway_Donjuan",
+      "Penongs_ArielCondinato",
+      "Poblacion_MarianoElemOffice",
+      "grandebaptis",
+      "Edsa_KatrinaDelosantos"
+    ],
+    "created_at": "2025-07-09T00:00:05.621112"
+  },
+  {
+    "id": "ff345e4e-764e-44b5-b988-a2994b387579",
+    "router_id": "router_002",
+    "name": "MUTYA",
+    "description": "LCP: Mutya - MiniEPON",
+    "accounts": [
+      "Mutya_ApplePastries",
+      "Mutya_HoneyFlordeliza",
+      "Mutya_MalitaCentral",
+      "Geverola_Nazareth"
+    ],
+    "created_at": "2025-07-09T00:01:44.148413"
+  },
+  {
+    "id": "716fd96c-d7fc-46e6-8d64-b60a10845fb6",
+    "router_id": "router_002",
+    "name": "RELOCATION 2",
+    "description": "LCP: Mutya - MiniEPON",
+    "accounts": [
+      "Tambakan_MacTecson",
+      "Tambakan_DoromalKent",
+      "Tambakan_MarivicSumanday",
+      "Relocation_IndayMaturan",
+      "Tambakan_EstelaAilen",
+      "Tambakan_Serda",
+      "Relocation_Simpron",
+      "Tambakan_CamposAnton"
+    ],
+    "created_at": "2025-07-09T00:06:39.636715"
   }
 ]

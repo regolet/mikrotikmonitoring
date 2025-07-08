@@ -250,11 +250,23 @@
         <div id="groups-page" class="page-content" style="display: none;">
             <div class="container-fluid mt-4">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3>Groups Management</h3>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
-                            <i class="bi bi-plus-circle"></i> Add Group
-                        </button>
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>Groups Management</h3>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                                <i class="bi bi-plus-circle"></i> Add Group
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="groups-search" placeholder="Search groups by name, description, or members...">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div id="groups-content">
@@ -638,6 +650,7 @@
                 this.rowsPerPage = 20;
                 this.sortColumn = 'download';
                 this.sortDirection = 'desc';
+                this.groupsData = []; // Store groups data for filtering
                 this.init();
             }
 
@@ -688,6 +701,11 @@
 
                 document.getElementById('update-group-btn')?.addEventListener('click', () => {
                     this.updateGroup();
+                });
+
+                // Groups search functionality
+                document.getElementById('groups-search')?.addEventListener('input', (e) => {
+                    this.filterGroups(e.target.value);
                 });
 
                 // Dual list select functionality
@@ -1227,6 +1245,8 @@
                             }
                         });
                         
+                        // Store groups data for filtering
+                        this.groupsData = groups;
                         this.renderGroups(groups);
                     } else {
                         showError('Groups Error', groupsData.error || 'Failed to load groups');
@@ -1237,7 +1257,12 @@
                 }
             }
 
-            renderGroups(groups) {
+            filterGroups(searchQuery) {
+                if (this.groupsData.length === 0) return;
+                this.renderGroups(this.groupsData, searchQuery);
+            }
+
+            renderGroups(groups, searchQuery = '') {
                 const content = document.getElementById('groups-content');
                 
                 if (groups.length === 0) {
@@ -1245,9 +1270,41 @@
                     return;
                 }
 
+                // Filter groups based on search query
+                let filteredGroups = groups;
+                if (searchQuery.trim()) {
+                    const query = searchQuery.toLowerCase();
+                    filteredGroups = groups.filter(group => {
+                        // Search in group name
+                        if (group.name && group.name.toLowerCase().includes(query)) {
+                            return true;
+                        }
+                        // Search in description
+                        if (group.description && group.description.toLowerCase().includes(query)) {
+                            return true;
+                        }
+                        // Search in member names
+                        if (group.accounts && group.accounts.some(acc => 
+                            acc.name && acc.name.toLowerCase().includes(query)
+                        )) {
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+
+                if (filteredGroups.length === 0) {
+                    content.innerHTML = `
+                        <div class="alert alert-info">
+                            ${searchQuery.trim() ? `No groups found matching "${searchQuery}".` : 'No groups found. Create your first group!'}
+                        </div>
+                    `;
+                    return;
+                }
+
                 content.innerHTML = `
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                        ${groups.map(group => {
+                        ${filteredGroups.map(group => {
                             // Calculate online/offline status
                             const totalMembers = group.accounts ? group.accounts.length : 0;
                             const onlineMembers = group.accounts ? group.accounts.filter(acc => acc.online).length : 0;
