@@ -264,6 +264,9 @@
                                         <i class="bi bi-search"></i>
                                     </span>
                                     <input type="text" class="form-control" id="groups-search" placeholder="Search groups by name, description, or members...">
+                                    <button class="btn btn-outline-secondary" type="button" id="clear-search-btn" style="display: none;">
+                                        <i class="bi bi-x"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -651,6 +654,7 @@
                 this.sortColumn = 'download';
                 this.sortDirection = 'desc';
                 this.groupsData = []; // Store groups data for filtering
+                this.currentSearchQuery = ''; // Store current search query
                 this.init();
             }
 
@@ -658,6 +662,7 @@
                 this.setupEventListeners();
                 this.setupRouting();
                 this.loadCurrentPage();
+                this.initializeSearchState();
             }
 
             setupEventListeners() {
@@ -705,7 +710,14 @@
 
                 // Groups search functionality
                 document.getElementById('groups-search')?.addEventListener('input', (e) => {
+                    this.currentSearchQuery = e.target.value;
                     this.filterGroups(e.target.value);
+                    this.updateClearButton();
+                });
+
+                // Clear search functionality
+                document.getElementById('clear-search-btn')?.addEventListener('click', () => {
+                    this.clearSearch();
                 });
 
                 // Dual list select functionality
@@ -1247,7 +1259,14 @@
                         
                         // Store groups data for filtering
                         this.groupsData = groups;
-                        this.renderGroups(groups);
+                        this.renderGroups(groups, this.currentSearchQuery);
+                        
+                        // Restore search input value if there was a previous search
+                        const searchInput = document.getElementById('groups-search');
+                        if (searchInput && this.currentSearchQuery) {
+                            searchInput.value = this.currentSearchQuery;
+                        }
+                        this.updateClearButton();
                     } else {
                         showError('Groups Error', groupsData.error || 'Failed to load groups');
                     }
@@ -1260,6 +1279,34 @@
             filterGroups(searchQuery) {
                 if (this.groupsData.length === 0) return;
                 this.renderGroups(this.groupsData, searchQuery);
+            }
+
+            updateClearButton() {
+                const clearBtn = document.getElementById('clear-search-btn');
+                if (clearBtn) {
+                    clearBtn.style.display = this.currentSearchQuery.trim() ? 'block' : 'none';
+                }
+            }
+
+            clearSearch() {
+                this.currentSearchQuery = '';
+                const searchInput = document.getElementById('groups-search');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                this.updateClearButton();
+                this.filterGroups('');
+            }
+
+            initializeSearchState() {
+                // Check if we're on the groups page and restore search state
+                if (this.currentPage === 'groups') {
+                    const searchInput = document.getElementById('groups-search');
+                    if (searchInput && this.currentSearchQuery) {
+                        searchInput.value = this.currentSearchQuery;
+                        this.updateClearButton();
+                    }
+                }
             }
 
             renderGroups(groups, searchQuery = '') {
