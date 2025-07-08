@@ -491,6 +491,10 @@
                             <input type="text" class="form-control" id="group-name" required>
                         </div>
                         <div class="mb-3">
+                            <label for="group-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="group-description" rows="3" placeholder="Enter a description for this group (optional)"></textarea>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Group Members</label>
                             <div class="row">
                                 <div class="col-md-5">
@@ -540,6 +544,10 @@
                         <div class="mb-3">
                             <label for="edit-group-name" class="form-label">Group Name</label>
                             <input type="text" class="form-control" id="edit-group-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-group-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="edit-group-description" rows="3" placeholder="Enter a description for this group (optional)"></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Group Members</label>
@@ -1283,6 +1291,7 @@
                                             </div>
                                         </div>
                                         <div class="card-body">
+                                            ${group.description ? `<p class="card-text text-muted mb-3"><em>${group.description}</em></p>` : ''}
                                             <p class="card-text">
                                                 <strong>Members:</strong><br>
                                                 <span>
@@ -1544,6 +1553,7 @@
 
             async saveGroup() {
                 const name = document.getElementById('group-name').value.trim();
+                const description = document.getElementById('group-description').value.trim();
                 const selectedMembers = this.getSelectedMembers('selected-members');
                 
                 if (!name) {
@@ -1562,6 +1572,7 @@
                         },
                         body: JSON.stringify({ 
                             name, 
+                            description,
                             accounts: selectedMembers,
                             router_id: routerId
                         })
@@ -1572,6 +1583,7 @@
                     if (data.success) {
                         showSuccess('Group Created', 'Group saved successfully');
                         document.getElementById('group-name').value = '';
+                        document.getElementById('group-description').value = '';
                         document.getElementById('selected-members').innerHTML = '';
                         document.getElementById('available-accounts').innerHTML = '';
                         bootstrap.Modal.getInstance(document.getElementById('addGroupModal')).hide();
@@ -1596,6 +1608,7 @@
                         if (group) {
                             document.getElementById('edit-group-id').value = group.id;
                             document.getElementById('edit-group-name').value = group.name;
+                            document.getElementById('edit-group-description').value = group.description || '';
                             
                             // Populate dual list with current group members
                             await this.populateDualList(
@@ -1617,6 +1630,7 @@
             async updateGroup() {
                 const id = document.getElementById('edit-group-id').value;
                 const name = document.getElementById('edit-group-name').value.trim();
+                const description = document.getElementById('edit-group-description').value.trim();
                 const selectedMembers = this.getSelectedMembers('edit-selected-members');
                 
                 if (!name) {
@@ -1636,6 +1650,7 @@
                         body: JSON.stringify({ 
                             id, 
                             name, 
+                            description,
                             accounts: selectedMembers,
                             router_id: routerId
                         })

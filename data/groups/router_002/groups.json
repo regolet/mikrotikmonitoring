@@ -38,48 +38,17 @@
   {
     "id": "596537b3-abf3-4289-8797-1a23cb8edb84",
     "router_id": "router_002",
-    "name": "MARWASA",
+    "name": "MARWASA TANKE - LCP:Marwasa - GEpon",
     "description": "",
     "accounts": [
-      "Lelamiebandalamarwasa",
-      "Amantemarwasa",
-      "crissellemarwasa",
-      "susanbenedictomarwasa",
-      "sanomarwasa",
-      "nunesmarwasa",
-      "socuanomarwasa",
-      "Marwasa_RoseArandia",
-      "Marwasa_Daisy abellon",
-      "Marwasa_Sanoy",
-      "Marwasa_RolenManolong",
-      "Marwasa_MarquezJun2",
-      "Marwasa_MarivicLlamig",
-      "Marwasa_TeoIsabel",
-      "Marwasa_CharoEstremos",
-      "Marwasa_Masoy",
-      "Marwasa_AguilarMenang",
-      "Marwasa_guhilde",
-      "Marwasa_JayAguinaldo",
-      "Marwasa_MarilouMehirola",
-      "Marwasa_Quiay2xChloie",
-      "Marwasa_ShadyMarshall",
-      "Marwasa_Japa",
-      "Marwasa_Tevejohn",
-      "Marwasa_Agaw2x",
-      "Marwasa_MasunongTessie",
-      "Marwasa_AlbaracinBeth",
-      "Marwasa_LumayasRonielyn",
-      "Marwasa_Fuentes",
-      "Marwasa_AlcordoJun2x",
-      "Marwasa_Gelvez",
       "Marwasa_BessCabrera",
-      "Marwasa_Arcabal",
-      "Marwasa_MariaSagot",
-      "Marwasa_DulayJocelyn",
-      "Marwasa_PrincessCarsonete",
-      "Marwasa_MelanieBandala"
+      "Amantemarwasa",
+      "Marwasa_Sanoy",
+      "Marwasa_TeoIsabel",
+      "susanbenedictomarwasa"
     ],
-    "created_at": "2025-07-08T16:16:17.722922"
+    "created_at": "2025-07-08T16:16:17.722922",
+    "updated_at": "2025-07-08T21:51:13.882919"
   },
   {
     "id": "7af9dde3-cee4-474e-97eb-6e5763f29d86",
@@ -123,22 +92,19 @@
   {
     "id": "7b11c496-96d8-47a3-af72-32a5effdbef7",
     "router_id": "router_002",
-    "name": "SAMTALIKA",
+    "name": "SAMTALIKA - LCP:Block3 - GEpon",
     "description": "",
     "accounts": [
-      "Samtalika_TadorDaphine",
-      "Samtalika_adorbirondo",
-      "Samtalika_gumagaykim",
-      "Samtalika_Jamesmanalo",
-      "Samtalika_loriebirondo",
       "Samtalika_Jandy",
+      "Samtalika_adorbirondo",
+      "Samtalika_loriebirondo",
       "Samtalika_RolyLabadan",
-      "Tunansantalika",
-      "kag.bayunonsantalika",
-      "bayunonsantalikaanak"
+      "Salmonan_vendobalilang",
+      "Samtalika_Jamesmanalo",
+      "Poblacion_erica glass"
     ],
     "created_at": "2025-07-08T16:18:20.211937",
-    "updated_at": "2025-07-08T17:37:47.016155"
+    "updated_at": "2025-07-08T21:45:42.025615"
   },
   {
     "id": "733a2674-d0b7-480c-95d3-2c42fcbc0291",
@@ -306,18 +272,15 @@
   {
     "id": "e3ebc53b-f35c-4deb-b74c-55d3080fd6dc",
     "router_id": "router_002",
-    "name": "SABANG",
+    "name": "SABANG - LCP:Palengke - Mini EPON",
     "description": "",
     "accounts": [
-      "Sabang_Cha2x",
-      "Sabang_LabisLolita",
-      "Sabang_charlot",
       "Sabang_PunoBoyet",
       "Sabang_AbreganaCamlon",
-      "Sabang_JasminSaripa",
-      "Sabang_OliverJimenez"
+      "Sabang_JasminSaripa"
     ],
-    "created_at": "2025-07-08T16:50:19.268680"
+    "created_at": "2025-07-08T16:50:19.268680",
+    "updated_at": "2025-07-08T21:29:52.855308"
   },
   {
     "id": "fd1c1d20-e6d1-4a75-b4d0-23545c89bfc9",
@@ -449,5 +412,37 @@
       "Mutya_MalitaCentral"
     ],
     "created_at": "2025-07-08T17:38:55.407979"
+  },
+  {
+    "id": "93af95ca-829f-413b-ac22-9ff12f9bb0cb",
+    "router_id": "router_002",
+    "name": "BLOCK3 - LCP:Block3 - Gepon",
+    "description": "",
+    "accounts": [
+      "tehuybaybay",
+      "Salmonan_VillaberTibo",
+      "Block3_RoxaneTador",
+      "Salmonan_CiriacoEmie",
+      "Block3_Jofel"
+    ],
+    "created_at": "2025-07-08T21:22:33.801311",
+    "updated_at": "2025-07-08T21:25:12.425134"
+  },
+  {
+    "id": "406929a9-7716-4747-982e-200bc3b74d09",
+    "router_id": "router_002",
+    "name": "NAP1:SABANG  LCP:Block3 - GEPON",
+    "description": "",
+    "accounts": [],
+    "created_at": "2025-07-08T21:33:41.839074",
+    "updated_at": "2025-07-08T21:34:37.855452"
+  },
+  {
+    "id": "335c7bbb-8aaf-4f76-81cf-37b3de168ce0",
+    "router_id": "router_002",
+    "name": "JOSEPHARMACY - LCP:Block3 - GEpon",
+    "description": "",
+    "accounts": [],
+    "created_at": "2025-07-08T21:42:27.076774"
   }
 ]
