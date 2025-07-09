@@ -26,6 +26,9 @@
                         <a class="nav-link" href="/groups" data-page="groups">Groups</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/groups-summary" data-page="groups-summary">Groups Summary</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/settings" data-page="settings">Settings</a>
                     </li>
                 </ul>
@@ -277,6 +280,14 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Groups Summary Page -->
+        <div id="groups-summary-page" class="page-content" style="display: none;">
+            <div class="container-fluid mt-4">
+                <h2>Groups Summary</h2>
+                <div class="alert alert-info">Groups Summary content will go here.</div>
             </div>
         </div>
 
@@ -656,6 +667,7 @@
                 this.groupsData = []; // Store groups data for filtering
                 this.currentSearchQuery = ''; // Store current search query
                 this.initializingRouters = false; // Flag to suppress router change event
+                this.injectCategoryModals(); // Ensure modals are always injected at startup
                 this.init();
             }
 
@@ -663,7 +675,7 @@
                 this.setupEventListeners();
                 this.setupRouting();
                 this.loadRouters(); // Ensure router selector is always populated
-                this.loadCurrentPage();
+                // this.loadCurrentPage(); // REMOVE this line to prevent double loading
                 this.initializeSearchState();
             }
 
@@ -805,7 +817,7 @@
                 // Handle browser back/forward
                 window.addEventListener('popstate', (e) => {
                     const page = e.state?.page || 'dashboard';
-                    this.showPage(page);
+                    this.navigateTo(page, true);
                 });
 
                 // Initial route
@@ -814,16 +826,19 @@
                     this.navigateTo('settings');
                 } else if (path === '/groups') {
                     this.navigateTo('groups');
+                } else if (path === '/groups-summary') {
+                    this.navigateTo('groups-summary');
                 } else {
                     this.navigateTo('dashboard');
                 }
             }
 
-            navigateTo(page) {
+            navigateTo(page, fromPopState = false) {
                 this.currentPage = page;
                 this.showPage(page);
-                window.history.pushState({ page }, '', `/${page === 'dashboard' ? '' : page}`);
-                
+                if (!fromPopState) {
+                    window.history.pushState({ page }, '', `/${page === 'dashboard' ? '' : page}`);
+                }
                 // Update navigation active state
                 document.querySelectorAll('.nav-link').forEach(link => {
                     link.classList.remove('active');
@@ -854,6 +869,9 @@
                         break;
                     case 'groups':
                         this.loadGroups();
+                        break;
+                    case 'groups-summary':
+                        this.loadCategoriesForSummary();
                         break;
                     case 'settings':
                         this.loadSettings();
@@ -2291,6 +2309,354 @@
                     showError('Connection Test', 'Failed to test connection');
                 }
             }
+
+            // Add the new method to the class
+            async loadCategoriesForSummary() {
+                const summaryContainer = document.querySelector('#groups-summary-page .container-fluid');
+                if (!summaryContainer) return;
+                // Clear all content before rendering
+                summaryContainer.innerHTML = '';
+                // Add title
+                const title = document.createElement('h2');
+                title.textContent = 'Groups Summary';
+                // Add 'Add Category' button
+                const addCatBtn = document.createElement('button');
+                addCatBtn.className = 'btn btn-sm btn-outline-primary float-end mb-3';
+                addCatBtn.innerHTML = `<i class="bi bi-plus-circle"></i> Add Category`;
+                addCatBtn.style.background = 'transparent';
+                addCatBtn.onclick = () => this.showCategoryModal();
+                // Always show header row (title + button)
+                const headerRow = document.createElement('div');
+                headerRow.className = 'd-flex justify-content-between align-items-center mb-3';
+                headerRow.appendChild(title);
+                headerRow.appendChild(addCatBtn);
+                summaryContainer.appendChild(headerRow);
+                const activeRouter = await this.getActiveRouter();
+                const routerId = activeRouter?.active_router_id;
+                if (!routerId) {
+                    const info = document.createElement('div');
+                    info.className = 'alert alert-warning';
+                    info.textContent = 'No router selected.';
+                    summaryContainer.appendChild(info);
+                    return;
+                }
+                // Fetch groups for this router so we can map group IDs to names
+                let groupsList = [];
+                try {
+                    const groupsResp = await fetch(`/api/groups?router_id=${routerId}`);
+                    const groupsData = await groupsResp.json();
+                    if (groupsData.success && Array.isArray(groupsData.groups)) {
+                        groupsList = groupsData.groups;
+                        this.groupsData = groupsList;
+                    } else {
+                        this.groupsData = [];
+                    }
+                } catch (e) {
+                    this.groupsData = [];
+                }
+                try {
+                    const response = await fetch(`/api/categories?router_id=${routerId}`);
+                    const data = await response.json();
+                    if (!data.success) {
+                        const info = document.createElement('div');
+                        info.className = 'alert alert-danger';
+                        info.textContent = `Failed to load categories: ${data.error || 'Unknown error'}`;
+                        summaryContainer.appendChild(info);
+                        return;
+                    }
+                    const categories = data.categories || [];
+                    this._lastCategories = categories;
+                    if (categories.length === 0) {
+                        const info = document.createElement('div');
+                        info.className = 'alert alert-info';
+                        info.textContent = 'No categories found for this router.';
+                        summaryContainer.appendChild(info);
+                        return;
+                    }
+                    const list = document.createElement('div');
+                    list.className = 'categories-list';
+                    categories.forEach((cat, catIdx) => {
+                        const catDiv = document.createElement('div');
+                        catDiv.className = 'category-card card mb-3';
+                        catDiv.innerHTML = `<div class='card-header d-flex justify-content-between align-items-center fw-bold'>
+                            <span>${cat.category}</span>
+                            <span>
+                                <button class='btn btn-sm btn-outline-success me-1' style='background:transparent;' title='Add Subcategory' onclick='app.showSubcategoryModal(${catIdx})'><i class=\"bi bi-plus\"></i></button>
+                                <button class='btn btn-sm btn-outline-secondary me-1' style='background:transparent;' title='Edit Category' onclick='app.showCategoryModal(${catIdx})'><i class=\"bi bi-pencil\"></i></button>
+                                <button class='btn btn-sm btn-outline-danger' style='background:transparent;' title='Delete Category' onclick='app.deleteCategory(${catIdx})'><i class=\"bi bi-trash\"></i></button>
+                            </span>
+                        </div>`;
+                        if (Array.isArray(cat.subcategories) && cat.subcategories.length > 0) {
+                            const subList = document.createElement('ul');
+                            subList.className = 'list-group list-group-flush';
+                            cat.subcategories.forEach((sub, subIdx) => {
+                                const subItem = document.createElement('li');
+                                subItem.className = 'list-group-item d-flex flex-column';
+                                // Subcategory name row
+                                const subRow = document.createElement('div');
+                                subRow.className = 'd-flex justify-content-between align-items-center';
+                                subRow.innerHTML = `<span>${sub.subcategory}</span>
+                                    <span>
+                                        <button class='btn btn-sm btn-outline-primary me-1' style='background:transparent;' title='Assign Groups' onclick='app.showAssignGroupsModal(${catIdx},${subIdx})'><i class=\"bi bi-collection\"></i></button>
+                                        <button class='btn btn-sm btn-outline-secondary me-1' style='background:transparent;' title='Edit Subcategory' onclick='app.showSubcategoryModal(${catIdx},${subIdx})'><i class=\"bi bi-pencil\"></i></button>
+                                        <button class='btn btn-sm btn-outline-danger' style='background:transparent;' title='Delete Subcategory' onclick='app.deleteSubcategory(${catIdx},${subIdx})'><i class=\"bi bi-trash\"></i></button>
+                                    </span>`;
+                                subItem.appendChild(subRow);
+                                // Assigned groups row
+                                const assignedGroups = Array.isArray(sub.groups) && sub.groups.length > 0 ? sub.groups : [];
+                                const assignedGroupsDiv = document.createElement('div');
+                                assignedGroupsDiv.className = 'mt-2';
+                                if (assignedGroups.length > 0) {
+                                    // Use up-to-date this.groupsData for mapping
+                                    let groupNames = assignedGroups;
+                                    if (Array.isArray(this.groupsData) && this.groupsData.length > 0) {
+                                        groupNames = assignedGroups.map(gid => {
+                                            const g = this.groupsData.find(gr => gr.id === gid);
+                                            return g ? g.name : gid;
+                                        });
+                                    }
+                                    assignedGroupsDiv.innerHTML = `<strong>Groups:</strong> ` + groupNames.map(name => `<span class='badge bg-info text-dark me-1'>${name}</span>`).join(' ');
+                                } else {
+                                    assignedGroupsDiv.innerHTML = `<span class='text-muted'><em>No groups assigned</em></span>`;
+                                }
+                                subItem.appendChild(assignedGroupsDiv);
+                                subList.appendChild(subItem);
+                            });
+                            catDiv.appendChild(subList);
+                        } else {
+                            catDiv.innerHTML += `<div class='card-body text-muted'>No subcategories</div>`;
+                        }
+                        list.appendChild(catDiv);
+                    });
+                    summaryContainer.appendChild(list);
+                } catch (err) {
+                    const info = document.createElement('div');
+                    info.className = 'alert alert-danger';
+                    info.textContent = 'Error loading categories.';
+                    summaryContainer.appendChild(info);
+                }
+            }
+
+            // Add modal HTML for add/edit category and subcategory
+            injectCategoryModals() {
+                if (document.getElementById('categoryModal')) return; // Only inject once
+                const modalHtml = `
+                <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="categoryModalLabel">Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <input type="text" class="form-control" id="categoryNameInput" placeholder="Category name">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveCategoryBtn">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal fade" id="subcategoryModal" tabindex="-1" aria-labelledby="subcategoryModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="subcategoryModalLabel">Subcategory</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <input type="text" class="form-control" id="subcategoryNameInput" placeholder="Subcategory name">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveSubcategoryBtn">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+
+            showCategoryModal(catIdx = null) {
+                console.log('showCategoryModal called', { catIdx, lastCategories: this._lastCategories });
+                this._categoryEditIndex = catIdx;
+                const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+                const input = document.getElementById('categoryNameInput');
+                if (catIdx !== null && this._lastCategories && this._lastCategories[catIdx]) {
+                    input.value = this._lastCategories[catIdx].category;
+                    document.getElementById('categoryModalLabel').textContent = 'Edit Category';
+                } else {
+                    input.value = '';
+                    document.getElementById('categoryModalLabel').textContent = 'Add Category';
+                }
+                document.getElementById('saveCategoryBtn').onclick = () => this.saveCategory();
+                modal.show();
+            }
+
+            showSubcategoryModal(catIdx, subIdx = null) {
+                this._subcategoryEditCatIdx = catIdx;
+                this._subcategoryEditIdx = subIdx;
+                const modal = new bootstrap.Modal(document.getElementById('subcategoryModal'));
+                const input = document.getElementById('subcategoryNameInput');
+                if (
+                    subIdx !== null &&
+                    this._lastCategories &&
+                    this._lastCategories[catIdx] &&
+                    this._lastCategories[catIdx].subcategories &&
+                    this._lastCategories[catIdx].subcategories[subIdx]
+                ) {
+                    input.value = this._lastCategories[catIdx].subcategories[subIdx].subcategory;
+                    document.getElementById('subcategoryModalLabel').textContent = 'Edit Subcategory';
+                } else {
+                    input.value = '';
+                    document.getElementById('subcategoryModalLabel').textContent = 'Add Subcategory';
+                }
+                document.getElementById('saveSubcategoryBtn').onclick = () => this.saveSubcategory();
+                modal.show();
+            }
+
+            deleteCategory(catIdx) {
+                if (!confirm('Delete this category and all its subcategories?')) return;
+                if (!this._lastCategories) return;
+                this._lastCategories.splice(catIdx, 1);
+                this.saveCategoriesToServer();
+            }
+
+            deleteSubcategory(catIdx, subIdx) {
+                if (!confirm('Delete this subcategory?')) return;
+                if (!this._lastCategories || !this._lastCategories[catIdx] || !this._lastCategories[catIdx].subcategories) return;
+                this._lastCategories[catIdx].subcategories.splice(subIdx, 1);
+                this.saveCategoriesToServer();
+            }
+
+            saveCategory() {
+                const input = document.getElementById('categoryNameInput');
+                const name = input.value.trim();
+                if (!name) return alert('Category name required');
+                if (!this._lastCategories) this._lastCategories = [];
+                if (this._categoryEditIndex !== null && this._lastCategories[this._categoryEditIndex]) {
+                    this._lastCategories[this._categoryEditIndex].category = name;
+                } else {
+                    this._lastCategories.push({ category: name, subcategories: [] });
+                }
+                bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+                this.saveCategoriesToServer();
+            }
+
+            saveSubcategory() {
+                const input = document.getElementById('subcategoryNameInput');
+                const name = input.value.trim();
+                if (!name) return alert('Subcategory name required');
+                if (!this._lastCategories || this._subcategoryEditCatIdx == null) return;
+                const cat = this._lastCategories[this._subcategoryEditCatIdx];
+                if (!cat.subcategories) cat.subcategories = [];
+                if (this._subcategoryEditIdx !== null && cat.subcategories[this._subcategoryEditIdx]) {
+                    cat.subcategories[this._subcategoryEditIdx].subcategory = name;
+                } else {
+                    cat.subcategories.push({ subcategory: name, groups: [] });
+                }
+                bootstrap.Modal.getInstance(document.getElementById('subcategoryModal')).hide();
+                this.saveCategoriesToServer();
+            }
+
+            async saveCategoriesToServer() {
+                // Save to server and reload UI
+                const activeRouter = await this.getActiveRouter();
+                const routerId = activeRouter?.active_router_id;
+                if (!routerId) return;
+                try {
+                    const res = await fetch('/api/categories', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ router_id: routerId, categories: this._lastCategories })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.loadCategoriesForSummary();
+                    } else {
+                        alert('Failed to save categories: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (err) {
+                    alert('Error saving categories');
+                }
+            }
+
+            showAssignGroupsModal(catIdx, subIdx) {
+                this._assignGroupsCatIdx = catIdx;
+                this._assignGroupsSubIdx = subIdx;
+                const modal = new bootstrap.Modal(document.getElementById('assignGroupsModal'));
+                const availableSelect = document.getElementById('assign-available-groups');
+                const selectedSelect = document.getElementById('assign-selected-groups');
+                availableSelect.innerHTML = '<option>Loading...</option>';
+                selectedSelect.innerHTML = '';
+                // Fetch groups for the current router
+                this.getActiveRouter().then(activeRouter => {
+                    const routerId = activeRouter?.active_router_id;
+                    if (!routerId) return;
+                    fetch(`/api/groups?router_id=${routerId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            availableSelect.innerHTML = '';
+                            selectedSelect.innerHTML = '';
+                            if (!data.success || !Array.isArray(data.groups)) {
+                                availableSelect.innerHTML = '<option disabled>Error loading groups</option>';
+                                return;
+                            }
+                            const assigned = (this._lastCategories?.[catIdx]?.subcategories?.[subIdx]?.groups) || [];
+                            // Populate assigned groups (right)
+                            data.groups.forEach(group => {
+                                if (assigned.includes(group.id)) {
+                                    const opt = document.createElement('option');
+                                    opt.value = group.id;
+                                    opt.textContent = group.name;
+                                    selectedSelect.appendChild(opt);
+                                }
+                            });
+                            // Populate available groups (left)
+                            data.groups.forEach(group => {
+                                if (!assigned.includes(group.id)) {
+                                    const opt = document.createElement('option');
+                                    opt.value = group.id;
+                                    opt.textContent = group.name;
+                                    availableSelect.appendChild(opt);
+                                }
+                            });
+                        });
+                });
+                // Transfer logic
+                document.getElementById('assign-add-groups').onclick = () => {
+                    const selected = Array.from(availableSelect.selectedOptions);
+                    selected.forEach(opt => {
+                        selectedSelect.appendChild(opt);
+                    });
+                };
+                document.getElementById('assign-remove-groups').onclick = () => {
+                    const selected = Array.from(selectedSelect.selectedOptions);
+                    selected.forEach(opt => {
+                        availableSelect.appendChild(opt);
+                    });
+                };
+                document.getElementById('saveAssignGroupsBtn').onclick = () => this.saveAssignedGroups();
+                modal.show();
+            }
+            saveAssignedGroups() {
+                const selectedSelect = document.getElementById('assign-selected-groups');
+                const selected = Array.from(selectedSelect.options).map(opt => opt.value);
+                if (
+                    this._lastCategories &&
+                    this._assignGroupsCatIdx != null &&
+                    this._assignGroupsSubIdx != null &&
+                    this._lastCategories[this._assignGroupsCatIdx] &&
+                    this._lastCategories[this._assignGroupsCatIdx].subcategories &&
+                    this._lastCategories[this._assignGroupsCatIdx].subcategories[this._assignGroupsSubIdx]
+                ) {
+                    this._lastCategories[this._assignGroupsCatIdx].subcategories[this._assignGroupsSubIdx].groups = selected;
+                    this.saveCategoriesToServer();
+                }
+                bootstrap.Modal.getInstance(document.getElementById('assignGroupsModal')).hide();
+            }
         }
 
         // Initialize the application
@@ -2306,6 +2672,47 @@
                 window.app.setRefreshInterval(5);
             }
         });
+
+        // Add modal HTML for assign groups (injectCategoryModals)
+        if (!document.getElementById('assignGroupsModal')) {
+            const assignGroupsModalHtml = `
+            <div class="modal fade" id="assignGroupsModal" tabindex="-1" aria-labelledby="assignGroupsModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="assignGroupsModalLabel">Assign Groups</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-5">
+                        <label class="form-label text-muted">Available Groups</label>
+                        <select id="assign-available-groups" class="form-select" size="8" multiple></select>
+                      </div>
+                      <div class="col-2 d-flex flex-column justify-content-center align-items-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary mb-2" id="assign-add-groups">
+                          <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="assign-remove-groups">
+                          <i class="bi bi-arrow-left"></i>
+                        </button>
+                      </div>
+                      <div class="col-5">
+                        <label class="form-label text-muted">Assigned Groups</label>
+                        <select id="assign-selected-groups" class="form-select" size="8" multiple></select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveAssignGroupsBtn">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', assignGroupsModalHtml);
+        }
     </script>
 </body>
 </html> 
