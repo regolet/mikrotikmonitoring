@@ -1349,6 +1349,38 @@
                     return;
                 }
 
+                // Sort groups by priority: Red (offline) first, then Orange, then Blue, then Green
+                filteredGroups.sort((a, b) => {
+                    const getPriority = (group) => {
+                        const totalMembers = group.accounts ? group.accounts.length : 0;
+                        if (totalMembers === 0) return 3; // Blue for no members
+                        
+                        const onlineMembers = group.accounts ? group.accounts.filter(acc => acc.online).length : 0;
+                        const offlineMembers = totalMembers - onlineMembers;
+                        const onlinePercentage = (onlineMembers / totalMembers) * 100;
+                        
+                        if (onlinePercentage === 0 || offlineMembers >= totalMembers * 0.5) {
+                            return 0; // Red - highest priority
+                        } else if (offlineMembers === totalMembers * 0.5) {
+                            return 1; // Orange
+                        } else if (onlinePercentage === 100) {
+                            return 3; // Green - lowest priority
+                        } else {
+                            return 2; // Blue
+                        }
+                    };
+                    
+                    const priorityA = getPriority(a);
+                    const priorityB = getPriority(b);
+                    
+                    if (priorityA !== priorityB) {
+                        return priorityA - priorityB; // Lower priority number = higher display priority
+                    }
+                    
+                    // If same priority, sort by name
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+
                 content.innerHTML = `
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                         ${filteredGroups.map(group => {
