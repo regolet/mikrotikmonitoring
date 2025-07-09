@@ -655,12 +655,14 @@
                 this.sortDirection = 'desc';
                 this.groupsData = []; // Store groups data for filtering
                 this.currentSearchQuery = ''; // Store current search query
+                this.initializingRouters = false; // Flag to suppress router change event
                 this.init();
             }
 
             init() {
                 this.setupEventListeners();
                 this.setupRouting();
+                this.loadRouters(); // Ensure router selector is always populated
                 this.loadCurrentPage();
                 this.initializeSearchState();
             }
@@ -790,9 +792,13 @@
                 });
 
                 // Router selector
-                document.getElementById('router-selector')?.addEventListener('change', (e) => {
-                    this.switchRouter(e.target.value);
-                });
+                const routerSelector = document.getElementById('router-selector');
+                if (routerSelector) {
+                    routerSelector.addEventListener('change', (e) => {
+                        if (this.initializingRouters) return; // Skip if initializing
+                        this.switchRouter(e.target.value);
+                    });
+                }
             }
 
             setupRouting() {
@@ -2023,6 +2029,8 @@
                 const selector = document.getElementById('router-selector');
                 if (!selector) return;
 
+                this.initializingRouters = true; // Set flag before changing value
+
                 selector.innerHTML = '';
                 routers.forEach(router => {
                     const option = document.createElement('option');
@@ -2038,6 +2046,7 @@
                     } else if (routers.length > 0) {
                         selector.value = routers[0].id;
                     }
+                    this.initializingRouters = false; // Unset flag after done
                 });
             }
 
