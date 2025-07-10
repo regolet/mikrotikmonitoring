@@ -1,4 +1,7 @@
 @echo off
+
+:: MikroTik Monitoring v2 Setup and Run
+:: Backend dependencies are now cleaned (no python-dotenv, no python-socketio)
 echo ========================================
 echo MikroTik Monitoring v2 Setup and Run
 echo ========================================
@@ -32,13 +35,13 @@ echo 🚀 Starting development servers...
 echo.
 
 echo Starting Flask Backend (port 80)...
-start cmd /k "cd backend && python app.py"
+start cmd /k "cd backend ; python app.py"
 
 echo Waiting 3 seconds for backend to start...
 timeout /t 3 /nobreak > nul
 
 echo Starting React Frontend (port 3000)...
-start cmd /k "cd frontend && npm start"
+start cmd /k "cd frontend ; npm start"
 
 echo.
 echo ========================================

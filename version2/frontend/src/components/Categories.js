@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from '../App';
 // Remove: import { Modal, Button, Form } from 'react-bootstrap';
@@ -31,34 +31,6 @@ function Categories() {
   const [assignGroups, setAssignGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
   const [assignError, setAssignError] = useState('');
-
-  useEffect(() => {
-    fetchData();
-  }, [activeRouterId]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Fetch groups for mapping group IDs to names
-      const groupsRes = await axios.get(`${API_BASE_URL}/groups?router_id=${activeRouterId}`);
-      setGroups(groupsRes.data.groups || []);
-      // Fetch categories
-      const catRes = await axios.get(`${API_BASE_URL}/categories?router_id=${activeRouterId}`);
-      if (!catRes.data.success) {
-        setCategories([]);
-        setError(catRes.data.error || 'Failed to load categories');
-      } else {
-        setCategories(catRes.data.categories || []);
-      }
-    } catch (err) {
-      setError('Error loading categories or groups.');
-      setCategories([]);
-      setGroups([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Helper to get group object by ID
   const getGroupById = (gid) => groups.find(g => g.id === gid);
@@ -195,6 +167,35 @@ function Categories() {
   // Helper for modal show/hide
   const modalShowClass = (show) => show ? 'modal fade show d-block' : 'modal fade';
   const modalBackdrop = (show) => show ? <div className="modal-backdrop fade show"></div> : null;
+
+  // Move fetchData definition above useEffect and wrap in useCallback
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch groups for mapping group IDs to names
+      const groupsRes = await axios.get(`${API_BASE_URL}/groups?router_id=${activeRouterId}`);
+      setGroups(groupsRes.data.groups || []);
+      // Fetch categories
+      const catRes = await axios.get(`${API_BASE_URL}/categories?router_id=${activeRouterId}`);
+      if (!catRes.data.success) {
+        setCategories([]);
+        setError(catRes.data.error || 'Failed to load categories');
+      } else {
+        setCategories(catRes.data.categories || []);
+      }
+    } catch (err) {
+      setError('Error loading categories or groups.');
+      setCategories([]);
+      setGroups([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeRouterId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [activeRouterId, fetchData]);
 
   // UI rendering
   if (loading) {

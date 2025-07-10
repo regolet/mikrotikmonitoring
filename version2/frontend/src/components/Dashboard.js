@@ -13,16 +13,6 @@ const normalizeName = (name) => {
   return name.replace(/[<>]/g, '').replace(/^pppoe-/, '').trim().toLowerCase();
 };
 
-// Helper function to format bytes (for stat cards)
-function formatBytes(bytes, decimals = 2) {
-  if (!bytes || isNaN(bytes)) return '0 Bytes';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
-
 // Helper to parse uptime string (e.g., '1d2h3m4s') to total seconds
 function parseUptimeToSeconds(uptime) {
   if (!uptime || typeof uptime !== 'string') return 0;
@@ -37,8 +27,6 @@ function parseUptimeToSeconds(uptime) {
 
 const Dashboard = () => {
   const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   // Add state for search, pagination, and stats
   const [search, setSearch] = useState('');
@@ -52,9 +40,8 @@ const Dashboard = () => {
   const [sortField, setSortField] = useState('downloadMbps');
   const [sortDirection, setSortDirection] = useState('desc');
   // Add at the top:
-  const { routers, activeRouterId, handleRouterChange } = useRouter();
+  const { activeRouterId } = useRouter();
   const socket = useSocket();
-  const [pppAccounts, setPppAccounts] = useState([]); // all accounts
   const [pppActive, setPppActive] = useState([]); // online accounts
   const [pppOffline, setPppOffline] = useState([]); // offline accounts
   // Add state for offline accounts pagination
@@ -125,7 +112,6 @@ const Dashboard = () => {
     setTotalDownloadMbps((totalDownload / 1e6).toFixed(2));
     setTotalUploadMbps((totalUpload / 1e6).toFixed(2));
     setLastUpdated(new Date());
-    setLoading(false);
   };
 
   // Sort function
@@ -201,7 +187,6 @@ const Dashboard = () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/ppp_accounts_summary?router_id=${activeRouterId}`);
         if (res.data.success) {
-          setPppAccounts(res.data.all_accounts || []);
           setPppActive(res.data.online_accounts || []);
           setPppOffline(res.data.offline_accounts || []);
           setStats(res.data.statistics || {}); // <-- Use statistics from backend
@@ -221,7 +206,6 @@ const Dashboard = () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/ppp_accounts_summary?router_id=${activeRouterId}`);
         if (isMounted && res.data.success) {
-          setPppAccounts(res.data.all_accounts || []);
           setPppActive(res.data.online_accounts || []);
           setPppOffline(res.data.offline_accounts || []);
           setStats(res.data.statistics || {});
@@ -246,13 +230,11 @@ const Dashboard = () => {
   // Refetch dashboard data when activeRouterId changes
   useEffect(() => {
     if (!activeRouterId) return;
-    setLoading(true);
-    setError(null);
     axios.get(`${API_BASE_URL}/dashboard?router_id=${activeRouterId}`)
       .then(res => {
         processDashboardData(res.data);
       })
-      .catch(() => setError('Failed to fetch dashboard data'));
+      .catch(() => {});
     if (!socket) return;
     const handler = (data) => {
       processDashboardData(data);

@@ -22,7 +22,6 @@ function Settings() {
   const [editRouter, setEditRouter] = useState(null);
   const [routerForm, setRouterForm] = useState(initialRouterForm);
   const [testConnLoading, setTestConnLoading] = useState(false);
-  const [testConnResult, setTestConnResult] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
@@ -131,7 +130,6 @@ function Settings() {
 
   const handleTestRouterConnection = async (routerId) => {
     setTestConnLoading(true);
-    setTestConnResult(null);
     try {
       const res = await axios.post(`${API_BASE_URL}/routers/test`, {
         router_id: routerId

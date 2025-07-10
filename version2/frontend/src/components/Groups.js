@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter, useSocket } from '../App';
 
@@ -6,8 +6,6 @@ const API_BASE_URL = 'http://localhost:80/api';
 
 function Groups() {
   const [groups, setGroups] = useState([]);
-  const [pppAccounts, setPppAccounts] = useState([]);
-  const [pppActive, setPppActive] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [error, setError] = useState(null);
@@ -24,11 +22,11 @@ function Groups() {
   const [selectedSearch, setSelectedSearch] = useState('');
   const [modalError, setModalError] = useState('');
 
-  const { routers, activeRouterId } = useRouter();
+  const { activeRouterId } = useRouter();
   const socket = useSocket();
 
-  // Updated fetchGroups to accept showSpinner argument
-  const fetchGroups = async (showSpinner = false) => {
+  // Move fetchGroups definition above useEffect and wrap in useCallback
+  const fetchGroups = useCallback(async (showSpinner = false) => {
     if (showSpinner) setLoading(true);
     try {
       const [groupsRes, pppActiveRes] = await Promise.all([
@@ -59,11 +57,12 @@ function Groups() {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  };
+  }, [activeRouterId]);
 
+  // Update all useEffect hooks to include fetchGroups in dependency array
   useEffect(() => {
     fetchGroups(true); // Show spinner on first load or router change
-  }, [activeRouterId]);
+  }, [activeRouterId, fetchGroups]);
 
   // Add 5-second polling for groups updates (background, no spinner)
   useEffect(() => {
@@ -71,7 +70,7 @@ function Groups() {
       fetchGroups(false); // Don't show spinner on polling
     }, 5000);
     return () => clearInterval(interval);
-  }, [activeRouterId]);
+  }, [activeRouterId, fetchGroups]);
 
   // If you want real-time group updates:
   useEffect(() => {
@@ -83,7 +82,7 @@ function Groups() {
     return () => {
       socket.off('groups_update', handler);
     };
-  }, [activeRouterId, socket]);
+  }, [activeRouterId, socket, fetchGroups]);
 
   // Helper: Get all accounts already assigned to other groups (except current group in edit)
   const getUsedAccounts = (excludeGroupId = null) => {
