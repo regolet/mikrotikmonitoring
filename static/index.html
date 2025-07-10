@@ -521,6 +521,10 @@
                             <textarea class="form-control" id="group-description" rows="3" placeholder="Enter a description for this group (optional)"></textarea>
                         </div>
                         <div class="mb-3">
+                            <label for="group-max-members" class="form-label">Max Members <span class="text-muted small">(optional, blank = no limit)</span></label>
+                            <input type="number" class="form-control" id="group-max-members" min="1" placeholder="Leave blank for no limit">
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Group Members</label>
                             <div class="row">
                                 <div class="col-md-5">
@@ -574,6 +578,10 @@
                         <div class="mb-3">
                             <label for="edit-group-description" class="form-label">Description</label>
                             <textarea class="form-control" id="edit-group-description" rows="3" placeholder="Enter a description for this group (optional)"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-group-max-members" class="form-label">Max Members <span class="text-muted small">(optional, blank = no limit)</span></label>
+                            <input type="number" class="form-control" id="edit-group-max-members" min="1" placeholder="Leave blank for no limit">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Group Members</label>
@@ -1437,8 +1445,9 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="d-flex align-items-center gap-3">
                                                     <h5 class="card-title mb-0">${group.name}</h5>
-                                                    <span class="badge bg-success">Online: ${onlineMembers}</span>
-                                                    <span class="badge bg-secondary">Offline: ${offlineMembers}</span>
+                                                    <span class="badge ${onlineMembers === 0 ? 'bg-danger' : 'bg-success'}">Online: ${onlineMembers}</span>
+                                                    <span class="badge ${offlineMembers === 0 ? 'bg-success' : 'bg-secondary'}">Offline: ${offlineMembers}</span>
+                                                    ${typeof group.max_members === 'number' ? `<span class="badge bg-info text-dark">${totalMembers}/${group.max_members}</span>` : `<span class="badge bg-info text-dark">${totalMembers}</span>`}
                                                 </div>
                                                 <div class="d-flex gap-2">
                                                     <button class="btn btn-sm btn-outline-light" onclick="app.editGroup('${group.id}')">
@@ -1714,36 +1723,36 @@
             async saveGroup() {
                 const name = document.getElementById('group-name').value.trim();
                 const description = document.getElementById('group-description').value.trim();
+                const maxMembersStr = document.getElementById('group-max-members').value.trim();
+                const max_members = maxMembersStr ? parseInt(maxMembersStr) : undefined;
                 const selectedMembers = this.getSelectedMembers('selected-members');
-                
                 if (!name) {
                     showError('Validation Error', 'Group name is required');
                     return;
                 }
-
                 try {
                     const activeRouter = await this.getActiveRouter();
                     const routerId = activeRouter?.active_router_id;
-                    
+                    const payload = {
+                        name,
+                        description,
+                        accounts: selectedMembers,
+                        router_id: routerId
+                    };
+                    if (max_members) payload.max_members = max_members;
                     const response = await fetch('/api/groups', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ 
-                            name, 
-                            description,
-                            accounts: selectedMembers,
-                            router_id: routerId
-                        })
+                        body: JSON.stringify(payload)
                     });
-
                     const data = await response.json();
-                    
                     if (data.success) {
                         showSuccess('Group Created', 'Group saved successfully');
                         document.getElementById('group-name').value = '';
                         document.getElementById('group-description').value = '';
+                        document.getElementById('group-max-members').value = '';
                         document.getElementById('selected-members').innerHTML = '';
                         document.getElementById('available-accounts').innerHTML = '';
                         bootstrap.Modal.getInstance(document.getElementById('addGroupModal')).hide();
@@ -1769,6 +1778,7 @@
                             document.getElementById('edit-group-id').value = group.id;
                             document.getElementById('edit-group-name').value = group.name;
                             document.getElementById('edit-group-description').value = group.description || '';
+                            document.getElementById('edit-group-max-members').value = group.max_members || '';
                             
                             // Populate dual list with current group members
                             await this.populateDualList(
@@ -1791,33 +1801,32 @@
                 const id = document.getElementById('edit-group-id').value;
                 const name = document.getElementById('edit-group-name').value.trim();
                 const description = document.getElementById('edit-group-description').value.trim();
+                const maxMembersStr = document.getElementById('edit-group-max-members').value.trim();
+                const max_members = maxMembersStr ? parseInt(maxMembersStr) : undefined;
                 const selectedMembers = this.getSelectedMembers('edit-selected-members');
-                
                 if (!name) {
                     showError('Validation Error', 'Group name is required');
                     return;
                 }
-
                 try {
                     const activeRouter = await this.getActiveRouter();
                     const routerId = activeRouter?.active_router_id;
-                    
+                    const payload = {
+                        id,
+                        name,
+                        description,
+                        accounts: selectedMembers,
+                        router_id: routerId
+                    };
+                    if (max_members) payload.max_members = max_members;
                     const response = await fetch('/api/groups', {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ 
-                            id, 
-                            name, 
-                            description,
-                            accounts: selectedMembers,
-                            router_id: routerId
-                        })
+                        body: JSON.stringify(payload)
                     });
-
                     const data = await response.json();
-                    
                     if (data.success) {
                         showSuccess('Group Updated', 'Group updated successfully');
                         bootstrap.Modal.getInstance(document.getElementById('editGroupModal')).hide();
@@ -2376,10 +2385,39 @@
                     const list = document.createElement('div');
                     list.className = 'categories-list';
                     categories.forEach((cat, catIdx) => {
+                        // Calculate total members and max_members for the whole category
+                        let catTotalMembers = 0;
+                        let catTotalMax = 0;
+                        let catHasAllMax = true;
+                        if (Array.isArray(cat.subcategories)) {
+                            cat.subcategories.forEach(sub => {
+                                if (Array.isArray(sub.groups) && Array.isArray(this.groupsData)) {
+                                    sub.groups.forEach(gid => {
+                                        const g = this.groupsData.find(gr => gr.id === gid);
+                                        if (g) {
+                                            catTotalMembers += g.accounts ? g.accounts.length : 0;
+                                            if (typeof g.max_members === 'number') {
+                                                catTotalMax += g.max_members;
+                                            } else {
+                                                catHasAllMax = false;
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        let catCountStr = '';
+                        if (catTotalMembers > 0) {
+                            if (catHasAllMax && catTotalMax > 0) {
+                                catCountStr = ` <span class='badge bg-primary ms-2'>members: ${catTotalMembers}/${catTotalMax}</span>`;
+                            } else {
+                                catCountStr = ` <span class='badge bg-primary ms-2'>members: ${catTotalMembers}</span>`;
+                            }
+                        }
                         const catDiv = document.createElement('div');
                         catDiv.className = 'category-card card mb-3';
                         catDiv.innerHTML = `<div class='card-header d-flex justify-content-between align-items-center fw-bold'>
-                            <span>${cat.category}</span>
+                            <span>${cat.category}${catCountStr}</span>
                             <span>
                                 <button class='btn btn-sm btn-outline-success me-1' style='background:transparent;' title='Add Subcategory' onclick='app.showSubcategoryModal(${catIdx})'><i class=\"bi bi-plus\"></i></button>
                                 <button class='btn btn-sm btn-outline-secondary me-1' style='background:transparent;' title='Edit Category' onclick='app.showCategoryModal(${catIdx})'><i class=\"bi bi-pencil\"></i></button>
@@ -2391,11 +2429,37 @@
                             subList.className = 'list-group list-group-flush';
                             cat.subcategories.forEach((sub, subIdx) => {
                                 const subItem = document.createElement('li');
-                                subItem.className = 'list-group-item d-flex flex-column';
+                                subItem.className = 'list-group-item d-flex flex-column ms-4'; // Add ms-4 for left indent
                                 // Subcategory name row
                                 const subRow = document.createElement('div');
                                 subRow.className = 'd-flex justify-content-between align-items-center';
-                                subRow.innerHTML = `<span>${sub.subcategory}</span>
+                                // Calculate total members and max_members for this subcategory
+                                let subTotalMembers = 0;
+                                let subTotalMax = 0;
+                                let hasAllMax = true;
+                                if (Array.isArray(sub.groups) && sub.groups.length > 0 && Array.isArray(this.groupsData)) {
+                                    sub.groups.forEach(gid => {
+                                        const g = this.groupsData.find(gr => gr.id === gid);
+                                        if (g) {
+                                            subTotalMembers += g.accounts ? g.accounts.length : 0;
+                                            if (typeof g.max_members === 'number') {
+                                                subTotalMax += g.max_members;
+                                            } else {
+                                                hasAllMax = false;
+                                            }
+                                        }
+                                    });
+                                }
+                                let subcatCountStr = '';
+                                if (sub.groups && sub.groups.length > 0) {
+                                    if (hasAllMax && subTotalMax > 0) {
+                                        const vacant = subTotalMax - subTotalMembers;
+                                        subcatCountStr = ` <span class='badge bg-primary ms-2'>members: ${subTotalMembers}/${subTotalMax}, vacant: ${vacant}</span>`;
+                                    } else {
+                                        subcatCountStr = ` <span class='badge bg-primary ms-2'>members: ${subTotalMembers}</span>`;
+                                    }
+                                }
+                                subRow.innerHTML = `<span>${sub.subcategory}${subcatCountStr}</span>
                                     <span>
                                         <button class='btn btn-sm btn-outline-primary me-1' style='background:transparent;' title='Assign Groups' onclick='app.showAssignGroupsModal(${catIdx},${subIdx})'><i class=\"bi bi-collection\"></i></button>
                                         <button class='btn btn-sm btn-outline-secondary me-1' style='background:transparent;' title='Edit Subcategory' onclick='app.showSubcategoryModal(${catIdx},${subIdx})'><i class=\"bi bi-pencil\"></i></button>
@@ -2407,15 +2471,15 @@
                                 const assignedGroupsDiv = document.createElement('div');
                                 assignedGroupsDiv.className = 'mt-2';
                                 if (assignedGroups.length > 0) {
-                                    // Use up-to-date this.groupsData for mapping
-                                    let groupNames = assignedGroups;
-                                    if (Array.isArray(this.groupsData) && this.groupsData.length > 0) {
-                                        groupNames = assignedGroups.map(gid => {
-                                            const g = this.groupsData.find(gr => gr.id === gid);
-                                            return g ? g.name : gid;
-                                        });
-                                    }
-                                    assignedGroupsDiv.innerHTML = `<strong>Groups:</strong> ` + groupNames.map(name => `<span class='badge bg-info text-dark me-1'>${name}</span>`).join(' ');
+                                    assignedGroupsDiv.innerHTML = `<strong>Groups:</strong> ` + assignedGroups.map(gid => {
+                                        const g = this.groupsData.find(gr => gr.id === gid);
+                                        if (g) {
+                                            const total = g.accounts ? g.accounts.length : 0;
+                                            return `<span class='badge bg-info text-dark me-1'>${g.name} (${total}${typeof g.max_members === 'number' ? `/${g.max_members}` : ''})</span>`;
+                                        } else {
+                                            return `<span class='badge bg-info text-dark me-1'>${gid}</span>`;
+                                        }
+                                    }).join(' ');
                                 } else {
                                     assignedGroupsDiv.innerHTML = `<span class='text-muted'><em>No groups assigned</em></span>`;
                                 }
@@ -2605,6 +2669,15 @@
                                 return;
                             }
                             const assigned = (this._lastCategories?.[catIdx]?.subcategories?.[subIdx]?.groups) || [];
+                            // Collect all group IDs assigned to any subcategory (except the current one)
+                            let allAssigned = new Set();
+                            if (this._lastCategories && this._lastCategories[catIdx] && Array.isArray(this._lastCategories[catIdx].subcategories)) {
+                                this._lastCategories[catIdx].subcategories.forEach((sub, sidx) => {
+                                    if (sidx !== subIdx && Array.isArray(sub.groups)) {
+                                        sub.groups.forEach(gid => allAssigned.add(gid));
+                                    }
+                                });
+                            }
                             // Populate assigned groups (right)
                             data.groups.forEach(group => {
                                 if (assigned.includes(group.id)) {
@@ -2614,9 +2687,9 @@
                                     selectedSelect.appendChild(opt);
                                 }
                             });
-                            // Populate available groups (left)
+                            // Populate available groups (left), exclude those assigned to other subcategories
                             data.groups.forEach(group => {
-                                if (!assigned.includes(group.id)) {
+                                if (!assigned.includes(group.id) && !allAssigned.has(group.id)) {
                                     const opt = document.createElement('option');
                                     opt.value = group.id;
                                     opt.textContent = group.name;
@@ -2715,4 +2788,5 @@
         }
     </script>
 </body>
+</html> 
 </html> 
