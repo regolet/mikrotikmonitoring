@@ -441,6 +441,8 @@ def api_groups():
                 'accounts': data.get('accounts', []),
                 'created_at': datetime.now().isoformat()
             }
+            if 'max_members' in data and data['max_members']:
+                new_group['max_members'] = data['max_members']
             groups.append(new_group)
             
             # Save to file
@@ -467,6 +469,11 @@ def api_groups():
                     group['name'] = data['name']
                     group['description'] = data.get('description', group.get('description', ''))
                     group['accounts'] = data.get('accounts', group.get('accounts', []))
+                    if 'max_members' in data and data['max_members']:
+                        group['max_members'] = data['max_members']
+                    elif 'max_members' in group:
+                        # Remove max_members if not provided in update
+                        group.pop('max_members', None)
                     group['updated_at'] = datetime.now().isoformat()
                     
                     # Save to file
@@ -531,6 +538,50 @@ def api_groups_members():
     except Exception as e:
         error(f"Error updating group members: {e}")
         return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/categories', methods=['GET', 'POST'])
+def api_categories():
+    """
+    GET: Returns all categories for the specified router.
+        Query param: router_id (optional, defaults to active router)
+        Response: { success: bool, categories: [ ... ] }
+    POST: Update categories for a router.
+        Payload: { router_id: str, categories: [ ... ] }
+        Response: { success: bool }
+    """
+    categories_file = 'data/categories.json'
+    router_id = request.args.get('router_id', get_active_router_id())
+
+    # Ensure categories file exists
+    if not os.path.exists(categories_file):
+        with open(categories_file, 'w') as f:
+            json.dump({}, f)
+
+    if request.method == 'GET':
+        try:
+            with open(categories_file, 'r') as f:
+                all_categories = json.load(f)
+            categories = all_categories.get(router_id, [])
+            return jsonify({'success': True, 'categories': categories, 'router_id': router_id})
+        except Exception as e:
+            error(f"Error reading categories: {e}")
+            return jsonify({'success': False, 'error': str(e)})
+
+    elif request.method == 'POST':
+        try:
+            data = request.get_json()
+            if not data or 'categories' not in data:
+                return jsonify({'success': False, 'error': 'Categories data is required'}), 400
+            post_router_id = data.get('router_id', router_id)
+            with open(categories_file, 'r') as f:
+                all_categories = json.load(f)
+            all_categories[post_router_id] = data['categories']
+            with open(categories_file, 'w') as f:
+                json.dump(all_categories, f, indent=2)
+            return jsonify({'success': True})
+        except Exception as e:
+            error(f"Error updating categories: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 400
 
 # Router Management API Endpoints
 @app.route('/api/routers', methods=['GET', 'POST', 'PUT', 'DELETE'])
