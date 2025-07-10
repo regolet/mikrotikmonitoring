@@ -80,11 +80,12 @@ const Dashboard = () => {
           if (dt > 0) {
             const rxDiff = rxBytes - prevStats.rx;
             const txDiff = txBytes - prevStats.tx;
-            downloadMbps = ((rxDiff * 8) / dt / 1e6).toFixed(2);
-            uploadMbps = ((txDiff * 8) / dt / 1e6).toFixed(2);
+            // SWAP: downloadMbps = txDiff, uploadMbps = rxDiff
+            downloadMbps = ((txDiff * 8) / dt / 1e6).toFixed(2);
+            uploadMbps = ((rxDiff * 8) / dt / 1e6).toFixed(2);
             // Sum for total speeds
-            totalDownload += rxDiff > 0 ? (rxDiff * 8) / dt : 0;
-            totalUpload += txDiff > 0 ? (txDiff * 8) / dt : 0;
+            totalDownload += txDiff > 0 ? (txDiff * 8) / dt : 0;
+            totalUpload += rxDiff > 0 ? (rxDiff * 8) / dt : 0;
           }
         } catch {}
       }
@@ -114,8 +115,10 @@ const Dashboard = () => {
       
       // Handle numeric values (speeds)
       if (field === 'downloadMbps' || field === 'uploadMbps') {
-        aVal = parseFloat(aVal) || 0;
-        bVal = parseFloat(bVal) || 0;
+        aVal = parseFloat(aVal);
+        bVal = parseFloat(bVal);
+        if (isNaN(aVal)) aVal = 0;
+        if (isNaN(bVal)) bVal = 0;
       } else {
         // Handle string values
         aVal = String(aVal).toLowerCase();
@@ -188,11 +191,18 @@ const Dashboard = () => {
   }, [activeRouterId, socket]);
 
   // Filter, sort, and paginate rows
-  const filteredRows = rows.filter(row =>
-    row.name.toLowerCase().includes(search.toLowerCase()) ||
-    row.profile.toLowerCase().includes(search.toLowerCase()) ||
-    row.status.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRows = rows.filter(row => {
+    const searchLower = search.toLowerCase();
+    return (
+      row.name.toLowerCase().includes(searchLower) ||
+      row.profile.toLowerCase().includes(searchLower) ||
+      row.status.toLowerCase().includes(searchLower) ||
+      String(row.downloadMbps).toLowerCase().includes(searchLower) ||
+      String(row.uploadMbps).toLowerCase().includes(searchLower) ||
+      String(row.address).toLowerCase().includes(searchLower) ||
+      String(row.uptime).toLowerCase().includes(searchLower)
+    );
+  });
   
   // Sort filtered rows
   const sortedRows = sortRows(filteredRows, sortField, sortDirection);
@@ -209,8 +219,9 @@ const Dashboard = () => {
       <div className="card mb-4">
         <div className="card-header d-flex justify-content-between align-items-center">
           <h3 className="mb-0">Network Summary</h3>
-          <div className="d-flex flex-wrap gap-2">
+          <div className="d-flex flex-wrap gap-2 align-items-center">
             {/* Auto-refresh controls omitted (always 5s) */}
+            <small className="text-muted">Last updated: <span>{lastUpdated ? lastUpdated.toLocaleTimeString() : '-'}</span></small>
           </div>
         </div>
         <div className="card-body">
@@ -279,11 +290,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="row">
-            <div className="col-12 text-end">
-              <small className="text-muted">Last updated: <span>{lastUpdated ? lastUpdated.toLocaleTimeString() : '-'}</span></small>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -341,18 +347,18 @@ const Dashboard = () => {
                     Status {getSortIndicator('status')}
                   </th>
                   <th 
-                    onClick={() => handleSort('downloadMbps')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Download Speed (Mbps) {getSortIndicator('downloadMbps')}
-                  </th>
-                  <th 
                     onClick={() => handleSort('uploadMbps')} 
                     style={{ cursor: 'pointer' }}
                     className="sortable-header"
                   >
                     Upload Speed (Mbps) {getSortIndicator('uploadMbps')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('downloadMbps')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Download Speed (Mbps) {getSortIndicator('downloadMbps')}
                   </th>
                   <th 
                     onClick={() => handleSort('address')} 
@@ -378,9 +384,9 @@ const Dashboard = () => {
                       <tr key={row.name + '-' + idx}>
                         <td>{row.name}</td>
                         <td>{row.profile}</td>
-                        <td><span className={`badge bg-${row.status === 'Running' ? 'success' : 'secondary'}`}>{row.status}</span></td>
-                        <td>{row.downloadMbps}</td>
-                        <td>{row.uploadMbps}</td>
+                        <td><span className={`badge bg-${row.status === 'Running' ? 'success' : 'secondary'}`}>{row.status === 'Running' ? 'Online' : row.status}</span></td>
+                        <td>{row.uploadMbps} Mbps</td>
+                        <td>{row.downloadMbps} Mbps</td>
                         <td>{row.address}</td>
                         <td>{row.uptime}</td>
                       </tr>
