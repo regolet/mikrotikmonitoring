@@ -68,42 +68,126 @@ function Settings() {
   };
 
   if (loading) {
-    return <div className="loading">Loading settings...</div>;
+    return (
+      <div className="container-fluid mt-4">
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2">Loading settings...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>;
+    return (
+      <div className="container-fluid mt-4">
+        <div className="alert alert-danger" role="alert">
+          Error: {error}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="settings">
-      <h2>Settings</h2>
-      
-      <div className="settings-section">
-        <h3>Routers</h3>
-        <div className="router-list">
-          {routers.map((router, index) => (
-            <div key={router.id || `router-${index}`} className={`router-item ${activeRouter === router.id ? 'active' : ''}`}>
-              <span>{router.name} ({router.host}:{router.port})</span>
-              <button 
-                onClick={() => handleRouterChange(router.id)}
-                className="btn btn-primary"
-              >
-                {activeRouter === router.id ? 'Active' : 'Set Active'}
-              </button>
-            </div>
-          ))}
+    <div className="container-fluid mt-4">
+      <div className="row">
+        <div className="col-12">
+          <h2 className="mb-4">Settings</h2>
         </div>
       </div>
 
-      <div className="settings-section">
-        <h3>Categories</h3>
-        <div className="category-list">
-          {categories.map((category, index) => (
-            <div key={category.id || `category-${index}`} className="category-item">
-              <span>{category.name}</span>
+      {/* Routers Section */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card mb-4">
+            <div className="card-header">
+              <h4 className="mb-0">Routers</h4>
             </div>
-          ))}
+            <div className="card-body">
+              {routers.length === 0 ? (
+                <div className="text-center text-muted">
+                  <i className="bi bi-router display-4"></i>
+                  <p className="mt-2">No routers configured</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Host</th>
+                        <th>Port</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {routers.map((router, index) => (
+                        <tr key={router.id || `router-${index}`}>
+                          <td>
+                            <strong>{router.name}</strong>
+                          </td>
+                          <td>{router.host}</td>
+                          <td>{router.port}</td>
+                          <td>
+                            <span className={`badge ${activeRouter === router.id ? 'bg-success' : 'bg-secondary'}`}>
+                              {activeRouter === router.id ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td>
+                            <button 
+                              onClick={() => handleRouterChange(router.id)}
+                              className={`btn btn-sm ${activeRouter === router.id ? 'btn-success' : 'btn-outline-primary'}`}
+                              disabled={activeRouter === router.id}
+                            >
+                              {activeRouter === router.id ? 'Active' : 'Set Active'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories Section */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card mb-4">
+            <div className="card-header">
+              <h4 className="mb-0">Categories</h4>
+            </div>
+            <div className="card-body">
+              {categories.length === 0 ? (
+                <div className="text-center text-muted">
+                  <i className="bi bi-tags display-4"></i>
+                  <p className="mt-2">No categories configured</p>
+                </div>
+              ) : (
+                <div className="row">
+                  {categories.map((category, index) => (
+                    <div key={category.id || `category-${index}`} className="col-md-4 col-lg-3 mb-3">
+                      <div className="card h-100">
+                        <div className="card-body text-center">
+                          <i className="bi bi-tag display-6 text-primary"></i>
+                          <h5 className="card-title mt-2">{category.name}</h5>
+                          {category.description && (
+                            <p className="card-text text-muted">{category.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
