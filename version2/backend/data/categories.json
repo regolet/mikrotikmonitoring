@@ -1,0 +1,92 @@
+{
+  "router_001": [
+    {
+      "category": "gpon",
+      "subcategories": [
+        {
+          "groups": [
+            "d393ab31-58ab-41a2-91ba-c2fc10ff1f88",
+            "2409f065-30f7-455f-802d-e09016b699fc",
+            "ec6d21ab-92f5-4983-8e36-814ce9872244"
+          ],
+          "subcategory": "lcp2"
+        },
+        {
+          "groups": [
+            "ef3175be-eb4d-4343-8593-bf14bc9b5535",
+            "f7f455dd-e466-4a02-983e-63677aa926bf",
+            "fd8c3e2a-f8c0-40a4-a69d-4b34175c8a1a",
+            "d8d1eb60-a7d4-4afe-9eeb-e2689c41c96a"
+          ],
+          "subcategory": "donmar"
+        }
+      ]
+    }
+  ],
+  "router_002": [
+    {
+      "category": "VSOL - Mini EPON",
+      "subcategories": [
+        {
+          "groups": [
+            "596537b3-abf3-4289-8797-1a23cb8edb84",
+            "6dc23939-10c4-49a4-a999-ad9f76e59429",
+            "226c7e49-fbb8-4c68-99f6-fe91c1984b17",
+            "e80931e1-0229-4d17-afaf-0e65b19c8725",
+            "a547ee59-25e2-4d47-97e4-73d0bbb55d34",
+            "3d188263-9cfc-4ad5-9c57-a53ba47b8080"
+          ],
+          "subcategory": "LCP: Marwasa"
+        }
+      ]
+    },
+    {
+      "category": "VSOL GEPON",
+      "subcategories": [
+        {
+          "groups": [
+            "716fd96c-d7fc-46e6-8d64-b60a10845fb6",
+            "acaa2589-024f-435a-8cf9-f9068637958f"
+          ],
+          "subcategory": "PON-4: LCP: Shell"
+        },
+        {
+          "groups": [
+            "5be02623-6cf5-43de-b6ba-0f8e6ca4b856",
+            "a740b663-cc2c-483a-b70e-524f06c59f79",
+            "61f2abd5-d413-4edf-be54-b75a4a971b65",
+            "aca5e4a5-795e-4137-9ed3-18cf6d80cc07",
+            "9cb21a15-9890-45aa-8f38-8036ce241773",
+            "88e8f00f-4c5b-4fee-9498-f4aacd22b4ad"
+          ],
+          "subcategory": "PON-3: BOLILA FBT"
+        },
+        {
+          "groups": [
+            "6dc23939-10c4-49a4-a999-ad9f76e59429",
+            "98864bca-67a1-4a9c-b495-55005d491319",
+            "a547ee59-25e2-4d47-97e4-73d0bbb55d34",
+            "226c7e49-fbb8-4c68-99f6-fe91c1984b17",
+            "e80931e1-0229-4d17-afaf-0e65b19c8725",
+            "3d188263-9cfc-4ad5-9c57-a53ba47b8080",
+            "d50c63ed-b1a4-4866-b6c0-9279c2e56e0e"
+          ],
+          "subcategory": "PON-1: LCP: (1:2) Slaughter/Block3"
+        },
+        {
+          "groups": [
+            "596537b3-abf3-4289-8797-1a23cb8edb84",
+            "4a3747d9-71ef-4c58-8af9-b392ca1df3f8",
+            "eab41fd5-3106-40a6-b3a8-a9855a773701",
+            "fd1c1d20-e6d1-4a75-b4d0-23545c89bfc9",
+            "1bfa6efc-2923-4d5a-bbaf-c4e6c5fae011",
+            "08177204-a09c-4dc8-ba0b-f6f789678da6",
+            "17402e03-daad-4f93-a4d6-ef0228fcfbeb",
+            "404fadc8-f6b0-4abe-9cb7-d268caae5e6e"
+          ],
+          "subcategory": "PON-2: LCP: (1:2) Highway/Marwasa"
+        }
+      ]
+    }
+  ]
+}
