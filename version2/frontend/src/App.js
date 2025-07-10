@@ -4,7 +4,7 @@ import './App.css';
 import Settings from './components/Settings';
 import Groups from './components/Groups';
 import Dashboard from './components/Dashboard';
-import GroupsSummary from './components/GroupsSummary';
+import Categories from './components/Categories';
 import axios from 'axios';
 import io from 'socket.io-client';
 
@@ -52,10 +52,10 @@ function Navigation() {
             </li>
             <li className="nav-item">
               <Link 
-                className={`nav-link ${location.pathname === '/groups-summary' ? 'active' : ''}`} 
-                to="/groups-summary"
+                className={`nav-link ${location.pathname === '/categories' ? 'active' : ''}`} 
+                to="/categories"
               >
-                Groups Summary
+                Categories
               </Link>
             </li>
             <li className="nav-item">
@@ -142,7 +142,9 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/groups" element={<Groups />} />
-                <Route path="/groups-summary" element={<GroupsSummary />} />
+                <Route path="/categories" element={<Categories />} />
+                {/* Redirect old /groups-summary to /categories for backward compatibility */}
+                <Route path="/groups-summary" element={<Categories />} />
               </Routes>
             </div>
           </div>

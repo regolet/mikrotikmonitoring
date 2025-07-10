@@ -87,6 +87,10 @@
           "subcategory": "PON-2: LCP: (1:2) Highway/Marwasa"
         }
       ]
+    },
+    {
+      "category": "test",
+      "subcategories": []
     }
   ]
 }

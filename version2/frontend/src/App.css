@@ -156,6 +156,22 @@ body {
   vertical-align: middle;
 }
 
+/* Sortable table headers */
+.sortable-header {
+  transition: background-color 0.2s ease;
+  user-select: none;
+}
+
+.sortable-header:hover {
+  background-color: rgba(0, 123, 255, 0.1) !important;
+  color: #0056b3 !important;
+}
+
+.sortable-header i {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+}
+
 /* Status indicators */
 .status-indicator {
   display: inline-flex;

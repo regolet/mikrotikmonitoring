@@ -586,6 +586,160 @@ def api_categories():
             error(f"Error updating categories: {e}")
             return jsonify({'success': False, 'error': str(e)}), 400
 
+# Individual Category CRUD Operations
+@app.route('/api/categories/<category_id>', methods=['PUT', 'DELETE'])
+def api_category_individual(category_id):
+    """
+    PUT: Update a specific category
+    DELETE: Delete a specific category
+    """
+    categories_file = 'data/categories.json'
+    router_id = request.args.get('router_id', get_active_router_id())
+    
+    try:
+        with open(categories_file, 'r') as f:
+            all_categories = json.load(f)
+        categories = all_categories.get(router_id, [])
+        
+        # Find category by ID (using index as ID for simplicity)
+        cat_idx = int(category_id) if category_id.isdigit() else None
+        if cat_idx is None or cat_idx >= len(categories):
+            return jsonify({'success': False, 'error': 'Category not found'}), 404
+        
+        if request.method == 'PUT':
+            data = request.get_json()
+            if not data or 'category' not in data:
+                return jsonify({'success': False, 'error': 'Category name is required'}), 400
+            
+            categories[cat_idx]['category'] = data['category']
+            all_categories[router_id] = categories
+            with open(categories_file, 'w') as f:
+                json.dump(all_categories, f, indent=2)
+            return jsonify({'success': True})
+        
+        elif request.method == 'DELETE':
+            categories.pop(cat_idx)
+            all_categories[router_id] = categories
+            with open(categories_file, 'w') as f:
+                json.dump(all_categories, f, indent=2)
+            return jsonify({'success': True})
+            
+    except Exception as e:
+        error(f"Error in category operation: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/categories/<category_id>/subcategories', methods=['POST'])
+def api_subcategory_create(category_id):
+    """Create a new subcategory"""
+    categories_file = 'data/categories.json'
+    router_id = request.args.get('router_id', get_active_router_id())
+    
+    try:
+        data = request.get_json()
+        if not data or 'subcategory' not in data:
+            return jsonify({'success': False, 'error': 'Subcategory name is required'}), 400
+        
+        with open(categories_file, 'r') as f:
+            all_categories = json.load(f)
+        categories = all_categories.get(router_id, [])
+        
+        cat_idx = int(category_id) if category_id.isdigit() else None
+        if cat_idx is None or cat_idx >= len(categories):
+            return jsonify({'success': False, 'error': 'Category not found'}), 404
+        
+        if 'subcategories' not in categories[cat_idx]:
+            categories[cat_idx]['subcategories'] = []
+        
+        categories[cat_idx]['subcategories'].append({
+            'subcategory': data['subcategory'],
+            'groups': []
+        })
+        
+        all_categories[router_id] = categories
+        with open(categories_file, 'w') as f:
+            json.dump(all_categories, f, indent=2)
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        error(f"Error creating subcategory: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/categories/<category_id>/subcategories/<subcategory_id>', methods=['PUT', 'DELETE'])
+def api_subcategory_individual(category_id, subcategory_id):
+    """Update or delete a specific subcategory"""
+    categories_file = 'data/categories.json'
+    router_id = request.args.get('router_id', get_active_router_id())
+    
+    try:
+        with open(categories_file, 'r') as f:
+            all_categories = json.load(f)
+        categories = all_categories.get(router_id, [])
+        
+        cat_idx = int(category_id) if category_id.isdigit() else None
+        sub_idx = int(subcategory_id) if subcategory_id.isdigit() else None
+        
+        if cat_idx is None or cat_idx >= len(categories):
+            return jsonify({'success': False, 'error': 'Category not found'}), 404
+        
+        if sub_idx is None or sub_idx >= len(categories[cat_idx].get('subcategories', [])):
+            return jsonify({'success': False, 'error': 'Subcategory not found'}), 404
+        
+        if request.method == 'PUT':
+            data = request.get_json()
+            if not data or 'subcategory' not in data:
+                return jsonify({'success': False, 'error': 'Subcategory name is required'}), 400
+            
+            categories[cat_idx]['subcategories'][sub_idx]['subcategory'] = data['subcategory']
+            all_categories[router_id] = categories
+            with open(categories_file, 'w') as f:
+                json.dump(all_categories, f, indent=2)
+            return jsonify({'success': True})
+        
+        elif request.method == 'DELETE':
+            categories[cat_idx]['subcategories'].pop(sub_idx)
+            all_categories[router_id] = categories
+            with open(categories_file, 'w') as f:
+                json.dump(all_categories, f, indent=2)
+            return jsonify({'success': True})
+            
+    except Exception as e:
+        error(f"Error in subcategory operation: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/categories/<category_id>/subcategories/<subcategory_id>/groups', methods=['PUT'])
+def api_subcategory_groups(category_id, subcategory_id):
+    """Update groups assigned to a subcategory"""
+    categories_file = 'data/categories.json'
+    router_id = request.args.get('router_id', get_active_router_id())
+    
+    try:
+        data = request.get_json()
+        if not data or 'groups' not in data:
+            return jsonify({'success': False, 'error': 'Groups data is required'}), 400
+        
+        with open(categories_file, 'r') as f:
+            all_categories = json.load(f)
+        categories = all_categories.get(router_id, [])
+        
+        cat_idx = int(category_id) if category_id.isdigit() else None
+        sub_idx = int(subcategory_id) if subcategory_id.isdigit() else None
+        
+        if cat_idx is None or cat_idx >= len(categories):
+            return jsonify({'success': False, 'error': 'Category not found'}), 404
+        
+        if sub_idx is None or sub_idx >= len(categories[cat_idx].get('subcategories', [])):
+            return jsonify({'success': False, 'error': 'Subcategory not found'}), 404
+        
+        categories[cat_idx]['subcategories'][sub_idx]['groups'] = data['groups']
+        all_categories[router_id] = categories
+        with open(categories_file, 'w') as f:
+            json.dump(all_categories, f, indent=2)
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        error(f"Error updating subcategory groups: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
 # Router Management API Endpoints
 @app.route('/api/routers', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_routers():

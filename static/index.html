@@ -26,7 +26,7 @@
                         <a class="nav-link" href="/groups" data-page="groups">Groups</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/groups-summary" data-page="groups-summary">Groups Summary</a>
+                        <a class="nav-link" href="/categories" data-page="categories">Categories</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/settings" data-page="settings">Settings</a>
@@ -283,11 +283,37 @@
             </div>
         </div>
 
-        <!-- Groups Summary Page -->
-        <div id="groups-summary-page" class="page-content" style="display: none;">
+        <!-- Categories Page -->
+        <div id="categories-page" class="page-content" style="display: none;">
             <div class="container-fluid mt-4">
-                <h2>Groups Summary</h2>
-                <div class="alert alert-info">Groups Summary content will go here.</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3>Categories Management</h3>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                <i class="bi bi-plus-circle"></i> Add Category
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="categories-search" placeholder="Search categories by name, description, or subcategories...">
+                                    <button class="btn btn-outline-secondary" type="button" id="clear-search-btn" style="display: none;">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="categories-content">
+                            <!-- Categories will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -619,6 +645,123 @@
         </div>
     </div>
 
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-category-form">
+                        <div class="mb-3">
+                            <label for="category-name" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="category-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="category-description" rows="3" placeholder="Enter a description for this category (optional)"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category-max-subcategories" class="form-label">Max Subcategories <span class="text-muted small">(optional, blank = no limit)</span></label>
+                            <input type="number" class="form-control" id="category-max-subcategories" min="1" placeholder="Leave blank for no limit">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subcategories</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Available Subcategories</label>
+                                    <input type="text" class="form-control mb-2" id="available-subcategories-search" placeholder="Search subcategories...">
+                                    <select id="available-subcategories" class="form-select" size="12" multiple>
+                                        <!-- Available subcategories will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mb-2" id="add-subcategories">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="remove-subcategories">
+                                        <i class="bi bi-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Selected Subcategories</label>
+                                    <select id="selected-subcategories" class="form-select" size="12" multiple>
+                                        <!-- Selected subcategories will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-category-btn">Save Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-category-form">
+                        <input type="hidden" id="edit-category-id">
+                        <div class="mb-3">
+                            <label for="edit-category-name" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="edit-category-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-category-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="edit-category-description" rows="3" placeholder="Enter a description for this category (optional)"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-category-max-subcategories" class="form-label">Max Subcategories <span class="text-muted small">(optional, blank = no limit)</span></label>
+                            <input type="number" class="form-control" id="edit-category-max-subcategories" min="1" placeholder="Leave blank for no limit">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subcategories</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Available Subcategories</label>
+                                    <input type="text" class="form-control mb-2" id="edit-available-subcategories-search" placeholder="Search subcategories...">
+                                    <select id="edit-available-subcategories" class="form-select" size="12" multiple>
+                                        <!-- Available subcategories will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mb-2" id="edit-add-subcategories">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="edit-remove-subcategories">
+                                        <i class="bi bi-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">Selected Subcategories</label>
+                                    <select id="edit-selected-subcategories" class="form-select" size="12" multiple>
+                                        <!-- Selected subcategories will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="update-category-btn">Update Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating Notification Container -->
     <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 
@@ -834,8 +977,8 @@
                     this.navigateTo('settings');
                 } else if (path === '/groups') {
                     this.navigateTo('groups');
-                } else if (path === '/groups-summary') {
-                    this.navigateTo('groups-summary');
+                } else if (path === '/categories') {
+                    this.navigateTo('categories');
                 } else {
                     this.navigateTo('dashboard');
                 }
@@ -878,8 +1021,8 @@
                     case 'groups':
                         this.loadGroups();
                         break;
-                    case 'groups-summary':
-                        this.loadCategoriesForSummary();
+                    case 'categories':
+                        this.loadCategories();
                         break;
                     case 'settings':
                         this.loadSettings();
@@ -2321,7 +2464,7 @@
 
             // Add the new method to the class
             async loadCategoriesForSummary() {
-                const summaryContainer = document.querySelector('#groups-summary-page .container-fluid');
+                const summaryContainer = document.querySelector('#categories-page .container-fluid');
                 if (!summaryContainer) return;
                 // Clear all content before rendering
                 summaryContainer.innerHTML = '';

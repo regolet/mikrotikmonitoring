@@ -1,3 +1,44 @@
+# MikroTik Monitoring v2 - React Frontend
+
+A modern, real-time monitoring dashboard and management UI for MikroTik routers. Built with React and Bootstrap, powered by a Flask API backend.
+
+## Features
+- Real-time dashboard with stat cards and PPPoE table
+- Multi-router support with global router menu
+- Groups management with multi-select and real-time status
+- Category and subcategory management (Categories tab)
+- Responsive, modern UI (Bootstrap 5, glassmorphism)
+- Single shared WebSocket connection for live updates
+- User-friendly error handling and loading states
+
+## Development Workflow
+1. Start both backend and frontend using the dev script:
+   ```bash
+   cd version2
+   run_dev.bat
+   ```
+   Or manually in two terminals:
+   - Terminal 1: `cd backend && python app.py`
+   - Terminal 2: `cd frontend && npm start`
+2. Frontend runs on [http://localhost:3000](http://localhost:3000)
+3. Backend runs on [http://localhost](http://localhost)
+
+## Production Build
+1. Build the React app:
+   ```bash
+   npm run build
+   ```
+2. The build output will be in the `build/` folder.
+3. Flask will serve the static files from `build/` in production mode.
+
+## Project Structure
+- `App.js` - Main app with routing and context
+- `components/` - Dashboard, Groups, Settings, Categories, etc.
+- `contexts/` - RouterContext, SocketContext
+- `App.css` - Custom styles
+
+---
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

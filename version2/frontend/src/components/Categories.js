@@ -5,7 +5,7 @@ import { useRouter } from '../App';
 
 const API_BASE_URL = 'http://localhost:80/api';
 
-function GroupsSummary() {
+function Categories() {
   const { activeRouterId } = useRouter();
   const [categories, setCategories] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -99,8 +99,7 @@ function GroupsSummary() {
   const handleDeleteCategory = async (catIdx) => {
     if (!window.confirm('Delete this category?')) return;
     try {
-      const catId = categories[catIdx].id;
-      await axios.delete(`${API_BASE_URL}/categories/${catId}?router_id=${activeRouterId}`);
+      await axios.delete(`${API_BASE_URL}/categories/${catIdx}?router_id=${activeRouterId}`);
       fetchData();
     } catch {
       setError('Failed to delete category');
@@ -110,10 +109,15 @@ function GroupsSummary() {
     if (!categoryName.trim()) return setCategoryError('Category name required');
     try {
       if (categoryModalMode === 'add') {
-        await axios.post(`${API_BASE_URL}/categories?router_id=${activeRouterId}`, { category: categoryName });
+        // For add, we need to update the entire categories structure
+        const newCategories = [...categories, { category: categoryName, subcategories: [] }];
+        await axios.post(`${API_BASE_URL}/categories?router_id=${activeRouterId}`, { 
+          router_id: activeRouterId, 
+          categories: newCategories 
+        });
       } else {
-        const catId = categories[categoryModalIdx].id;
-        await axios.put(`${API_BASE_URL}/categories/${catId}?router_id=${activeRouterId}`, { category: categoryName });
+        // For edit, update the specific category
+        await axios.put(`${API_BASE_URL}/categories/${categoryModalIdx}?router_id=${activeRouterId}`, { category: categoryName });
       }
       setShowCategoryModal(false);
       fetchData();
@@ -141,9 +145,7 @@ function GroupsSummary() {
   const handleDeleteSubcategory = async (catIdx, subIdx) => {
     if (!window.confirm('Delete this subcategory?')) return;
     try {
-      const catId = categories[catIdx].id;
-      const subId = categories[catIdx].subcategories[subIdx].id;
-      await axios.delete(`${API_BASE_URL}/categories/${catId}/subcategories/${subId}?router_id=${activeRouterId}`);
+      await axios.delete(`${API_BASE_URL}/categories/${catIdx}/subcategories/${subIdx}?router_id=${activeRouterId}`);
       fetchData();
     } catch {
       setError('Failed to delete subcategory');
@@ -152,12 +154,10 @@ function GroupsSummary() {
   const handleSubcategoryModalSave = async () => {
     if (!subcategoryName.trim()) return setSubcategoryError('Subcategory name required');
     try {
-      const catId = categories[subcategoryModalCatIdx].id;
       if (subcategoryModalMode === 'add') {
-        await axios.post(`${API_BASE_URL}/categories/${catId}/subcategories?router_id=${activeRouterId}`, { subcategory: subcategoryName });
+        await axios.post(`${API_BASE_URL}/categories/${subcategoryModalCatIdx}/subcategories?router_id=${activeRouterId}`, { subcategory: subcategoryName });
       } else {
-        const subId = categories[subcategoryModalCatIdx].subcategories[subcategoryModalIdx].id;
-        await axios.put(`${API_BASE_URL}/categories/${catId}/subcategories/${subId}?router_id=${activeRouterId}`, { subcategory: subcategoryName });
+        await axios.put(`${API_BASE_URL}/categories/${subcategoryModalCatIdx}/subcategories/${subcategoryModalIdx}?router_id=${activeRouterId}`, { subcategory: subcategoryName });
       }
       setShowSubcategoryModal(false);
       fetchData();
@@ -184,9 +184,7 @@ function GroupsSummary() {
   };
   const handleAssignGroupsSave = async () => {
     try {
-      const catId = categories[assignCatIdx].id;
-      const subId = categories[assignCatIdx].subcategories[assignSubIdx].id;
-      await axios.put(`${API_BASE_URL}/categories/${catId}/subcategories/${subId}/groups?router_id=${activeRouterId}`, { groups: assignGroups });
+      await axios.put(`${API_BASE_URL}/categories/${assignCatIdx}/subcategories/${assignSubIdx}/groups?router_id=${activeRouterId}`, { groups: assignGroups });
       setShowAssignGroupsModal(false);
       fetchData();
     } catch {
@@ -231,7 +229,7 @@ function GroupsSummary() {
   return (
     <div className="container-fluid mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2>Groups Summary</h2>
+        <h2>Categories</h2>
         <button className="btn btn-sm btn-outline-primary" style={{background:'transparent'}} onClick={handleShowAddCategory}>
           <i className="bi bi-plus-circle"></i> Add Category
         </button>
@@ -412,7 +410,7 @@ function GroupsSummary() {
       {/* Assign Groups Modal */}
       <>
         <div className={modalShowClass(showAssignGroupsModal)} tabIndex="-1" style={{ background: showAssignGroupsModal ? 'rgba(0,0,0,0.3)' : undefined }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Assign Groups to Subcategory</h5>
@@ -422,20 +420,72 @@ function GroupsSummary() {
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label">Subcategory: {categories[assignCatIdx]?.subcategories[assignSubIdx]?.subcategory || ''}</label>
-                    <input
-                      type="text"
-                      className={`form-control${assignError ? ' is-invalid' : ''}`}
-                      placeholder="Enter group ID (e.g., 1, 2, 3)"
-                      value={assignGroups.join(', ')}
-                      onChange={e => setAssignGroups(e.target.value.split(',').map(g => g.trim()).filter(g => g))}
-                    />
-                    {assignError && <div className="invalid-feedback">{assignError}</div>}
                   </div>
-                  <strong>Current Groups:</strong>
-                  {categories[assignCatIdx]?.subcategories[assignSubIdx]?.groups?.map((gid, gidx) => {
-                    const g = getGroupById(gid);
-                    return <span key={gidx} className="badge bg-info text-dark me-1">{g ? g.name : gid}</span>;
-                  })}
+                  <div className="row">
+                    <div className="col-5">
+                      <label className="form-label text-muted">Available Groups</label>
+                      <select 
+                        id="assign-available-groups"
+                        className="form-select" 
+                        size="8" 
+                        multiple
+                      >
+                        {allGroups
+                          .filter(g => !assignGroups.includes(g.id))
+                          .map(g => (
+                            <option key={g.id} value={g.id}>
+                              {g.name} ({g.accounts ? g.accounts.length : 0}{typeof g.max_members === 'number' ? `/${g.max_members}` : ''})
+                            </option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                    <div className="col-2 d-flex flex-column justify-content-center align-items-center">
+                      <button 
+                        type="button" 
+                        className="btn btn-sm btn-outline-primary mb-2"
+                        onClick={() => {
+                          const availableSelect = document.querySelector('#assign-available-groups');
+                          const selected = Array.from(availableSelect?.selectedOptions || []).map(opt => opt.value);
+                          const newAssignGroups = [...assignGroups, ...selected];
+                          setAssignGroups(newAssignGroups);
+                        }}
+                      >
+                        <i className="bi bi-arrow-right"></i>
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() => {
+                          const selectedSelect = document.querySelector('#assign-selected-groups');
+                          const selected = Array.from(selectedSelect?.selectedOptions || []).map(opt => opt.value);
+                          const newAssignGroups = assignGroups.filter(g => !selected.includes(g));
+                          setAssignGroups(newAssignGroups);
+                        }}
+                      >
+                        <i className="bi bi-arrow-left"></i>
+                      </button>
+                    </div>
+                    <div className="col-5">
+                      <label className="form-label text-muted">Assigned Groups</label>
+                      <select 
+                        id="assign-selected-groups"
+                        className="form-select" 
+                        size="8" 
+                        multiple
+                      >
+                        {assignGroups.map(gid => {
+                          const g = allGroups.find(gr => gr.id === gid);
+                          return (
+                            <option key={gid} value={gid}>
+                              {g ? g.name : gid} ({g ? (g.accounts ? g.accounts.length : 0) : 0}{g && typeof g.max_members === 'number' ? `/${g.max_members}` : ''})
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  </div>
+                  {assignError && <div className="alert alert-danger mt-3">{assignError}</div>}
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowAssignGroupsModal(false)}>Cancel</button>
@@ -451,4 +501,4 @@ function GroupsSummary() {
   );
 }
 
-export default GroupsSummary; 
+export default Categories; 

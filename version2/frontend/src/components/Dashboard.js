@@ -36,6 +36,9 @@ const Dashboard = () => {
   // Add state for total speeds
   const [totalUploadMbps, setTotalUploadMbps] = useState('0.00');
   const [totalDownloadMbps, setTotalDownloadMbps] = useState('0.00');
+  // Add sorting state
+  const [sortField, setSortField] = useState('downloadMbps');
+  const [sortDirection, setSortDirection] = useState('desc');
   // Add at the top:
   const { routers, activeRouterId, handleRouterChange } = useRouter();
   const socket = useSocket();
@@ -103,6 +106,49 @@ const Dashboard = () => {
     setLoading(false);
   };
 
+  // Sort function
+  const sortRows = (rowsToSort, field, direction) => {
+    return [...rowsToSort].sort((a, b) => {
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // Handle numeric values (speeds)
+      if (field === 'downloadMbps' || field === 'uploadMbps') {
+        aVal = parseFloat(aVal) || 0;
+        bVal = parseFloat(bVal) || 0;
+      } else {
+        // Handle string values
+        aVal = String(aVal).toLowerCase();
+        bVal = String(bVal).toLowerCase();
+      }
+      
+      if (direction === 'asc') {
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      } else {
+        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+      }
+    });
+  };
+
+  // Handle sort click
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+    setPage(1);
+  };
+
+  // Get sort indicator
+  const getSortIndicator = (field) => {
+    if (sortField !== field) return <i className="bi bi-arrow-down-up text-muted"></i>;
+    return sortDirection === 'asc' 
+      ? <i className="bi bi-arrow-up text-primary"></i>
+      : <i className="bi bi-arrow-down text-primary"></i>;
+  };
+
   // Fetch routers and active router on mount
   useEffect(() => {
     const fetchRouters = async () => {
@@ -141,16 +187,20 @@ const Dashboard = () => {
     };
   }, [activeRouterId, socket]);
 
-  // Filter and paginate rows
+  // Filter, sort, and paginate rows
   const filteredRows = rows.filter(row =>
     row.name.toLowerCase().includes(search.toLowerCase()) ||
     row.profile.toLowerCase().includes(search.toLowerCase()) ||
     row.status.toLowerCase().includes(search.toLowerCase())
   );
-  const totalPages = rowsPerPage > 0 ? Math.ceil(filteredRows.length / rowsPerPage) : 1;
+  
+  // Sort filtered rows
+  const sortedRows = sortRows(filteredRows, sortField, sortDirection);
+  
+  const totalPages = rowsPerPage > 0 ? Math.ceil(sortedRows.length / rowsPerPage) : 1;
   const paginatedRows = rowsPerPage > 0
-    ? filteredRows.slice((page - 1) * rowsPerPage, page * rowsPerPage)
-    : filteredRows;
+    ? sortedRows.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+    : sortedRows;
 
   // Render table (version1 style)
   return (
@@ -269,32 +319,74 @@ const Dashboard = () => {
             <table className="table table-striped table-hover table-sm">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Profile Plan</th>
-                  <th>Status</th>
-                  <th>Download Speed (Mbps)</th>
-                  <th>Upload Speed (Mbps)</th>
-                  <th>Address</th>
-                  <th>Uptime</th>
+                  <th 
+                    onClick={() => handleSort('name')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Name {getSortIndicator('name')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('profile')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Profile Plan {getSortIndicator('profile')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('status')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Status {getSortIndicator('status')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('downloadMbps')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Download Speed (Mbps) {getSortIndicator('downloadMbps')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('uploadMbps')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Upload Speed (Mbps) {getSortIndicator('uploadMbps')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('address')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Address {getSortIndicator('address')}
+                  </th>
+                  <th 
+                    onClick={() => handleSort('uptime')} 
+                    style={{ cursor: 'pointer' }}
+                    className="sortable-header"
+                  >
+                    Uptime {getSortIndicator('uptime')}
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                {paginatedRows.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center text-muted">No PPPoE interfaces found.</td></tr>
-                ) : (
-                  paginatedRows.map((row, idx) => (
-                    <tr key={row.name + '-' + idx}>
-                      <td>{row.name}</td>
-                      <td>{row.profile}</td>
-                      <td><span className={`badge bg-${row.status === 'Running' ? 'success' : 'secondary'}`}>{row.status}</span></td>
-                      <td>{row.downloadMbps}</td>
-                      <td>{row.uploadMbps}</td>
-                      <td>{row.address}</td>
-                      <td>{row.uptime}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
+                              <tbody>
+                  {paginatedRows.length === 0 ? (
+                    <tr><td colSpan={7} className="text-center text-muted">No PPPoE interfaces found.</td></tr>
+                  ) : (
+                    paginatedRows.map((row, idx) => (
+                      <tr key={row.name + '-' + idx}>
+                        <td>{row.name}</td>
+                        <td>{row.profile}</td>
+                        <td><span className={`badge bg-${row.status === 'Running' ? 'success' : 'secondary'}`}>{row.status}</span></td>
+                        <td>{row.downloadMbps}</td>
+                        <td>{row.uploadMbps}</td>
+                        <td>{row.address}</td>
+                        <td>{row.uptime}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
             </table>
           </div>
           {/* Pagination */}
