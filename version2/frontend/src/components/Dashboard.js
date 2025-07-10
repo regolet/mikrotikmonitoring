@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:80/api';
 
 function Dashboard() {
   const [status, setStatus] = useState(null);
@@ -104,8 +104,8 @@ function Dashboard() {
       <div className="interfaces-section">
         <h3>Network Interfaces</h3>
         <div className="interfaces-grid">
-          {interfaces.map(iface => (
-            <div key={iface.name} className="interface-card">
+          {interfaces.map((iface, index) => (
+            <div key={`${iface.name}-${index}`} className="interface-card">
               <h4>{iface.name}</h4>
               <div className="interface-details">
                 <div><strong>Type:</strong> {iface.type}</div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:80/api';
 
 function Settings() {
   const [routers, setRouters] = useState([]);
@@ -82,8 +82,8 @@ function Settings() {
       <div className="settings-section">
         <h3>Routers</h3>
         <div className="router-list">
-          {routers.map(router => (
-            <div key={router.id} className={`router-item ${activeRouter === router.id ? 'active' : ''}`}>
+          {routers.map((router, index) => (
+            <div key={router.id || `router-${index}`} className={`router-item ${activeRouter === router.id ? 'active' : ''}`}>
               <span>{router.name} ({router.host}:{router.port})</span>
               <button 
                 onClick={() => handleRouterChange(router.id)}
@@ -99,8 +99,8 @@ function Settings() {
       <div className="settings-section">
         <h3>Categories</h3>
         <div className="category-list">
-          {categories.map(category => (
-            <div key={category.id} className="category-item">
+          {categories.map((category, index) => (
+            <div key={category.id || `category-${index}`} className="category-item">
               <span>{category.name}</span>
             </div>
           ))}
