@@ -2409,7 +2409,8 @@
                         let catCountStr = '';
                         if (catTotalMembers > 0) {
                             if (catHasAllMax && catTotalMax > 0) {
-                                catCountStr = ` <span class='badge bg-primary ms-2'>members: ${catTotalMembers}/${catTotalMax}</span>`;
+                                const catVacant = catTotalMax - catTotalMembers;
+                                catCountStr = ` <span class='badge bg-primary ms-2'>members: ${catTotalMembers}/${catTotalMax}, vacant: ${catVacant}</span>`;
                             } else {
                                 catCountStr = ` <span class='badge bg-primary ms-2'>members: ${catTotalMembers}</span>`;
                             }
