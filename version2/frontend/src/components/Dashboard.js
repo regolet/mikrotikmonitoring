@@ -42,7 +42,6 @@ const Dashboard = () => {
   // Add at the top:
   const { activeRouterId } = useRouter();
   const socket = useSocket();
-  const [pppActive, setPppActive] = useState([]); // online accounts
   const [pppOffline, setPppOffline] = useState([]); // offline accounts
   // Add state for offline accounts pagination
   const [offlineRowsPerPage, setOfflineRowsPerPage] = useState(20);
@@ -167,13 +166,13 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRouters = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/routers`);
+        await axios.get(`${API_BASE_URL}/routers`);
         // setRouters(res.data.routers); // Removed as per edit hint
       } catch {}
     };
     const fetchActiveRouter = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/routers/active`);
+        await axios.get(`${API_BASE_URL}/routers/active`);
         // setActiveRouterId(res.data.active_router_id); // Removed as per edit hint
       } catch {}
     };
@@ -187,7 +186,6 @@ const Dashboard = () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/ppp_accounts_summary?router_id=${activeRouterId}`);
         if (res.data.success) {
-          setPppActive(res.data.online_accounts || []);
           setPppOffline(res.data.offline_accounts || []);
           setStats(res.data.statistics || {}); // <-- Use statistics from backend
         }
@@ -206,7 +204,6 @@ const Dashboard = () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/ppp_accounts_summary?router_id=${activeRouterId}`);
         if (isMounted && res.data.success) {
-          setPppActive(res.data.online_accounts || []);
           setPppOffline(res.data.offline_accounts || []);
           setStats(res.data.statistics || {});
         }
@@ -224,7 +221,6 @@ const Dashboard = () => {
 
   // Use the accounts from the summary endpoint
   // onlineAccounts and offlineAccounts are now computed on the backend
-  const onlineAccounts = pppActive; // These are the online accounts from the summary
   const offlineAccounts = pppOffline; // These are the offline accounts from the summary
 
   // Refetch dashboard data when activeRouterId changes
@@ -267,19 +263,10 @@ const Dashboard = () => {
     ? sortedRows.slice((page - 1) * rowsPerPage, page * rowsPerPage)
     : sortedRows;
 
-  // Update onlineRows and offlineRows logic
-  const paginatedOnlineAccounts = rowsPerPage > 0
-    ? onlineAccounts.slice((page - 1) * rowsPerPage, page * rowsPerPage)
-    : onlineAccounts;
-  
   // Split rows into online and offline
   // const onlineRows = sortedRows.filter(row => row.status === 'Running');
   // const offlineRows = sortedRows.filter(row => row.status !== 'Running');
 
-  // Build a set of online account names
-  const onlineAccountNames = new Set(sortedRows.filter(row => row.status === 'Running').map(row => row.name));
-  // All account names
-  const allAccountNames = sortedRows.map(row => row.name);
   // Offline accounts: those not in the online set
   // const offlineAccounts = sortedRows.filter(row => !onlineAccountNames.has(row.name)); // This line is now redundant
 
