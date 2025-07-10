@@ -23,6 +23,18 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+// Helper to parse uptime string (e.g., '1d2h3m4s') to total seconds
+function parseUptimeToSeconds(uptime) {
+  if (!uptime || typeof uptime !== 'string') return 0;
+  let total = 0;
+  const regex = /(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/;
+  const match = uptime.match(regex);
+  if (!match) return 0;
+  const [, d, h, m, s] = match.map(x => parseInt(x) || 0);
+  total += d * 86400 + h * 3600 + m * 60 + s;
+  return total;
+}
+
 const Dashboard = () => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +54,15 @@ const Dashboard = () => {
   // Add at the top:
   const { routers, activeRouterId, handleRouterChange } = useRouter();
   const socket = useSocket();
+  const [pppAccounts, setPppAccounts] = useState([]); // all accounts
+  const [pppActive, setPppActive] = useState([]); // online accounts
+  const [pppOffline, setPppOffline] = useState([]); // offline accounts
+  // Add state for offline accounts pagination
+  const [offlineRowsPerPage, setOfflineRowsPerPage] = useState(20);
+  const [offlinePage, setOfflinePage] = useState(1);
+  // Offline table sorting state
+  const [offlineSortField, setOfflineSortField] = useState('last_uptime');
+  const [offlineSortDirection, setOfflineSortDirection] = useState('desc');
 
   // Helper to process dashboard data and update state
   const processDashboardData = (data) => {
@@ -119,6 +140,10 @@ const Dashboard = () => {
         bVal = parseFloat(bVal);
         if (isNaN(aVal)) aVal = 0;
         if (isNaN(bVal)) bVal = 0;
+      } else if (field === 'uptime') {
+        // Sort uptime as seconds
+        aVal = parseUptimeToSeconds(aVal);
+        bVal = parseUptimeToSeconds(bVal);
       } else {
         // Handle string values
         aVal = String(aVal).toLowerCase();
@@ -170,6 +195,54 @@ const Dashboard = () => {
     fetchActiveRouter();
   }, []);
 
+  // Fetch PPP accounts summary (all, online, offline)
+  useEffect(() => {
+    const fetchAccountsSummary = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/ppp_accounts_summary?router_id=${activeRouterId}`);
+        if (res.data.success) {
+          setPppAccounts(res.data.all_accounts || []);
+          setPppActive(res.data.online_accounts || []);
+          setPppOffline(res.data.offline_accounts || []);
+          setStats(res.data.statistics || {}); // <-- Use statistics from backend
+        }
+      } catch (e) {
+        // handle error
+      }
+    };
+    if (activeRouterId) fetchAccountsSummary();
+  }, [activeRouterId]);
+
+  // Auto-refresh PPP accounts summary every 5 seconds
+  useEffect(() => {
+    if (!activeRouterId) return;
+    let isMounted = true;
+    const fetchAccountsSummary = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/ppp_accounts_summary?router_id=${activeRouterId}`);
+        if (isMounted && res.data.success) {
+          setPppAccounts(res.data.all_accounts || []);
+          setPppActive(res.data.online_accounts || []);
+          setPppOffline(res.data.offline_accounts || []);
+          setStats(res.data.statistics || {});
+        }
+      } catch (e) {
+        // handle error
+      }
+    };
+    fetchAccountsSummary();
+    const interval = setInterval(fetchAccountsSummary, 5000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [activeRouterId]);
+
+  // Use the accounts from the summary endpoint
+  // onlineAccounts and offlineAccounts are now computed on the backend
+  const onlineAccounts = pppActive; // These are the online accounts from the summary
+  const offlineAccounts = pppOffline; // These are the offline accounts from the summary
+
   // Refetch dashboard data when activeRouterId changes
   useEffect(() => {
     if (!activeRouterId) return;
@@ -211,6 +284,109 @@ const Dashboard = () => {
   const paginatedRows = rowsPerPage > 0
     ? sortedRows.slice((page - 1) * rowsPerPage, page * rowsPerPage)
     : sortedRows;
+
+  // Update onlineRows and offlineRows logic
+  const paginatedOnlineAccounts = rowsPerPage > 0
+    ? onlineAccounts.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+    : onlineAccounts;
+  
+  // Split rows into online and offline
+  // const onlineRows = sortedRows.filter(row => row.status === 'Running');
+  // const offlineRows = sortedRows.filter(row => row.status !== 'Running');
+
+  // Build a set of online account names
+  const onlineAccountNames = new Set(sortedRows.filter(row => row.status === 'Running').map(row => row.name));
+  // All account names
+  const allAccountNames = sortedRows.map(row => row.name);
+  // Offline accounts: those not in the online set
+  // const offlineAccounts = sortedRows.filter(row => !onlineAccountNames.has(row.name)); // This line is now redundant
+
+  // For offline table pagination
+  const offlineTotalPages = offlineRowsPerPage > 0 ? Math.ceil(offlineAccounts.length / offlineRowsPerPage) : 1;
+
+  // Helper to parse date string
+  function parseDate(dateStr) {
+    if (!dateStr || dateStr === '-') return null;
+    // Accepts 'YYYY-MM-DD HH:mm:ss'
+    const parts = dateStr.split(/[- :]/);
+    if (parts.length < 6) return null;
+    // Parse as local time (not UTC)
+    return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
+  }
+
+  // Compute downtime live for each offline account
+  const offlineAccountsWithDowntime = offlineAccounts.map(acc => {
+    let downtime = '-';
+    const lastUptimeDate = parseDate(acc.last_uptime);
+    if (lastUptimeDate) {
+      const now = new Date();
+      downtime = Math.floor((now.getTime() - lastUptimeDate.getTime()) / 1000);
+      if (downtime < 0) downtime = 0;
+    }
+    return { ...acc, downtime };
+  });
+
+  // Sort offline accounts
+  const sortedOfflineAccounts = [...offlineAccountsWithDowntime].sort((a, b) => {
+    let aVal = a[offlineSortField];
+    let bVal = b[offlineSortField];
+    if (offlineSortField === 'downtime') {
+      aVal = aVal === '-' ? -1 : parseInt(aVal, 10);
+      bVal = bVal === '-' ? -1 : parseInt(bVal, 10);
+    } else if (offlineSortField === 'last_uptime') {
+      aVal = parseDate(aVal)?.getTime() || 0;
+      bVal = parseDate(bVal)?.getTime() || 0;
+    } else {
+      aVal = String(aVal).toLowerCase();
+      bVal = String(bVal).toLowerCase();
+    }
+    if (offlineSortDirection === 'asc') {
+      return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+    } else {
+      return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+    }
+  });
+
+  // Paginate sorted offline accounts
+  const paginatedOfflineAccounts = offlineRowsPerPage > 0
+    ? sortedOfflineAccounts.slice((offlinePage - 1) * offlineRowsPerPage, offlinePage * offlineRowsPerPage)
+    : sortedOfflineAccounts;
+
+  // Helper for sort indicator
+  const getOfflineSortIndicator = (field) => {
+    if (offlineSortField !== field) return <i className="bi bi-arrow-down-up text-muted"></i>;
+    return offlineSortDirection === 'asc'
+      ? <i className="bi bi-arrow-up text-primary"></i>
+      : <i className="bi bi-arrow-down text-primary"></i>;
+  };
+
+  // Helper to format downtime in y,M,w,d,h,m,s
+  function formatDowntime(seconds) {
+    if (seconds === '-' || seconds == null || isNaN(seconds)) return '-';
+    seconds = parseInt(seconds, 10);
+    if (seconds < 0) return '-';
+    const y = Math.floor(seconds / (365 * 24 * 3600));
+    seconds %= 365 * 24 * 3600;
+    const M = Math.floor(seconds / (30 * 24 * 3600));
+    seconds %= 30 * 24 * 3600;
+    const w = Math.floor(seconds / (7 * 24 * 3600));
+    seconds %= 7 * 24 * 3600;
+    const d = Math.floor(seconds / (24 * 3600));
+    seconds %= 24 * 3600;
+    const h = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    let str = '';
+    if (y) str += `${y}y `;
+    if (M) str += `${M}M `;
+    if (w) str += `${w}w `;
+    if (d) str += `${d}d `;
+    if (h) str += `${h}h `;
+    if (m) str += `${m}m `;
+    if (s || !str) str += `${s}s`;
+    return str.trim();
+  }
 
   // Render table (version1 style)
   return (
@@ -275,7 +451,7 @@ const Dashboard = () => {
               <div className="stat-card horizontal-card bg-info bg-opacity-10">
                 <div className="icon-container"><i className="bi bi-cloud-arrow-up text-info"></i></div>
                 <div className="card-content">
-                  <h5 className="mb-0 text-info" style={{ fontSize: '1.25rem' }}>{totalDownloadMbps} Mbps</h5>
+                  <h5 className="mb-0 text-info" style={{ fontSize: '1.25rem' }}>{totalUploadMbps} Mbps</h5>
                   <p className="mb-0">Total Upload</p>
                 </div>
               </div>
@@ -284,7 +460,7 @@ const Dashboard = () => {
               <div className="stat-card horizontal-card bg-primary bg-opacity-10">
                 <div className="icon-container"><i className="bi bi-cloud-arrow-down text-primary"></i></div>
                 <div className="card-content">
-                  <h5 className="mb-0 text-primary" style={{ fontSize: '1.25rem' }}>{totalUploadMbps} Mbps</h5>
+                  <h5 className="mb-0 text-primary" style={{ fontSize: '1.25rem' }}>{totalDownloadMbps} Mbps</h5>
                   <p className="mb-0">Total Download</p>
                 </div>
               </div>
@@ -294,119 +470,162 @@ const Dashboard = () => {
       </div>
 
       {/* PPPoE Interfaces Table Section */}
-      <div className="card mb-4">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center gap-2 flex-grow-1">
-            <input
-              type="text"
-              className="form-control form-control-sm"
-              placeholder="Search..."
-              style={{ maxWidth: 350, width: '100%' }}
-              value={search}
-              onChange={e => { setSearch(e.target.value); setPage(1); }}
-            />
-          </div>
-          <div>
-            <select
-              className="form-select form-select-sm"
-              value={rowsPerPage}
-              onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
-            >
-              <option value={10}>10 rows</option>
-              <option value={20}>20 rows</option>
-              <option value={50}>50 rows</option>
-              <option value={100}>100 rows</option>
-              <option value={0}>All</option>
-            </select>
+      <div className="row">
+        <div className="col-lg-7 col-12 mb-4 mb-lg-0">
+          <div className="card mb-4">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Online Accounts</h5>
+              <div className="d-flex align-items-center gap-2">
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  placeholder="Search..."
+                  style={{ width: 200 }}
+                  value={search}
+                  onChange={e => { setSearch(e.target.value); setPage(1); }}
+                />
+                <select
+                  className="form-select form-select-sm"
+                  style={{ width: 120 }}
+                  value={rowsPerPage}
+                  onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
+                >
+                  <option value={10}>10 rows</option>
+                  <option value={20}>20 rows</option>
+                  <option value={50}>50 rows</option>
+                  <option value={100}>100 rows</option>
+                  <option value={0}>All</option>
+                </select>
+              </div>
+            </div>
+            <div className="card-body">
+              <div className="table-responsive">
+                <table className="table table-striped table-hover table-sm">
+                  <thead>
+                    <tr>
+                      <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }} className="sortable-header">Name {getSortIndicator('name')}</th>
+                      <th onClick={() => handleSort('profile')} style={{ cursor: 'pointer' }} className="sortable-header">Profile Plan {getSortIndicator('profile')}</th>
+                      <th onClick={() => handleSort('status')} style={{ cursor: 'pointer' }} className="sortable-header">Status {getSortIndicator('status')}</th>
+                      <th onClick={() => handleSort('uploadMbps')} style={{ cursor: 'pointer' }} className="sortable-header">Upload Speed (Mbps) {getSortIndicator('uploadMbps')}</th>
+                      <th onClick={() => handleSort('downloadMbps')} style={{ cursor: 'pointer' }} className="sortable-header">Download Speed (Mbps) {getSortIndicator('downloadMbps')}</th>
+                      <th onClick={() => handleSort('address')} style={{ cursor: 'pointer' }} className="sortable-header">Address {getSortIndicator('address')}</th>
+                      <th onClick={() => handleSort('uptime')} style={{ cursor: 'pointer' }} className="sortable-header">Uptime {getSortIndicator('uptime')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedRows.length === 0 ? (
+                      <tr><td colSpan={7} className="text-center text-muted">No online accounts found.</td></tr>
+                    ) : (
+                      paginatedRows.map((row, idx) => (
+                        <tr key={row.name + '-' + idx}>
+                          <td>{row.name}</td>
+                          <td>{row.profile}</td>
+                          <td><span className={`badge bg-success`}>Online</span></td>
+                          <td>{row.uploadMbps} Mbps</td>
+                          <td>{row.downloadMbps} Mbps</td>
+                          <td>{row.address}</td>
+                          <td>{row.uptime}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              {/* Pagination (if needed) */}
+              {rowsPerPage > 0 && totalPages > 1 && (
+                <nav>
+                  <ul className="pagination pagination-sm justify-content-end">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <li key={i} className={`page-item${page === i + 1 ? ' active' : ''}`}>
+                        <button className="page-link" onClick={() => setPage(i + 1)}>{i + 1}</button>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+            </div>
           </div>
         </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover table-sm">
-              <thead>
-                <tr>
-                  <th 
-                    onClick={() => handleSort('name')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Name {getSortIndicator('name')}
-                  </th>
-                  <th 
-                    onClick={() => handleSort('profile')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Profile Plan {getSortIndicator('profile')}
-                  </th>
-                  <th 
-                    onClick={() => handleSort('status')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Status {getSortIndicator('status')}
-                  </th>
-                  <th 
-                    onClick={() => handleSort('uploadMbps')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Upload Speed (Mbps) {getSortIndicator('uploadMbps')}
-                  </th>
-                  <th 
-                    onClick={() => handleSort('downloadMbps')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Download Speed (Mbps) {getSortIndicator('downloadMbps')}
-                  </th>
-                  <th 
-                    onClick={() => handleSort('address')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Address {getSortIndicator('address')}
-                  </th>
-                  <th 
-                    onClick={() => handleSort('uptime')} 
-                    style={{ cursor: 'pointer' }}
-                    className="sortable-header"
-                  >
-                    Uptime {getSortIndicator('uptime')}
-                  </th>
-                </tr>
-              </thead>
-                              <tbody>
-                  {paginatedRows.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center text-muted">No PPPoE interfaces found.</td></tr>
-                  ) : (
-                    paginatedRows.map((row, idx) => (
-                      <tr key={row.name + '-' + idx}>
-                        <td>{row.name}</td>
-                        <td>{row.profile}</td>
-                        <td><span className={`badge bg-${row.status === 'Running' ? 'success' : 'secondary'}`}>{row.status === 'Running' ? 'Online' : row.status}</span></td>
-                        <td>{row.uploadMbps} Mbps</td>
-                        <td>{row.downloadMbps} Mbps</td>
-                        <td>{row.address}</td>
-                        <td>{row.uptime}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-            </table>
+        <div className="col-lg-5 col-12">
+          <div className="card mb-4">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Offline Accounts</h5>
+              <div className="d-flex align-items-center gap-2">
+                <select
+                  className="form-select form-select-sm"
+                  style={{ width: 120 }}
+                  value={offlineRowsPerPage}
+                  onChange={e => { setOfflineRowsPerPage(Number(e.target.value)); setOfflinePage(1); }}
+                >
+                  <option value={10}>10 rows</option>
+                  <option value={20}>20 rows</option>
+                  <option value={50}>50 rows</option>
+                  <option value={100}>100 rows</option>
+                  <option value={0}>All</option>
+                </select>
+              </div>
+            </div>
+            <div className="card-body">
+              <div className="table-responsive">
+                <table className="table table-striped table-hover table-sm">
+                  <thead>
+                    <tr>
+                      <th onClick={() => {
+                        if (offlineSortField === 'name') setOfflineSortDirection(offlineSortDirection === 'asc' ? 'desc' : 'asc');
+                        else { setOfflineSortField('name'); setOfflineSortDirection('asc'); }
+                      }} style={{ cursor: 'pointer' }}>Name {getOfflineSortIndicator('name')}</th>
+                      <th onClick={() => {
+                        if (offlineSortField === 'status') setOfflineSortDirection(offlineSortDirection === 'asc' ? 'desc' : 'asc');
+                        else { setOfflineSortField('status'); setOfflineSortDirection('asc'); }
+                      }} style={{ cursor: 'pointer' }}>Status {getOfflineSortIndicator('status')}</th>
+                      <th onClick={() => {
+                        if (offlineSortField === 'last_uptime') setOfflineSortDirection(offlineSortDirection === 'asc' ? 'desc' : 'asc');
+                        else { setOfflineSortField('last_uptime'); setOfflineSortDirection('desc'); }
+                      }} style={{ cursor: 'pointer' }}>Last Uptime {getOfflineSortIndicator('last_uptime')}</th>
+                      <th onClick={() => {
+                        if (offlineSortField === 'downtime') setOfflineSortDirection(offlineSortDirection === 'asc' ? 'desc' : 'asc');
+                        else { setOfflineSortField('downtime'); setOfflineSortDirection('desc'); setOfflinePage(1); }
+                      }} style={{ cursor: 'pointer' }}>Downtime {getOfflineSortIndicator('downtime')}</th>
+                      {/* Row menu/actions column can be added here if needed */}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedOfflineAccounts.length === 0 ? (
+                      <tr><td colSpan={4} className="text-center text-muted">No offline accounts found.</td></tr>
+                    ) : (
+                      paginatedOfflineAccounts.map((acc, idx) => (
+                        <tr key={acc.name + '-' + idx}>
+                          <td>{acc.name}</td>
+                          <td>
+                            {acc.status === 'Disabled' ? (
+                              <span className="badge bg-secondary">Disabled</span>
+                            ) : (
+                              <span className="badge bg-danger">Offline</span>
+                            )}
+                          </td>
+                          <td>{acc.last_uptime || '-'}</td>
+                          <td>{formatDowntime(acc.downtime)}</td>
+                          {/* Action buttons can be added here if needed */}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              {/* Pagination for offline table */}
+              {offlineRowsPerPage > 0 && offlineTotalPages > 1 && (
+                <nav>
+                  <ul className="pagination pagination-sm justify-content-end">
+                    {Array.from({ length: offlineTotalPages }, (_, i) => (
+                      <li key={i} className={`page-item${offlinePage === i + 1 ? ' active' : ''}`}>
+                        <button className="page-link" onClick={() => setOfflinePage(i + 1)}>{i + 1}</button>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+            </div>
           </div>
-          {/* Pagination */}
-          {rowsPerPage > 0 && totalPages > 1 && (
-            <nav>
-              <ul className="pagination pagination-sm justify-content-end">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <li key={i} className={`page-item${page === i + 1 ? ' active' : ''}`}>
-                    <button className="page-link" onClick={() => setPage(i + 1)}>{i + 1}</button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
         </div>
       </div>
     </div>
