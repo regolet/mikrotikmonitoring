@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, send_file
 from flask_cors import CORS
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from mikrotik_client import MikroTikClient
 from router_manager import router_manager
@@ -59,10 +59,7 @@ def groups():
     return index()
 
 # Catch-all route for SPA navigation
-@app.route('/<path:path>')
-def catch_all(path):
-    """Catch-all route for SPA navigation"""
-    return index()
+
 
 @app.route('/api/status')
 def api_status():
@@ -344,6 +341,88 @@ def api_ppp_accounts():
         })
     except Exception as e:
         error(f"Error in PPP accounts API: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/ppp_accounts_summary')
+def api_ppp_accounts_summary():
+    """Get PPP accounts summary with all, online, and offline accounts"""
+    try:
+        router_id = request.args.get('router_id', get_active_router_id())
+        client = get_mikrotik_client(router_id)
+        if client is None:
+            return jsonify({'success': False, 'error': router_manager.last_client_error or 'Failed to connect to router'})
+        if not client.test_connection():
+            return jsonify({'success': False, 'error': 'Not connected'})
+        
+        # Fetch all accounts and active accounts
+        all_accounts = client.get_ppp_secrets() or []
+        active_accounts = client.get_ppp_active() or []
+        
+        # Create a set of active account names for fast lookup
+        active_names = set()
+        for acc in active_accounts:
+            if acc.get('name'):
+                active_names.add(acc['name'].lower())
+        
+        # Separate accounts into online and offline
+        online_accounts = []
+        offline_accounts = []
+        
+        for account in all_accounts:
+            account_name = account.get('name', '').lower()
+            if account_name in active_names:
+                online_accounts.append(account)
+            else:
+                # Always set status for offline accounts
+                offline_acc = dict(account)  # ensure a copy
+                disabled_val = str(offline_acc.get('disabled', '')).strip().lower()
+                if disabled_val in ('true', 'yes', '1') or offline_acc.get('disabled') is True or offline_acc.get('disabled') == 1:
+                    offline_acc['status'] = 'Disabled'
+                else:
+                    offline_acc['status'] = 'Offline'
+                # Set last_uptime to last_logged_out if present, otherwise '-'
+                offline_acc['last_uptime'] = offline_acc.get('last-logged-out', '-')
+                # Calculate downtime in seconds if last-logged-out is present
+                last_logged_out = offline_acc.get('last-logged-out')
+                if last_logged_out:
+                    try:
+                        # Parse as local time (not UTC) to match frontend expectations
+                        dt_last = datetime.strptime(last_logged_out, '%Y-%m-%d %H:%M:%S')
+                        now = datetime.now()
+                        downtime_seconds = int((now - dt_last).total_seconds())
+                        offline_acc['downtime'] = downtime_seconds
+                    except Exception:
+                        offline_acc['downtime'] = '-'
+                else:
+                    offline_acc['downtime'] = '-'
+                offline_accounts.append(offline_acc)
+        
+        # Calculate statistics
+        total_accounts = len(all_accounts)
+        online_count = len(online_accounts)
+        offline_count = len(offline_accounts)
+        enabled_count = len([acc for acc in all_accounts if acc.get('disabled') != 'true'])
+        disabled_count = total_accounts - enabled_count
+        
+        router = router_manager.get_router(router_id)
+        return jsonify({
+            'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
+            'all_accounts': all_accounts,
+            'online_accounts': online_accounts,
+            'offline_accounts': offline_accounts,
+            'statistics': {
+                'total_accounts': total_accounts,
+                'online_accounts': online_count,
+                'offline_accounts': offline_count,
+                'enabled_accounts': enabled_count,
+                'disabled_accounts': disabled_count
+            },
+            'current_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+    except Exception as e:
+        error(f"Error in PPP accounts summary API: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/api/pppoe')
@@ -901,7 +980,28 @@ def get_dashboard_data():
         pppoe_ifaces = client.get_pppoe_interfaces() or []
         ppp_accounts = client.get_ppp_secrets() or []
         ppp_active = client.get_ppp_active() or []
-        aggregate_stats = client.get_aggregate_statistics() or {}
+        
+        # Use the same logic as the summary endpoint for consistency
+        active_names = set()
+        for acc in ppp_active:
+            if acc.get('name'):
+                active_names.add(acc['name'].lower())
+        
+        # Calculate statistics using the same logic as summary endpoint
+        total_accounts = len(ppp_accounts)
+        online_count = len([acc for acc in ppp_accounts if acc.get('name', '').lower() in active_names])
+        offline_count = total_accounts - online_count
+        enabled_count = len([acc for acc in ppp_accounts if acc.get('disabled') != 'true'])
+        disabled_count = total_accounts - enabled_count
+        
+        aggregate_stats = {
+            'total_accounts': total_accounts,
+            'online_accounts': online_count,
+            'offline_accounts': offline_count,
+            'enabled_accounts': enabled_count,
+            'disabled_accounts': disabled_count
+        }
+        
         return {
             'success': True,
             'router_id': router_id,
@@ -934,6 +1034,12 @@ def dashboard_broadcast_loop():
         time.sleep(3)
 
 threading.Thread(target=dashboard_broadcast_loop, daemon=True).start()
+
+# Catch-all route for SPA navigation (must be at the end)
+@app.route('/<path:path>')
+def catch_all(path):
+    """Catch-all route for SPA navigation"""
+    return index()
 
 # Main entry point
 if __name__ == '__main__':
