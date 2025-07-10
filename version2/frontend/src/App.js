@@ -1,38 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import './App.css';
 import Settings from './components/Settings';
 import Groups from './components/Groups';
 import Dashboard from './components/Dashboard';
+import GroupsSummary from './components/GroupsSummary';
+import axios from 'axios';
+import io from 'socket.io-client';
 
 // Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
+export const RouterContext = createContext();
+
+export function useRouter() {
+  return useContext(RouterContext);
+}
+
+export const SocketContext = createContext();
+export function useSocket() { return useContext(SocketContext); }
+
 function Navigation() {
   const location = useLocation();
-  const [routers, setRouters] = useState([]);
-  const [activeRouter, setActiveRouter] = useState('');
-
-  useEffect(() => {
-    // Fetch routers for the dropdown
-    fetch('http://localhost:80/api/routers')
-      .then(res => res.json())
-      .then(data => {
-        if (data.routers) {
-          setRouters(data.routers);
-          if (data.routers.length > 0) {
-            setActiveRouter(data.routers[0].id);
-          }
-        }
-      })
-      .catch(err => console.error('Error fetching routers:', err));
-  }, []);
-
-  const handleRouterChange = (routerId) => {
-    setActiveRouter(routerId);
-    // You can add logic here to change the active router globally
-  };
+  const { routers, activeRouterId, handleRouterChange } = useRouter();
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -61,6 +52,14 @@ function Navigation() {
             </li>
             <li className="nav-item">
               <Link 
+                className={`nav-link ${location.pathname === '/groups-summary' ? 'active' : ''}`} 
+                to="/groups-summary"
+              >
+                Groups Summary
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link 
                 className={`nav-link ${location.pathname === '/settings' ? 'active' : ''}`} 
                 to="/settings"
               >
@@ -76,8 +75,8 @@ function Navigation() {
                   id="router-selector" 
                   className="form-select form-select-sm" 
                   style={{width: 'auto'}}
-                  value={activeRouter}
-                  onChange={(e) => handleRouterChange(e.target.value)}
+                  value={activeRouterId}
+                  onChange={handleRouterChange}
                 >
                   {routers.length === 0 ? (
                     <option value="">Loading...</option>
@@ -99,19 +98,57 @@ function Navigation() {
 }
 
 function App() {
+  const [routers, setRouters] = useState([]);
+  const [activeRouterId, setActiveRouterId] = useState('');
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const fetchRouters = async () => {
+      try {
+        const res = await axios.get('http://localhost:80/api/routers');
+        if (res.data.success) setRouters(res.data.routers);
+      } catch {}
+    };
+    const fetchActiveRouter = async () => {
+      try {
+        const res = await axios.get('http://localhost:80/api/routers/active');
+        if (res.data.active_router_id) setActiveRouterId(res.data.active_router_id);
+      } catch {}
+    };
+    fetchRouters();
+    fetchActiveRouter();
+  }, []);
+
+  useEffect(() => {
+    const s = io('http://localhost:80');
+    setSocket(s);
+    return () => s.disconnect();
+  }, []);
+
+  const handleRouterChange = async (e) => {
+    const newId = e.target.value;
+    setActiveRouterId(newId);
+    await axios.post('http://localhost:80/api/routers/active', { router_id: newId });
+  };
+
   return (
-    <Router>
-      <div className="App">
-        <Navigation />
-        <div id="main-content">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/groups" element={<Groups />} />
-          </Routes>
-        </div>
-      </div>
-    </Router>
+    <RouterContext.Provider value={{ routers, activeRouterId, handleRouterChange }}>
+      <SocketContext.Provider value={socket}>
+        <Router>
+          <div className="App">
+            <Navigation />
+            <div id="main-content">
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/groups" element={<Groups />} />
+                <Route path="/groups-summary" element={<GroupsSummary />} />
+              </Routes>
+            </div>
+          </div>
+        </Router>
+      </SocketContext.Provider>
+    </RouterContext.Provider>
   );
 }
 

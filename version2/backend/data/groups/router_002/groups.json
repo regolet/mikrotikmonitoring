@@ -179,16 +179,6 @@
     "max_members": 8
   },
   {
-    "id": "e41c88b7-0600-44d2-8060-dcfa382bc797",
-    "router_id": "router_002",
-    "name": "DUMOY",
-    "description": "",
-    "accounts": [],
-    "created_at": "2025-07-08T16:51:58.469686",
-    "max_members": 8,
-    "updated_at": "2025-07-09T22:16:10.440392"
-  },
-  {
     "id": "385706b5-b707-4584-a0b0-fd5eb268e8b1",
     "router_id": "router_002",
     "name": "PENONGS",

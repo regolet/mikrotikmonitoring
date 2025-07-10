@@ -7,9 +7,12 @@ import logging
 from mikrotik_client import MikroTikClient
 from router_manager import router_manager
 from logger import log, info, error, warning, debug
+from flask_socketio import SocketIO, emit
+import threading, time
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for API endpoints
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO)
@@ -727,8 +730,60 @@ def api_active_router():
             error(f"Error setting active router: {e}")
             return jsonify({'success': False, 'error': str(e)}), 400
 
+# Helper to gather all dashboard data
+
+def get_dashboard_data():
+    try:
+        router_id = get_active_router_id()
+        client = get_mikrotik_client(router_id)
+        if client is None or not client.test_connection():
+            return {
+                'success': False,
+                'error': router_manager.last_client_error or 'Failed to connect to router',
+                'current_time': datetime.now().isoformat()
+            }
+        router = router_manager.get_router(router_id)
+        # Gather all data
+        pppoe_ifaces = client.get_pppoe_interfaces() or []
+        ppp_accounts = client.get_ppp_secrets() or []
+        ppp_active = client.get_ppp_active() or []
+        aggregate_stats = client.get_aggregate_statistics() or {}
+        return {
+            'success': True,
+            'router_id': router_id,
+            'router_name': router['name'] if router else 'Unknown',
+            'pppoe_interfaces': pppoe_ifaces,
+            'ppp_accounts': ppp_accounts,
+            'ppp_active': ppp_active,
+            'aggregate_stats': aggregate_stats,
+            'current_time': datetime.now().isoformat(),
+            'error_message': client.get_error()
+        }
+    except Exception as e:
+        error(f"Error in dashboard data aggregation: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'current_time': datetime.now().isoformat()
+        }
+
+@app.route('/api/dashboard')
+def dashboard():
+    return jsonify(get_dashboard_data())
+
+# WebSocket background broadcast
+
+def dashboard_broadcast_loop():
+    while True:
+        data = get_dashboard_data()
+        socketio.emit('dashboard_update', data)
+        time.sleep(3)
+
+threading.Thread(target=dashboard_broadcast_loop, daemon=True).start()
+
+# Main entry point
 if __name__ == '__main__':
     # Initialize router manager
     info("Starting MikroTik Monitoring Application")
     info(f"Loaded {len(router_manager.routers)} routers")
-    app.run(host='127.0.0.1', port=80, debug=True)
+    app.run(host='0.0.0.0', port=80)
