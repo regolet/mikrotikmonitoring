@@ -72,6 +72,42 @@ A modern, real-time monitoring dashboard for MikroTik routers with React fronten
    - Select your router from the dropdown in the navbar
    - The dashboard will automatically load data
 
+## 🚀 Deployment
+
+### Lightweight Deployment Package
+The project includes a deployment system to create lightweight packages for sharing:
+
+**Original size**: ~387 MB (includes `node_modules`)
+**Deployment package**: ~1 MB (99.7% size reduction)
+
+### Creating a Deployment Package
+```bash
+# Run the deployment script
+deploy.bat
+```
+
+This creates a `deployment/` folder containing:
+- All source code (excluding `node_modules`)
+- Installation script (`install.bat`)
+- Setup script (`setup_and_run.bat`)
+- Documentation
+
+### Deploying on Another Computer
+1. **Copy the `deployment` folder** to the target machine
+2. **Run `install.bat`** to install dependencies
+3. **Run `setup_and_run.bat`** to start the application
+
+**Requirements on target machine**:
+- Node.js (for npm install)
+- Python 3.8+ (for Flask backend)
+
+### Version Control
+The project includes `.gitignore` to exclude:
+- `node_modules/` (386+ MB of dependencies)
+- Build files and logs
+- Environment files
+- IDE-specific files
+
 ## 📊 Dashboard Features
 
 ### Network Summary Cards
@@ -168,6 +204,8 @@ version2/
 │   ├── package.json       # Node.js dependencies
 │   └── public/            # Static files
 ├── setup_and_run.bat      # Setup script
+├── deploy.bat             # Deployment script
+├── .gitignore             # Version control exclusions
 ├── test_system.py         # System tests
 └── README.md              # This file
 ```
@@ -184,7 +222,20 @@ version2/
 - Groups: `backend/data/groups/`
 - Categories: `backend/data/categories.json`
 
+### Deployment Updates
+- Update `deploy.bat` if adding new files
+- Test deployment package on clean machine
+- Update `.gitignore` for new file types
+
 ## 📝 Changelog
+
+### v2.0.1
+- Added lightweight deployment system
+- Created `deploy.bat` for easy sharing
+- Added `.gitignore` for version control
+- 99.7% size reduction for deployment packages
+- Fixed ESLint warnings and errors
+- Improved uptime sorting in tables
 
 ### v2.0.0
 - Complete rewrite with React frontend
@@ -206,4 +257,16 @@ version2/
 
 ## 📄 License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For issues and questions:
+1. Check the troubleshooting section
+2. Review the changelog
+3. Create an issue on GitHub
+4. Contact the maintainers
+
+---
+
+**Note**: The deployment system makes sharing this webapp much easier by reducing the package size from 387MB to just 1MB! 
