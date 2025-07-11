@@ -28,11 +28,10 @@
       "Spamast_AlfecheJayar",
       "Spamast_Esperanza",
       "Spamast_AlexCabrera",
-      "Spamast_PanyMosquida",
-      "Spamast_Mamalitas"
+      "Spamast_PanyMosquida"
     ],
     "created_at": "2025-07-08T16:17:06.797493",
-    "updated_at": "2025-07-09T18:47:54.582308",
+    "updated_at": "2025-07-11T15:33:36.996096",
     "max_members": 8
   },
   {
@@ -99,11 +98,10 @@
       "Kulo_RelatadoJr",
       "Kulo_Bucodbernie",
       "Kulo_Bangahonmarlyn",
-      "Kulo_JagnaPayk",
       "Kulo_HervasDexel"
     ],
     "created_at": "2025-07-08T16:19:29.148359",
-    "updated_at": "2025-07-09T18:46:43.912057",
+    "updated_at": "2025-07-11T15:34:09.534165",
     "max_members": 8
   },
   {
@@ -215,17 +213,16 @@
     "name": "SAPA",
     "description": "LCP: Slaughter - GEpon",
     "accounts": [
+      "Poblacion_kulo welamae",
       "Sapa_TampipiDondon",
       "Sapa_CesvantesGerald",
       "Sapa_Sacildonivie",
       "Sapa_SacilJun2x",
       "Sapa_HugoMargarito",
-      "Sapa_DanDelaCuesta",
-      "Sapa_DoubleNett",
-      "Poblacion_kulo welamae"
+      "Sapa_DanDelaCuesta"
     ],
     "created_at": "2025-07-08T17:37:05.622444",
-    "updated_at": "2025-07-09T18:47:42.661351",
+    "updated_at": "2025-07-11T15:27:21.688123",
     "max_members": 8
   },
   {
@@ -573,17 +570,16 @@
     "name": "SANROQUE Basketballcourt",
     "description": "LCP: Slaughter- MiniEPON",
     "accounts": [
+      "Demegillosalvacion",
       "Sanroque_CassandraInn",
       "undaycolo",
-      "Sanroque_Talolok",
-      "Demegillosalvacion",
-      "Sanroque_MasiwelTindahan",
-      "Sanroque_TindahanMasiwel",
       "Marwasa_CharoEstremos",
-      "Sanroque_JpTeh"
+      "Sanroque_Talolok",
+      "Sanroque_JpTeh",
+      "Sanroque_TindahanMasiwel"
     ],
     "created_at": "2025-07-08T23:50:45.181956",
-    "updated_at": "2025-07-09T18:46:59.600248",
+    "updated_at": "2025-07-11T15:33:53.398657",
     "max_members": 8
   },
   {
@@ -691,5 +687,71 @@
     "created_at": "2025-07-09T19:35:18.685140",
     "max_members": 8,
     "updated_at": "2025-07-09T19:36:05.996516"
+  },
+  {
+    "id": "4d924139-2210-46d6-832d-459749aaa09b",
+    "router_id": "router_002",
+    "name": "ALL",
+    "description": "",
+    "accounts": [
+      "maxene",
+      "Looban_AprilynMalubay",
+      "nikkoinutanfelis",
+      "Tambakan_Cabanilla",
+      "bayunonsantalikaanak",
+      "undasantoninyo",
+      "duloruson",
+      "macky05",
+      "AnibRonLabrador",
+      "motorstarmalita",
+      "Felis_aike sarmiento",
+      "Sabang_Cha2x",
+      "Sabang_LabisLolita",
+      "Stonino_Jun2x",
+      "Geverola_BenedictoStephanie",
+      "Poblacion_Sanroque sarominez",
+      "Poblacion_Sanroque ciriaco",
+      "Sanroque_jenelyn flores",
+      "Sanroque_Bigboy printing",
+      "Fatima_Ericshop",
+      "Sabang_charlot",
+      "Fatima_sombilon",
+      "Looban_jocelynbadang",
+      "Fatima_christy",
+      "Sanroque_Marselina",
+      "Highway_Mac2x",
+      "Tambakan_JoshuaOpong",
+      "REDRED_TEST",
+      "Highway_MarlinoDanwata",
+      "Black3_Ardiente",
+      "Palengke_Bugoy",
+      "Rabaya_MarjoniSusmitha",
+      "Sanroque_Atbangbalay",
+      "Felis_DianneGonzales",
+      "Fatima_Jing2Sanjuan",
+      "Looban_BbEmok",
+      "Sanroque_Gabreal",
+      "Sanmiguel_Chloe",
+      "Felis_Kje2Hardwere",
+      "server",
+      "Felis_ElemTindahan",
+      "Rabaya_Llamig2",
+      "Labrador_Gerome",
+      "Sabang_OliverJimenez",
+      "Sanroque_Jan2Tabocco",
+      "Sanroque_MaritesLabra",
+      "Fatima_TuradoJing2x",
+      "Marwasa_Gelvez",
+      "Marwasa_Arcabal",
+      "Tugas_Rillo",
+      "Looban_WeljieAlcoy",
+      "Tugas_Calacar",
+      "Abbes_AJprinting",
+      "Tambakan_NovaNavarez",
+      "RDvillage_Charlie",
+      "ogadarelocation"
+    ],
+    "created_at": "2025-07-11T14:05:44.656673",
+    "updated_at": "2025-07-11T15:33:01.393434"
   }
 ]
