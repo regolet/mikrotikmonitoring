@@ -1,201 +1,120 @@
-# MikroTik Monitoring Web Application
+# MikroTik Monitoring System
 
-A comprehensive Python web application for monitoring MikroTik routers using Flask and the RouterOS API.
+A comprehensive monitoring solution for MikroTik routers with real-time dashboard, PPP account management, and multi-router support.
 
-## 🚀 Features
+## 🚀 Main Application
 
-### Core Monitoring
-- **Real-time system resources** (CPU, memory, disk usage)
-- **Network interfaces** status and traffic statistics
-- **PPPoE interfaces** with detailed traffic monitoring
-- **Active hotspot users** management
-- **DHCP lease information** tracking
-- **PPP connections** monitoring and management
+The main application is located in the `version2/` directory. This is a modern React + Flask application with advanced features:
 
-### Advanced Features
-- **Group management** for organizing accounts
-- **Real-time data updates** with configurable refresh intervals
-- **Connection testing** before saving settings
-- **Data export** functionality (JSON format)
-- **Performance monitoring** and statistics
-- **Comprehensive logging** with debug mode
-- **Responsive web interface** using Bootstrap 5
+### Features
+- **Real-time PPP Account Monitoring**: Live status of online/offline accounts
+- **Network Statistics**: Total accounts, online/offline counts, enabled/disabled status
+- **Speed Monitoring**: Real-time upload/download speeds for active connections
+- **Multi-router Support**: Manage multiple MikroTik routers
+- **Groups & Categories**: Organize accounts into logical groups
+- **Modern UI**: React frontend with Bootstrap 5
+- **Auto-refresh**: Dashboard updates every 5 seconds
+- **Sortable Tables**: Sort by any column
+- **Search & Filter**: Find specific accounts quickly
 
-### Security & Reliability
-- **Connection status indicators** with detailed error reporting
-- **Health check endpoints** for monitoring
-- **Security headers** implementation
-- **Configuration validation** and error handling
-- **Graceful error recovery** and user feedback
+## 📁 Project Structure
 
-## 📋 Requirements
-
-- **Python 3.7+**
-- **MikroTik router** with API access enabled
-- **Network connectivity** to your MikroTik router
-
-## 🛠️ Installation
-
-1. **Clone or download** this repository
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Configure router settings** (see Configuration section below)
-4. **Run the application**:
-   ```bash
-   python app.py
-   ```
-5. **Access the web interface** at `http://127.0.0.1:5000/`
-
-## ⚙️ Configuration
-
-### Router Settings
-The application uses `settings.json` for configuration. You can also create a `.env` file:
-
-```env
-MIKROTIK_HOST=192.168.88.1
-MIKROTIK_USER=admin
-MIKROTIK_PASSWORD=your_password
-MIKROTIK_PORT=8728
+```
+mikrotik monitoring/
+├── version2/                 # Main application (React + Flask)
+│   ├── backend/             # Flask API server
+│   ├── frontend/            # React application
+│   ├── setup_and_run.bat    # Quick setup script
+│   └── README.md            # Detailed documentation
+├── version1_backup/         # Backup of original simple version
+└── README.md               # This file
 ```
 
-### MikroTik Router Setup
+## 🛠️ Quick Start
 
-1. **Enable API service**:
-   - Navigate to `IP → Services`
-   - Ensure "api" service is enabled
-   - For SSL connections, enable "api-ssl" service
-
-2. **Create dedicated API user** (recommended):
-   ```
-   /tool user-manager user add username=monitor password=secure_pass
-   /tool user-manager user print where username=monitor
+1. **Navigate to version2**:
+   ```bash
+   cd version2
    ```
 
-3. **Configure firewall rules** (optional but recommended):
-   ```
-   /ip firewall filter add chain=input protocol=tcp dst-port=8728 src-address=YOUR_MONITORING_IP action=accept comment="API Access"
+2. **Run the setup script**:
+   ```bash
+   # Windows
+   setup_and_run.bat
    ```
 
-## 🎯 Usage
+3. **Or manually**:
+   ```bash
+   # Backend
+   cd backend && pip install -r requirements.txt && python app.py
+   
+   # Frontend (in another terminal)
+   cd frontend && npm install && npm start
+   ```
+
+4. **Access the dashboard**: http://localhost:3000
+
+## 📖 Documentation
+
+- **Main Documentation**: See `version2/README.md` for detailed setup and usage instructions
+- **API Documentation**: Available in the backend code
+- **Deployment Guide**: Included in version2 for lightweight deployment packages
+
+## 🔧 Configuration
+
+1. **Add your first router**:
+   - Go to Settings → Routers
+   - Click "Add Router"
+   - Enter router details (IP, username, password)
+   - Test connection and save
+
+2. **Set as active router**:
+   - Select your router from the dropdown in the navbar
+   - The dashboard will automatically load data
+
+## 🚀 Deployment
+
+The version2 includes a deployment system to create lightweight packages:
+
+```bash
+cd version2
+deploy.bat
+```
+
+This creates a `deployment/` folder with a 99.7% size reduction (from ~387MB to ~1MB).
+
+## 📊 Features Overview
 
 ### Dashboard
-- **Network Summary**: Overview of total accounts, online/offline status
-- **PPPoE Interfaces**: Real-time traffic monitoring with pagination
-- **System Resources**: CPU, memory, and disk usage with visual indicators
-- **Auto-refresh**: Configurable intervals (5s, 10s, 30s, 1min)
+- Real-time PPP account monitoring
+- Network statistics and speed monitoring
+- Auto-refresh every 5 seconds
+- Sortable and searchable tables
 
-### Groups Management
-- **Create groups** to organize PPP accounts
-- **Monitor group status** with color-coded indicators
-- **Track online/offline** accounts within groups
+### Router Management
+- Multi-router support
+- Connection testing
+- SSL/TLS support
+- Active router selection
 
-### Settings
-- **Test connection** before saving new settings
-- **Update router credentials** securely
-- **View connection tips** and troubleshooting information
-
-### Data Export
-- **Export monitoring data** as JSON files
-- **Include all system information** and statistics
-- **Timestamped exports** for historical analysis
-
-## 🔧 API Endpoints
-
-### Health & Status
-- `GET /api/health` - Check router connectivity
-- `POST /api/health` - Test connection with custom parameters
-- `GET /api/performance` - Application performance statistics
-
-### Data Export
-- `GET /api/export` - Download complete monitoring data
-
-### Logging
-- `GET /api/logs` - Retrieve application logs
-- `GET /api/logs?clear=true` - Clear log buffer
-
-### PPPoE Monitoring
-- `GET /api/pppoe_interfaces` - Real-time PPPoE interface data
+### Groups & Categories
+- Account organization
+- Hierarchical category system
+- Router-specific groups
+- Member management
 
 ## 🐛 Troubleshooting
 
-### Connection Issues
-1. **Check router accessibility**:
-   ```bash
-   ping 192.168.88.1
-   telnet 192.168.88.1 8728
-   ```
-
-2. **Verify API service**:
-   - Login to MikroTik WebFig or WinBox
-   - Check `IP → Services → api` is enabled
-
-3. **Test credentials**:
-   - Use the "Test Connection" button in Settings
-   - Check username/password are correct
-
-4. **Check firewall rules**:
-   - Ensure port 8728 (or 8729 for SSL) is accessible
-   - Verify source IP is allowed
-
-### Common Errors
-- **"Connection refused"**: API service not enabled
-- **"Authentication failed"**: Incorrect username/password
-- **"No data returned"**: Router doesn't have PPPoE/hotspot configured
-
-### Debug Mode
-Enable debug mode to see detailed logs:
-```bash
-export DEBUG=True
-python app.py
-```
-
-Then open browser console to view real-time logs.
-
-## 📊 Performance Monitoring
-
-The application tracks:
-- **Connection success/failure rates**
-- **Average response times**
-- **Total API requests**
-- **Application uptime**
-
-Access performance data via `/api/performance` endpoint.
-
-## 🔒 Security Features
-
-- **Security headers** implementation
-- **Input validation** for all settings
-- **Error message sanitization**
-- **Session management**
-- **Rate limiting** considerations
-
-## 📈 Future Enhancements
-
-- [ ] **Email notifications** for critical events
-- [ ] **Historical data storage** and trending
-- [ ] **Mobile app** companion
-- [ ] **Multi-router support**
-- [ ] **Advanced alerting** system
-- [ ] **Backup/restore** functionality
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+For issues and support:
+1. Check the detailed documentation in `version2/README.md`
+2. Review the troubleshooting section
+3. Test router connectivity manually
+4. Check browser console for errors
 
 ## 📄 License
 
 This project is released under the MIT License.
 
-## 🆘 Support
+---
 
-For issues and questions:
-1. Check the troubleshooting section
-2. Review application logs
-3. Test router connectivity manually
-4. Create an issue with detailed error information
+**Note**: The original simple version has been backed up to `version1_backup/` for reference. The main development and features are now in `version2/`. 
