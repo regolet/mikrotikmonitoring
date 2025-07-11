@@ -1,16 +1,22 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import './App.css';
-import Settings from './components/Settings';
-import Groups from './components/Groups';
-import Dashboard from './components/Dashboard';
-import Categories from './components/Categories';
-import axios from 'axios';
-import io from 'socket.io-client';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import "./App.css";
+import Settings from "./components/Settings";
+import Groups from "./components/Groups";
+import Dashboard from "./components/Dashboard";
+import Categories from "./components/Categories";
+import axios from "axios";
+import io from "socket.io-client";
 
 // Bootstrap CSS
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 export const RouterContext = createContext();
 
@@ -19,7 +25,9 @@ export function useRouter() {
 }
 
 export const SocketContext = createContext();
-export function useSocket() { return useContext(SocketContext); }
+export function useSocket() {
+  return useContext(SocketContext);
+}
 
 function Navigation() {
   const location = useLocation();
@@ -28,39 +36,46 @@ function Navigation() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
       <div className="container">
-        <Link className="navbar-brand" to="/">MikroTik Monitoring</Link>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <Link className="navbar-brand" to="/">
+          MikroTik Monitoring
+        </Link>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`} 
+              <Link
+                className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
                 to="/"
               >
                 Dashboard
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${location.pathname === '/groups' ? 'active' : ''}`} 
+              <Link
+                className={`nav-link ${location.pathname === "/groups" ? "active" : ""}`}
                 to="/groups"
               >
                 Groups
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${location.pathname === '/categories' ? 'active' : ''}`} 
+              <Link
+                className={`nav-link ${location.pathname === "/categories" ? "active" : ""}`}
                 to="/categories"
               >
                 Categories
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${location.pathname === '/settings' ? 'active' : ''}`} 
+              <Link
+                className={`nav-link ${location.pathname === "/settings" ? "active" : ""}`}
                 to="/settings"
               >
                 Settings
@@ -70,18 +85,20 @@ function Navigation() {
           <ul className="navbar-nav">
             <li className="nav-item">
               <div className="d-flex align-items-center">
-                <label htmlFor="router-selector" className="text-light me-2">Router:</label>
-                <select 
-                  id="router-selector" 
-                  className="form-select form-select-sm" 
-                  style={{width: 'auto'}}
+                <label htmlFor="router-selector" className="text-light me-2">
+                  Router:
+                </label>
+                <select
+                  id="router-selector"
+                  className="form-select form-select-sm"
+                  style={{ width: "auto" }}
                   value={activeRouterId}
                   onChange={handleRouterChange}
                 >
                   {routers.length === 0 ? (
                     <option value="">Loading...</option>
                   ) : (
-                    routers.map(router => (
+                    routers.map((router) => (
                       <option key={router.id} value={router.id}>
                         {router.name}
                       </option>
@@ -99,28 +116,33 @@ function Navigation() {
 
 function App() {
   const [routers, setRouters] = useState([]);
-  const [activeRouterId, setActiveRouterId] = useState('');
+  const [activeRouterId, setActiveRouterId] = useState("");
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const fetchRouters = async () => {
       try {
-        const res = await axios.get('http://localhost:80/api/routers');
+        const res = await axios.get("http://localhost:80/api/routers");
         if (res.data.success) setRouters(res.data.routers);
-      } catch {}
+      } catch (error) {
+        console.error("Failed to fetch routers:", error);
+      }
     };
     const fetchActiveRouter = async () => {
       try {
-        const res = await axios.get('http://localhost:80/api/routers/active');
-        if (res.data.active_router_id) setActiveRouterId(res.data.active_router_id);
-      } catch {}
+        const res = await axios.get("http://localhost:80/api/routers/active");
+        if (res.data.active_router_id)
+          setActiveRouterId(res.data.active_router_id);
+      } catch (error) {
+        console.error("Failed to fetch active router:", error);
+      }
     };
     fetchRouters();
     fetchActiveRouter();
   }, []);
 
   useEffect(() => {
-    const s = io('http://localhost:80');
+    const s = io("http://localhost:80");
     setSocket(s);
     return () => s.disconnect();
   }, []);
@@ -128,11 +150,15 @@ function App() {
   const handleRouterChange = async (e) => {
     const newId = e.target.value;
     setActiveRouterId(newId);
-    await axios.post('http://localhost:80/api/routers/active', { router_id: newId });
+    await axios.post("http://localhost:80/api/routers/active", {
+      router_id: newId,
+    });
   };
 
   return (
-    <RouterContext.Provider value={{ routers, activeRouterId, handleRouterChange }}>
+    <RouterContext.Provider
+      value={{ routers, activeRouterId, handleRouterChange }}
+    >
       <SocketContext.Provider value={socket}>
         <Router>
           <div className="App">
